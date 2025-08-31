@@ -44,28 +44,35 @@ const Events = () => {
       type: "Banda de Louvor",
       description: "Ministério de louvor que conduz a congregação em momentos de adoração",
       leaders: "André Dale Laste e Silvano Cardoso",
-      schedule: "Durante os cultos principais"
-    },
-    {
-      name: "Jovens Adoradores", 
-      type: "Grupo de Jovens",
-      description: "Encontros especiais para jovens com estudos bíblicos e atividades",
-      leaders: "Silvano e Leonice Cardoso",
-      schedule: "Consultar programação"
+      schedule: "Ensaios: Quinta-feira | Cultos principais"
     },
     {
       name: "Obreiros",
       type: "Grupo de Oração",
-      description: "Grupo dedicado à intercessão e oração pelos membros e pela igreja",
-      leaders: "Marica Machado e Ademar Malmann", 
-      schedule: "Consultar programação"
+      description: "Grupo dedicado à intercessão e oração pela igreja e comunidade",
+      leaders: "Marica Machado e Ademar Malmann",
+      schedule: "Terça-feira - Reunião de Oração"
+    },
+    {
+      name: "Jovens Adoradores",
+      type: "Grupo de Jovens",
+      description: "Encontros especiais para jovens com estudos bíblicos e atividades",
+      leaders: "Silvano e Leonice Cardoso",
+      schedule: "Sábado - Atividades em grupo"
+    },
+    {
+      name: "Mensageira Do Cristo Rei",
+      type: "Grupo de Mulheres",
+      description: "Ministério dedicado às mulheres da igreja com estudos e comunhão",
+      leaders: "Ana Venconi e Gisele Segatto",
+      schedule: "Sábado - Reuniões do grupo"
     },
     {
       name: "Ourinhos de Cristo",
       type: "Ministério Infantil",
       description: "Atividades especiais para crianças durante os cultos",
-      leaders: "Leonice Cardoso",
-      schedule: "Domingos durante o culto"
+      leaders: "Leonice Cardoso e Elen Dale Laste",
+      schedule: "Sábado - Atividades infantis | Domingos durante o culto"
     }
   ];
 

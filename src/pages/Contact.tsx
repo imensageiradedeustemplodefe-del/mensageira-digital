@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Phone, Mail, Clock, Send, MessageCircle } from "lucide-react";
+import { MapPin, Mail, Clock, Send, MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,12 +51,6 @@ const Contact = () => {
       description: "Venha nos visitar pessoalmente"
     },
     {
-      icon: Phone,
-      title: "Telefone",
-      content: "[Telefone a ser informado]",
-      description: "Ligue para mais informações"
-    },
-    {
       icon: Mail,
       title: "E-mail",
       content: "imensageiradedeustemplodefe@gmail.com", 
@@ -68,13 +62,6 @@ const Contact = () => {
       content: "Sex: 20:00 | Dom: 19:30",
       description: "Horários dos cultos principais"
     }
-  ];
-
-  const officeHours = [
-    { day: "Segunda a Quinta", hours: "14:00 - 18:00" },
-    { day: "Sexta-feira", hours: "14:00 - 19:00" }, 
-    { day: "Sábado", hours: "Consultar programação" },
-    { day: "Domingo", hours: "17:00 - 20:00" }
   ];
 
   return (
@@ -210,26 +197,8 @@ const Contact = () => {
               </Card>
             </div>
 
-            {/* Office Hours and Additional Info */}
+            {/* Additional Info */}
             <div className="space-y-6">
-              <Card className="bg-card/60 backdrop-blur border-none">
-                <CardHeader>
-                  <CardTitle className="text-xl text-foreground">
-                    Horário de Atendimento
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {officeHours.map((schedule, index) => (
-                      <div key={index} className="flex justify-between items-center py-2 border-b border-border/50 last:border-b-0">
-                        <span className="text-muted-foreground">{schedule.day}</span>
-                        <span className="font-medium text-foreground">{schedule.hours}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
               <Card className="bg-gradient-to-br from-primary/5 to-peaceful-blue/10 border-none">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-foreground mb-4">
