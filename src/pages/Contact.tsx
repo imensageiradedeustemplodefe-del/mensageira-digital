@@ -278,7 +278,7 @@ const Contact = () => {
                     <div className="text-center space-y-2">
                       <MapPin className="w-8 h-8 text-muted-foreground mx-auto" />
                       <p className="text-muted-foreground">
-                        Mapa será adicionado quando o endereço for informado
+                        R. Elias Biasi - Berger, Caçador - SC, 89500-000
                       </p>
                     </div>
                   </div>
