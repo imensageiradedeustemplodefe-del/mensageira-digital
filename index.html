@@ -3,22 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mensageira-digital</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>Mensageira de Deus Templo de Fé - Igreja Evangélica</title>
+    <meta name="description" content="Igreja Mensageira de Deus Templo de Fé - Comunidade cristã com cultos ao vivo, palavra diária, eventos e programação especial. Pastores Gilmar e Vera Radaelli." />
+    <meta name="author" content="Mensageira de Deus Templo de Fé" />
+    <meta name="keywords" content="igreja, evangélica, culto, Jesus, Cristo, fé, oração, Mensageira de Deus" />
 
-    <meta property="og:title" content="mensageira-digital" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1E90FF" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Mensageira de Deus" />
+
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://lovable.dev/projects/61fccfbc-b6c2-4808-ad5f-d692a4e939eb" />
+    <meta property="og:title" content="Mensageira de Deus Templo de Fé" />
+    <meta property="og:description" content="Igreja Mensageira de Deus Templo de Fé - Comunidade cristã com cultos ao vivo e palavra de Deus" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:title" content="Mensageira de Deus Templo de Fé" />
+    <meta name="twitter:description" content="Igreja Mensageira de Deus Templo de Fé - Comunidade cristã com cultos ao vivo e palavra de Deus" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- PWA Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('SW registered: ', registration);
+            }, function(registrationError) {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

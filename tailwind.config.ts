@@ -26,7 +26,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					light: 'hsl(var(--primary-light))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -61,7 +62,12 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Church-specific colors
+				'spiritual-glow': 'hsl(var(--spiritual-glow))',
+				'divine-light': 'hsl(var(--divine-light))',
+				'peaceful-blue': 'hsl(var(--peaceful-blue))',
+				'warm-gold': 'hsl(var(--warm-gold))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
