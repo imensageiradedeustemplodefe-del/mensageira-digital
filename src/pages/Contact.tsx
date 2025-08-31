@@ -256,7 +256,7 @@ const Contact = () => {
                   </h3>
                   <div className="aspect-video rounded-lg overflow-hidden">
                     <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3518.8!2d-51.0!3d-26.8!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjbCsDQ4JzAwLjAiUyA1McKwMDAnMDAuMCJX!5e0!3m2!1spt-BR!2sbr!4v1640000000000!5m2!1spt-BR!2sbr&q=R.+Elias+Biasi,+49+-+Berger,+Caçador+-+SC,+89500-000"
+                      src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=R.+Elias+Biasi+49+Berger+Caçador+SC+Brazil&zoom=16"
                       width="100%"
                       height="100%"
                       style={{ border: 0 }}
