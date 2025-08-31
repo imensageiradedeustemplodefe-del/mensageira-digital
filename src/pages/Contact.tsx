@@ -205,22 +205,18 @@ const Contact = () => {
                     Outras Formas de Contato
                   </h3>
                   <div className="space-y-3 text-muted-foreground">
-                    <div className="flex items-center">
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      <span className="text-sm">WhatsApp: [A ser informado]</span>
+                    <div className="flex items-start">
+                      <Mail className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm break-all">E-mail da secretaria: imensageiradedeustemplodefe@gmail.com</span>
                     </div>
                     <div className="flex items-center">
-                      <Mail className="w-4 h-4 mr-2" />
-                      <span className="text-sm">E-mail da secretaria: imensageiradedeustemplodefe@gmail.com</span>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-4 h-4 mr-2 bg-blue-600 rounded"></div>
+                      <div className="w-4 h-4 mr-2 bg-blue-600 rounded flex-shrink-0"></div>
                       <a href="https://www.facebook.com/igrejamensageira" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-primary transition-colors">
                         Facebook: Igreja Mensageira
                       </a>
                     </div>
                     <div className="flex items-center">
-                      <div className="w-4 h-4 mr-2 bg-gradient-to-br from-purple-600 to-pink-600 rounded"></div>
+                      <div className="w-4 h-4 mr-2 bg-gradient-to-br from-purple-600 to-pink-600 rounded flex-shrink-0"></div>
                       <a href="https://www.instagram.com/igrejamensageira?igsh=MW0xd3p5bmlyM2ps" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-primary transition-colors">
                         Instagram: @igrejamensageira
                       </a>
