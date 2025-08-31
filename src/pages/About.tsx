@@ -47,9 +47,15 @@ const About = () => {
     },
     {
       name: "Ourinhos de Cristo",
-      leaders: "Leonice Cardoso",
+      leaders: "Leonice Cardoso e Elen Dale Laste",
       type: "Ministério Infantil",
       icon: "👶"
+    },
+    {
+      name: "Mensageira Do Cristo Rei",
+      leaders: "Ana Venconi e Gisele Segatto",
+      type: "Grupo de Mulheres",
+      icon: "👩"
     }
   ];
 

@@ -23,9 +23,11 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">M</span>
-            </div>
+            <img 
+              src="/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png" 
+              alt="Logo Igreja Mensageira de Deus Templo de Fé" 
+              className="w-10 h-10 object-contain"
+            />
             <div className="hidden sm:block">
               <h1 className="text-lg font-bold text-foreground">Mensageira de Deus</h1>
               <p className="text-sm text-muted-foreground -mt-1">Templo de Fé</p>

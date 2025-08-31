@@ -47,7 +47,7 @@ const Contact = () => {
     {
       icon: MapPin,
       title: "Endereço",
-      content: "[Endereço da igreja a ser informado]",
+      content: "R. Elias Biasi - Berger, Caçador - SC, 89500-000",
       description: "Venha nos visitar pessoalmente"
     },
     {
@@ -59,7 +59,7 @@ const Contact = () => {
     {
       icon: Mail,
       title: "E-mail",
-      content: "[E-mail a ser informado]", 
+      content: "imensageiradedeustemplodefe@gmail.com", 
       description: "Envie sua mensagem"
     },
     {
@@ -242,7 +242,19 @@ const Contact = () => {
                     </div>
                     <div className="flex items-center">
                       <Mail className="w-4 h-4 mr-2" />
-                      <span className="text-sm">E-mail da secretaria: [A ser informado]</span>
+                      <span className="text-sm">E-mail da secretaria: imensageiradedeustemplodefe@gmail.com</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-4 h-4 mr-2 bg-blue-600 rounded"></div>
+                      <a href="https://www.facebook.com/igrejamensageira" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-primary transition-colors">
+                        Facebook: Igreja Mensageira
+                      </a>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-4 h-4 mr-2 bg-gradient-to-br from-purple-600 to-pink-600 rounded"></div>
+                      <a href="https://www.instagram.com/igrejamensageira?igsh=MW0xd3p5bmlyM2ps" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-primary transition-colors">
+                        Instagram: @igrejamensageira
+                      </a>
                     </div>
                   </div>
 
