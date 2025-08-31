@@ -10,6 +10,11 @@ import About from "./pages/About";
 import Events from "./pages/Events";
 import Live from "./pages/Live";
 import Contact from "./pages/Contact";
+import Prayer from "./pages/Prayer";
+import Gallery from "./pages/Gallery";
+import Testimonies from "./pages/Testimonies";
+import Sermons from "./pages/Sermons";
+import Studies from "./pages/Studies";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +34,11 @@ const App = () => (
               <Route path="/eventos" element={<Events />} />
               <Route path="/live" element={<Live />} />
               <Route path="/contato" element={<Contact />} />
+              <Route path="/oracao" element={<Prayer />} />
+              <Route path="/galeria" element={<Gallery />} />
+              <Route path="/testemunhos" element={<Testimonies />} />
+              <Route path="/sermoes" element={<Sermons />} />
+              <Route path="/estudos" element={<Studies />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
