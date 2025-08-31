@@ -20,10 +20,25 @@ const Contact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simular envio do formulário
+    // Criar o email com os dados do formulário
+    const subject = encodeURIComponent(`Mensagem do site: ${formData.subject}`);
+    const body = encodeURIComponent(
+      `Nome: ${formData.name}\n` +
+      `E-mail: ${formData.email}\n` +
+      `Telefone: ${formData.phone || 'Não informado'}\n` +
+      `Assunto: ${formData.subject}\n\n` +
+      `Mensagem:\n${formData.message}`
+    );
+    
+    const mailtoLink = `mailto:imensageiradedeustemplodefe@gmail.com?subject=${subject}&body=${body}`;
+    
+    // Abrir o cliente de email
+    window.location.href = mailtoLink;
+    
+    // Mostrar toast de sucesso
     toast({
-      title: "Mensagem Enviada!",
-      description: "Recebemos sua mensagem e entraremos em contato em breve.",
+      title: "Cliente de E-mail Aberto!",
+      description: "Seu cliente de e-mail foi aberto com a mensagem preenchida. Complete o envio por lá.",
     });
 
     // Limpar formulário
@@ -233,19 +248,28 @@ const Contact = () => {
                 </CardContent>
               </Card>
 
-              {/* Map Placeholder */}
+              {/* Map */}
               <Card className="bg-card/60 backdrop-blur border-none">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-foreground mb-4">
                     Localização
                   </h3>
-                  <div className="aspect-video bg-muted/50 rounded-lg flex items-center justify-center">
-                    <div className="text-center space-y-2">
-                      <MapPin className="w-8 h-8 text-muted-foreground mx-auto" />
-                      <p className="text-muted-foreground">
-                        R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000
-                      </p>
-                    </div>
+                  <div className="aspect-video rounded-lg overflow-hidden">
+                    <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3518.8!2d-51.0!3d-26.8!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjbCsDQ4JzAwLjAiUyA1McKwMDAnMDAuMCJX!5e0!3m2!1spt-BR!2sbr!4v1640000000000!5m2!1spt-BR!2sbr&q=R.+Elias+Biasi,+49+-+Berger,+Caçador+-+SC,+89500-000"
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="Localização da Igreja Mensageira de Deus Templo de Fé"
+                    />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <p className="text-muted-foreground text-sm">
+                      R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000
+                    </p>
                   </div>
                 </CardContent>
               </Card>
