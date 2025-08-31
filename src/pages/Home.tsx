@@ -124,7 +124,7 @@ const Home = () => {
           </h2>
           <div className="flex items-center justify-center text-muted-foreground mb-6">
             <MapPin className="w-5 h-5 mr-2" />
-            <span>R. Elias Biasi - Berger, Caçador - SC, 89500-000</span>
+            <span>R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000</span>
           </div>
           <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
             Venha fazer parte da nossa família! Todos são bem-vindos para adorar 

@@ -47,7 +47,7 @@ const Contact = () => {
     {
       icon: MapPin,
       title: "Endereço",
-      content: "R. Elias Biasi - Berger, Caçador - SC, 89500-000",
+      content: "R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000",
       description: "Venha nos visitar pessoalmente"
     },
     {
@@ -278,7 +278,7 @@ const Contact = () => {
                     <div className="text-center space-y-2">
                       <MapPin className="w-8 h-8 text-muted-foreground mx-auto" />
                       <p className="text-muted-foreground">
-                        R. Elias Biasi - Berger, Caçador - SC, 89500-000
+                        R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000
                       </p>
                     </div>
                   </div>

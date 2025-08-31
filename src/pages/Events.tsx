@@ -204,7 +204,7 @@ const Events = () => {
               <div className="space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-center justify-center">
                   <MapPin className="w-4 h-4 mr-2" />
-                  <span>Endereço: R. Elias Biasi - Berger, Caçador - SC, 89500-000</span>
+                  <span>Endereço: R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000</span>
                 </div>
                 <div className="flex items-center justify-center">
                   <Clock className="w-4 h-4 mr-2" />
