@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings, Upload, Eye, Trash2, Plus, Users } from "lucide-react";
+import { Settings, Upload, Eye, Trash2, Plus, Users, LogOut } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,18 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const Admin = () => {
   const { toast } = useToast();
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
   
   // Mock data - in real app this would come from backend
   const [testimonies, setTestimonies] = useState([
@@ -90,15 +99,23 @@ const Admin = () => {
       {/* Header */}
       <section className="bg-gradient-to-br from-primary/10 to-peaceful-blue/20 py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center">
-            <Settings className="w-8 h-8 text-primary mr-3" />
-            <h1 className="text-3xl font-bold text-foreground">
-              Painel Administrativo
-            </h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Settings className="w-8 h-8 text-primary mr-3" />
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">
+                  Painel Administrativo
+                </h1>
+                <p className="text-muted-foreground mt-2">
+                  Gerencie o conteúdo do site da igreja
+                </p>
+              </div>
+            </div>
+            <Button onClick={handleLogout} variant="outline">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
           </div>
-          <p className="text-muted-foreground mt-2">
-            Gerencie o conteúdo do site da igreja
-          </p>
         </div>
       </section>
 

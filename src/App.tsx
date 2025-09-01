@@ -15,40 +15,50 @@ import Gallery from "./pages/Gallery";
 import Testimonies from "./pages/Testimonies";
 import ComingSoon from "./pages/ComingSoon";
 import Admin from "./pages/Admin";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import { AuthProvider } from "./hooks/useAuth";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <div className="min-h-screen flex flex-col">
-          <Navigation />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/sobre" element={<About />} />
-              <Route path="/eventos" element={<Events />} />
-              <Route path="/live" element={<Live />} />
-              <Route path="/contato" element={<Contact />} />
-              <Route path="/oracao" element={<Prayer />} />
-              <Route path="/galeria" element={<Gallery />} />
-              <Route path="/testemunhos" element={<Testimonies />} />
-              <Route path="/em-breve" element={<ComingSoon />} />
-              <Route path="/admin" element={<Admin />} />
-              {/* Redirect old routes to coming soon */}
-              <Route path="/sermoes" element={<ComingSoon />} />
-              <Route path="/estudos" element={<ComingSoon />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </BrowserRouter>
+      <AuthProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <div className="min-h-screen flex flex-col">
+            <Navigation />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/sobre" element={<About />} />
+                <Route path="/eventos" element={<Events />} />
+                <Route path="/live" element={<Live />} />
+                <Route path="/contato" element={<Contact />} />
+                <Route path="/oracao" element={<Prayer />} />
+                <Route path="/galeria" element={<Gallery />} />
+                <Route path="/testemunhos" element={<Testimonies />} />
+                <Route path="/em-breve" element={<ComingSoon />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/admin" element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } />
+                {/* Redirect old routes to coming soon */}
+                <Route path="/sermoes" element={<ComingSoon />} />
+                <Route path="/estudos" element={<ComingSoon />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
