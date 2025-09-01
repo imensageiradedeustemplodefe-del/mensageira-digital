@@ -3,8 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Events from "./pages/Events";
@@ -15,10 +17,8 @@ import Gallery from "./pages/Gallery";
 import Testimonies from "./pages/Testimonies";
 import ComingSoon from "./pages/ComingSoon";
 import Admin from "./pages/Admin";
-import Login from "./pages/Login";
+import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
-import { AuthProvider } from "./hooks/useAuth";
-import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -38,11 +38,11 @@ const App = () => (
                 <Route path="/eventos" element={<Events />} />
                 <Route path="/live" element={<Live />} />
                 <Route path="/contato" element={<Contact />} />
-                <Route path="/oracao" element={<Prayer />} />
+                <Route path="/oracoes" element={<Prayer />} />
                 <Route path="/galeria" element={<Gallery />} />
                 <Route path="/testemunhos" element={<Testimonies />} />
                 <Route path="/em-breve" element={<ComingSoon />} />
-                <Route path="/login" element={<Login />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={
                   <ProtectedRoute>
                     <Admin />

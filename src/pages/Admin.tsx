@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Admin = () => {
@@ -18,7 +18,6 @@ const Admin = () => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/');
   };
   
   // Mock data - in real app this would come from backend
