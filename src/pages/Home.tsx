@@ -1,4 +1,4 @@
-import { Calendar, Clock, MapPin, Youtube } from "lucide-react";
+import { Calendar, Clock, MapPin, Youtube, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DailyVerse from "@/components/DailyVerse";
@@ -53,6 +53,22 @@ const Home = () => {
                   Assistir ao Vivo
                 </Button>
               </Link>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-primary text-primary hover:bg-primary/10"
+                onClick={() => {
+                  if ('serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window) {
+                    // PWA install logic would go here
+                    alert('Para instalar o app, use o menu do navegador ou procure por "Instalar App"');
+                  } else {
+                    alert('Para instalar o app, use o menu do navegador ou procure por "Adicionar à tela inicial"');
+                  }
+                }}
+              >
+                <Download className="w-5 h-5 mr-2" />
+                Instalar App
+              </Button>
               <Link to="/eventos">
                 <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/10">
                   <Calendar className="w-5 h-5 mr-2" />

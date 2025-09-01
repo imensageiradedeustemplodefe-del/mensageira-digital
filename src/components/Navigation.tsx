@@ -20,8 +20,8 @@ const Navigation = () => {
     { name: "Pedidos de Oração", href: "/oracao", icon: Heart },
     { name: "Galeria", href: "/galeria", icon: Camera },
     { name: "Testemunhos", href: "/testemunhos", icon: MessageCircle },
-    { name: "Sermões", href: "/sermoes", icon: BookOpen },
-    { name: "Estudos Bíblicos", href: "/estudos", icon: GraduationCap },
+    { name: "Sermões", href: "/em-breve", icon: BookOpen, comingSoon: true },
+    { name: "Estudos Bíblicos", href: "/em-breve", icon: GraduationCap, comingSoon: true },
   ];
 
   const isActive = (href: string) => location.pathname === href;
@@ -93,6 +93,11 @@ const Navigation = () => {
                         >
                           <Icon className="w-4 h-4 mr-3" />
                           {item.name}
+                          {item.comingSoon && (
+                            <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
+                              em breve
+                            </span>
+                          )}
                         </Link>
                       );
                     })}
@@ -158,6 +163,11 @@ const Navigation = () => {
                     >
                       <Icon className="w-4 h-4 mr-3" />
                       {item.name}
+                      {item.comingSoon && (
+                        <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
+                          em breve
+                        </span>
+                      )}
                     </Link>
                   );
                 })}

@@ -73,23 +73,6 @@ const Prayer = () => {
     "Outros"
   ];
 
-  const testimonies = [
-    {
-      name: "Maria Silva",
-      testimony: "Deus me curou de uma doença grave. Sou grata pelas orações da igreja!",
-      date: "Dezembro 2024"
-    },
-    {
-      name: "João Santos", 
-      testimony: "Encontrei emprego após meses de oração. Deus é fiel!",
-      date: "Novembro 2024"
-    },
-    {
-      name: "Ana Costa",
-      testimony: "Minha família foi restaurada através das orações. Glória a Deus!",
-      date: "Outubro 2024"
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -271,31 +254,6 @@ const Prayer = () => {
         </div>
       </section>
 
-      {/* Recent Testimonies */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-foreground mb-12">
-            Testemunhos de Orações Respondidas
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonies.map((testimony, index) => (
-              <Card key={index} className="hover:shadow-lg transition-all duration-300">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{testimony.name}</CardTitle>
-                    <Badge variant="secondary">{testimony.date}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground italic">
-                    "{testimony.testimony}"
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   );
 };
