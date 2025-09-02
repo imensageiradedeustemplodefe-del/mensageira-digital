@@ -1,10 +1,59 @@
+import { useState, useEffect } from "react";
 import { Calendar, Clock, MapPin, Youtube, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DailyVerse from "@/components/DailyVerse";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const Home = () => {
+  const { toast } = useToast();
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [installable, setInstallable] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      toast({
+        title: "Instalação não disponível",
+        description: "Use o menu do seu navegador para adicionar à tela inicial ou instalar o app.",
+        variant: "default"
+      });
+      return;
+    }
+
+    const promptEvent = deferredPrompt;
+    setDeferredPrompt(null);
+    setInstallable(false);
+
+    promptEvent.prompt();
+    const { outcome } = await promptEvent.userChoice;
+
+    if (outcome === 'accepted') {
+      toast({
+        title: "App instalado!",
+        description: "O app foi instalado com sucesso em seu dispositivo.",
+      });
+    } else {
+      toast({
+        title: "Instalação cancelada",
+        description: "A instalação foi cancelada. Você pode instalar mais tarde pelo menu do navegador.",
+        variant: "default"
+      });
+    }
+  };
+
   const upcomingEvents = [
     {
       title: "Culto de Cura e Libertação",
@@ -57,17 +106,10 @@ const Home = () => {
                 size="lg" 
                 variant="outline" 
                 className="border-primary text-primary hover:bg-primary/10"
-                onClick={() => {
-                  if ('serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window) {
-                    // PWA install logic would go here
-                    alert('Para instalar o app, use o menu do navegador ou procure por "Instalar App"');
-                  } else {
-                    alert('Para instalar o app, use o menu do navegador ou procure por "Adicionar à tela inicial"');
-                  }
-                }}
+                onClick={handleInstallClick}
               >
                 <Download className="w-5 h-5 mr-2" />
-                Instalar App
+                {installable ? 'Instalar App' : 'Instalar App'}
               </Button>
               <Link to="/eventos">
                 <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/10">
