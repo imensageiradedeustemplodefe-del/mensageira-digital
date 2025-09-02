@@ -49,12 +49,19 @@ const DailyVerse = () => {
     }
   ];
 
-  const getDailyVerse = () => {
+  const getDailyVerse = (useRandom = false) => {
     setIsLoading(true);
-    // Gera um índice baseado na data atual
-    const today = new Date();
-    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    const verseIndex = dayOfYear % verses.length;
+    let verseIndex;
+    
+    if (useRandom) {
+      // Gera um índice aleatório para o botão de atualizar
+      verseIndex = Math.floor(Math.random() * verses.length);
+    } else {
+      // Gera um índice baseado na data atual para o versículo do dia
+      const today = new Date();
+      const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+      verseIndex = dayOfYear % verses.length;
+    }
     
     setTimeout(() => {
       setVerse(verses[verseIndex]);
@@ -107,7 +114,7 @@ const DailyVerse = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={getDailyVerse}
+              onClick={() => getDailyVerse(true)}
               disabled={isLoading}
               className="hover:bg-white/20"
             >
