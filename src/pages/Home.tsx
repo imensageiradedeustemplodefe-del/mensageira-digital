@@ -5,11 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DailyVerse from "@/components/DailyVerse";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 
 const Home = () => {
   const { toast } = useToast();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [installable, setInstallable] = useState(false);
+  
+  // Hook para gerenciar atualizações automáticas
+  useServiceWorkerUpdate();
 
   useEffect(() => {
     const handler = (e: Event) => {
