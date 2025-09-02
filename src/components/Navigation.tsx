@@ -17,7 +17,7 @@ const Navigation = () => {
   ];
 
   const ministryPages = [
-    { name: "Pedidos de Oração", href: "/oracao", icon: Heart },
+    { name: "Pedidos de Oração", href: "/oracoes", icon: Heart },
     { name: "Galeria", href: "/galeria", icon: Camera },
     { name: "Testemunhos", href: "/testemunhos", icon: MessageCircle },
     { name: "Sermões", href: "/em-breve", icon: BookOpen, comingSoon: true },
