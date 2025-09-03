@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      gallery_categories: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gallery_photos: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          description: string | null
+          event_date: string | null
+          id: string
+          image_url: string
+          is_published: boolean | null
+          participants: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          image_url: string
+          is_published?: boolean | null
+          participants?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          image_url?: string
+          is_published?: boolean | null
+          participants?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_photos_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -34,6 +108,33 @@ export type Database = {
           email?: string
           id?: string
           role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      testimonies: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_approved: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          name?: string
           updated_at?: string
         }
         Relationships: []

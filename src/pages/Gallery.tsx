@@ -1,106 +1,105 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Camera, Calendar, Users, Heart, Image as ImageIcon, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string;
+}
+
+interface Photo {
+  id: string;
+  title: string;
+  description: string;
+  image_url: string;
+  category_id: string;
+  event_date: string;
+  participants: number;
+  is_published: boolean;
+  gallery_categories?: { name: string };
+}
 
 const Gallery = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Placeholder images - in a real app, these would come from a CMS or database
-  const photos = [
-    {
-      id: 1,
-      title: "Culto da Família - Dezembro 2024",
-      category: "cultos",
-      date: "2024-12-15",
-      description: "Momento especial de adoração e comunhão",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&crop=center",
-      participants: 85
-    },
-    {
-      id: 2,
-      title: "Batismo nas Águas",
-      category: "batismos",
-      date: "2024-11-20",
-      description: "Celebração dos novos membros da família",
-      image: "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=400&h=300&fit=crop&crop=center",
-      participants: 12
-    },
-    {
-      id: 3,
-      title: "Ensaio Geração de Samuel",
-      category: "musica",
-      date: "2024-12-10", 
-      description: "Preparação para o culto de domingo",
-      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center",
-      participants: 8
-    },
-    {
-      id: 4,
-      title: "Reunião das Mulheres",
-      category: "grupos",
-      date: "2024-12-08",
-      description: "Mensageira do Cristo Rei - Encontro mensal",
-      image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=400&h=300&fit=crop&crop=center",
-      participants: 25
-    },
-    {
-      id: 5,
-      title: "Ourinhos de Cristo",
-      category: "criancas",
-      date: "2024-12-03",
-      description: "Atividades especiais para as crianças",
-      image: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400&h=300&fit=crop&crop=center",
-      participants: 18
-    },
-    {
-      id: 6,
-      title: "Jovens Adoradores",
-      category: "jovens",
-      date: "2024-11-30",
-      description: "Retiro espiritual dos jovens",
-      image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=300&fit=crop&crop=center",
-      participants: 32
-    },
-    {
-      id: 7,
-      title: "Culto de Cura e Libertação",
-      category: "cultos",
-      date: "2024-12-06",
-      description: "Noite de oração e milagres",
-      image: "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=400&h=300&fit=crop&crop=center",
-      participants: 95
-    },
-    {
-      id: 8,
-      title: "Obreiros em Oração",
-      category: "oracao",
-      date: "2024-12-05",
-      description: "Intercessão pela igreja e comunidade",
-      image: "https://images.unsplash.com/photo-1574391884720-bfab8d3b8b4a?w=400&h=300&fit=crop&crop=center",
-      participants: 15
+  useEffect(() => {
+    fetchPhotos();
+    fetchCategories();
+  }, []);
+
+  const fetchPhotos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('gallery_photos')
+        .select(`
+          *,
+          gallery_categories(name)
+        `)
+        .eq('is_published', true)
+        .order('event_date', { ascending: false });
+
+      if (error) throw error;
+      setPhotos(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar fotos:', error);
     }
-  ];
+  };
 
-  const categories = [
-    { id: "all", name: "Todas", icon: ImageIcon },
-    { id: "cultos", name: "Cultos", icon: Heart },
-    { id: "batismos", name: "Batismos", icon: Users },
-    { id: "musica", name: "Música", icon: Camera },
-    { id: "grupos", name: "Grupos", icon: Users },
-    { id: "criancas", name: "Crianças", icon: Heart },
-    { id: "jovens", name: "Jovens", icon: Users },
-    { id: "oracao", name: "Oração", icon: Heart }
-  ];
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('gallery_categories')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+      
+      // Add "all" category at the beginning
+      const allCategories = [
+        { id: "all", name: "Todas", slug: "all", icon: "ImageIcon" },
+        ...(data || [])
+      ];
+      setCategories(allCategories);
+    } catch (error) {
+      console.error('Erro ao buscar categorias:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredPhotos = selectedCategory === "all" 
     ? photos 
-    : photos.filter(photo => photo.category === selectedCategory);
+    : photos.filter(photo => photo.category_id === selectedCategory);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
+
+  const getIconComponent = (iconName: string) => {
+    const icons: { [key: string]: any } = {
+      ImageIcon,
+      Heart,
+      Users,
+      Camera
+    };
+    return icons[iconName] || ImageIcon;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg text-muted-foreground">Carregando galeria...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -126,7 +125,7 @@ const Gallery = () => {
           </div>
           <div className="flex flex-wrap justify-center gap-2">
             {categories.map((category) => {
-              const Icon = category.icon;
+              const Icon = getIconComponent(category.icon);
               return (
                 <Button
                   key={category.id}
@@ -152,7 +151,7 @@ const Gallery = () => {
               <Card key={photo.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
                 <div className="aspect-video overflow-hidden">
                   <img
-                    src={photo.image}
+                    src={photo.image_url}
                     alt={photo.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -162,7 +161,7 @@ const Gallery = () => {
                     <CardTitle className="text-lg line-clamp-2">{photo.title}</CardTitle>
                     <Badge variant="secondary" className="text-xs whitespace-nowrap ml-2">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {formatDate(photo.date)}
+                      {formatDate(photo.event_date)}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -214,28 +213,6 @@ const Gallery = () => {
         </div>
       </section>
 
-      {/* Upload Section */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Card className="bg-card/60 backdrop-blur border-none">
-            <CardContent className="p-8">
-              <Camera className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-4">Compartilhe suas Fotos</h3>
-              <p className="text-muted-foreground mb-6">
-                Você tem fotos especiais de eventos da igreja? Envie para nós pelo e-mail
-                e ajude a documentar nossa jornada de fé!
-              </p>
-              <Button 
-                onClick={() => window.location.href = 'mailto:imensageiradedeustemplodefe@gmail.com?subject=Fotos para Galeria'}
-                className="bg-primary hover:bg-primary/90"
-              >
-                <Camera className="w-4 h-4 mr-2" />
-                Enviar Fotos
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
     </div>
   );
 };
