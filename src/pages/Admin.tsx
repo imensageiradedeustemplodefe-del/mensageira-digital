@@ -7,7 +7,8 @@ import { GalleryManager } from '@/components/admin/GalleryManager';
 import { TestimoniesManager } from '@/components/admin/TestimoniesManager';
 import { MediaManager } from '@/components/admin/MediaManager';
 import PrayerRequestsManager from '@/components/admin/PrayerRequestsManager';
-import { LogOut, Image, Settings, MessageCircle, Music, Heart } from 'lucide-react';
+import EventsManager from '@/components/admin/EventsManager';
+import { LogOut, Image, Settings, MessageCircle, Music, Heart, Calendar } from 'lucide-react';
 
 const Admin = () => {
   const { signOut } = useAuth();
@@ -46,7 +47,7 @@ const Admin = () => {
       <section className="py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs defaultValue="testimonies" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="testimonies" className="flex items-center">
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Testemunhos
@@ -58,6 +59,10 @@ const Admin = () => {
               <TabsTrigger value="media" className="flex items-center">
                 <Music className="w-4 h-4 mr-2" />
                 Mídias
+              </TabsTrigger>
+              <TabsTrigger value="events" className="flex items-center">
+                <Calendar className="w-4 h-4 mr-2" />
+                Eventos
               </TabsTrigger>
               <TabsTrigger value="prayers" className="flex items-center">
                 <Heart className="w-4 h-4 mr-2" />
@@ -75,6 +80,10 @@ const Admin = () => {
 
             <TabsContent value="media" className="mt-6">
               <MediaManager />
+            </TabsContent>
+
+            <TabsContent value="events" className="mt-6">
+              <EventsManager />
             </TabsContent>
 
             <TabsContent value="prayers" className="mt-6">

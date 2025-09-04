@@ -38,6 +38,57 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          category: string
+          contact_info: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          event_date: string
+          id: string
+          image_url: string | null
+          is_published: boolean | null
+          location: string | null
+          max_participants: number | null
+          registration_required: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          contact_info?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          event_date: string
+          id?: string
+          image_url?: string | null
+          is_published?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          registration_required?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          contact_info?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          event_date?: string
+          id?: string
+          image_url?: string | null
+          is_published?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          registration_required?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gallery_categories: {
         Row: {
           created_at: string
