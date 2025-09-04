@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, BookOpen, GraduationCap, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Navigation = () => {
+  const { settings } = useSiteSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
@@ -38,8 +40,12 @@ const Navigation = () => {
               className="w-10 h-10 object-contain"
             />
             <div className="hidden sm:block">
-              <h1 className="text-lg font-bold text-foreground">Mensageira de Deus</h1>
-              <p className="text-sm text-muted-foreground -mt-1">Templo de Fé</p>
+              <h1 className="text-lg font-bold text-foreground">
+                {settings.church_name?.split(' - ')[0] || 'Mensageira de Deus'}
+              </h1>
+              <p className="text-sm text-muted-foreground -mt-1">
+                {settings.church_name?.split(' - ')[1] || 'Templo de Fé'}
+              </p>
             </div>
           </Link>
 

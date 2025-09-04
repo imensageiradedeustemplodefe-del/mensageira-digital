@@ -1,22 +1,25 @@
 import { Heart, Target, Eye, Users2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const About = () => {
+  const { settings } = useSiteSettings();
+  
   const pastors = [
     {
-      name: "Pr. Gilmar Radaelli",
+      name: settings.pastor_principal_name || "Pr. Gilmar Radaelli",
       role: "Pastor Responsável",
-      description: "Líder espiritual dedicado ao crescimento da igreja e ao cuidado pastoral das famílias."
+      description: settings.pastor_principal_description || "Líder espiritual dedicado ao crescimento da igreja e ao cuidado pastoral das famílias."
     },
     {
-      name: "Pra. Vera Lucia Radaelli",
+      name: settings.pastora_name || "Pra. Vera Lucia Radaelli",
       role: "Pastora Responsável",
-      description: "Comprometida com o ministério de mulheres e o ensino da Palavra de Deus."
+      description: settings.pastora_description || "Comprometida com o ministério de mulheres e o ensino da Palavra de Deus."
     },
     {
-      name: "Pr. João Ezequiel Batista",
+      name: settings.pastor_auxiliar_name || "Pr. João Ezequiel Batista",
       role: "Pastor Auxiliar",
-      description: "Apoio pastoral e liderança em diversas atividades da congregação."
+      description: settings.pastor_auxiliar_description || "Apoio pastoral e liderança em diversas atividades da congregação."
     }
   ];
 
@@ -91,8 +94,7 @@ const About = () => {
             Nossa História
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
-            A Mensageira de Deus Templo de Fé é uma comunidade de fé comprometida 
-            com a pregação da Palavra de Deus e o cuidado pastoral das famílias.
+            {settings.church_description || "A Mensageira de Deus Templo de Fé é uma comunidade de fé comprometida com a pregação da Palavra de Deus e o cuidado pastoral das famílias."}
           </p>
         </div>
       </section>

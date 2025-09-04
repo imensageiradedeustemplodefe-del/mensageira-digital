@@ -3,8 +3,10 @@ import { Play, Calendar, Clock, Youtube, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Live = () => {
+  const { settings } = useSiteSettings();
   const [isLive, setIsLive] = useState(false);
   const [nextService, setNextService] = useState<string>("");
 
@@ -36,50 +38,52 @@ const Live = () => {
       const now = new Date();
       const day = now.getDay();
       const hour = now.getHours();
-      const minute = now.getMinutes();
+      
+      const fridayTime = settings.friday_service_time || "19:30";
+      const sundayTime = settings.sunday_service_time || "19:30";
+      const wednesdayTime = settings.wednesday_service_time || "19:30";
+      
+      const [fridayHour] = fridayTime.split(':').map(Number);
+      const [sundayHour] = sundayTime.split(':').map(Number);
 
-      if (day === 5 && hour < 20) {
-        setNextService("Hoje às 20:00 - Culto de Cura e Libertação");
-      } else if (day === 0 && hour < 19) {
-        setNextService("Hoje às 19:30 - Culto da Família");
+      if (day === 5 && hour < fridayHour) {
+        setNextService(`Hoje às ${fridayTime} - Culto de Cura e Libertação`);
+      } else if (day === 0 && hour < sundayHour) {
+        setNextService(`Hoje às ${sundayTime} - Culto da Família`);
+      } else if (day === 3) {
+        setNextService(`Hoje às ${wednesdayTime} - Culto de Oração`);
       } else if (day < 5) {
-        setNextService("Sexta-feira às 20:00 - Culto de Cura e Libertação");
-      } else if (day === 5 && hour >= 20) {
-        setNextService("Domingo às 19:30 - Culto da Família");
+        setNextService(`Sexta-feira às ${fridayTime} - Culto de Cura e Libertação`);
+      } else if (day === 5 && hour >= fridayHour) {
+        setNextService(`Domingo às ${sundayTime} - Culto da Família`);
       } else if (day === 6) {
-        setNextService("Domingo às 19:30 - Culto da Família");
+        setNextService(`Domingo às ${sundayTime} - Culto da Família`);
       } else {
         setNextService("Sexta-feira às 20:00 - Culto de Cura e Libertação");
       }
     };
 
     calculateNextService();
-  }, []);
+  }, [settings.friday_service_time, settings.sunday_service_time, settings.wednesday_service_time]);
 
   const services = [
     {
       name: "Culto de Cura e Libertação",
       day: "Sexta-feira",
-      time: "20:00",
+      time: settings.friday_service_time || "19:30",
       description: "Noite especial de oração e libertação"
     },
     {
       name: "Culto da Família",
       day: "Domingo", 
-      time: "19:30",
+      time: settings.sunday_service_time || "19:30",
       description: "Culto para toda a família"
     },
     {
-      name: "Santa Ceia",
-      day: "2º Domingo",
-      time: "19:30",
-      description: "Celebração da Santa Ceia"
-    },
-    {
-      name: "Culto dos Homens",
-      day: "4º Sábado",
-      time: "19:30",
-      description: "Encontro dos Homens de Propósito"
+      name: "Culto de Oração",
+      day: "Quarta-feira",
+      time: settings.wednesday_service_time || "19:30",
+      description: "Momento de oração e comunhão"
     }
   ];
 
@@ -122,7 +126,7 @@ const Live = () => {
                 </div>
                 <div className="flex items-center space-x-2 text-muted-foreground">
                   <Users className="w-4 h-4" />
-                  <span className="text-sm">Canal: Mensageira de Deus Templo de Fé</span>
+                  <span className="text-sm">Canal: {settings.church_name || 'Mensageira de Deus Templo de Fé'}</span>
                 </div>
               </div>
             </CardContent>

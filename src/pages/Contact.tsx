@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Contact = () => {
   const { toast } = useToast();
+  const { settings } = useSiteSettings();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,7 +32,7 @@ const Contact = () => {
       `Mensagem:\n${formData.message}`
     );
     
-    const mailtoLink = `mailto:imensageiradedeustemplodefe@gmail.com?subject=${subject}&body=${body}`;
+    const mailtoLink = `mailto:${settings.contact_email_secretary || settings.church_email}?subject=${subject}&body=${body}`;
     
     // Abrir o cliente de email
     window.location.href = mailtoLink;
@@ -62,19 +64,19 @@ const Contact = () => {
     {
       icon: MapPin,
       title: "Endereço",
-      content: "R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000",
+      content: settings.contact_address_full || settings.church_address || "R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000",
       description: "Venha nos visitar pessoalmente"
     },
     {
       icon: Mail,
       title: "E-mail",
-      content: "imensageiradedeustemplodefe@gmail.com", 
+      content: settings.contact_email_secretary || settings.church_email || "imensageiradedeustemplodefe@gmail.com",
       description: "Envie sua mensagem"
     },
     {
       icon: Clock,
       title: "Horários",
-      content: "Sex: 20:00 | Dom: 19:30",
+      content: `Sex: ${settings.friday_service_time} | Dom: ${settings.sunday_service_time}`,
       description: "Horários dos cultos principais"
     }
   ];
@@ -222,17 +224,17 @@ const Contact = () => {
                   <div className="space-y-3 text-muted-foreground">
                     <div className="flex items-start">
                       <Mail className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm break-all">E-mail da secretaria: imensageiradedeustemplodefe@gmail.com</span>
+                      <span className="text-sm break-all">E-mail da secretaria: {settings.contact_email_secretary || settings.church_email}</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-4 h-4 mr-2 bg-blue-600 rounded flex-shrink-0"></div>
-                      <a href="https://www.facebook.com/igrejamensageira" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-primary transition-colors">
+                      <a href={settings.facebook_url || "https://www.facebook.com/igrejamensageira"} target="_blank" rel="noopener noreferrer" className="text-sm hover:text-primary transition-colors">
                         Facebook: Igreja Mensageira
                       </a>
                     </div>
                     <div className="flex items-center">
                       <div className="w-4 h-4 mr-2 bg-gradient-to-br from-purple-600 to-pink-600 rounded flex-shrink-0"></div>
-                      <a href="https://www.instagram.com/igrejamensageira?igsh=MW0xd3p5bmlyM2ps" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-primary transition-colors">
+                      <a href={settings.instagram_url || "https://www.instagram.com/igrejamensageira?igsh=MW0xd3p5bmlyM2ps"} target="_blank" rel="noopener noreferrer" className="text-sm hover:text-primary transition-colors">
                         Instagram: @igrejamensageira
                       </a>
                     </div>
@@ -268,7 +270,7 @@ const Contact = () => {
                   </div>
                   <div className="mt-4 text-center">
                     <p className="text-muted-foreground text-sm">
-                      R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000
+                      {settings.contact_address_full || settings.church_address || "R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000"}
                     </p>
                   </div>
                 </CardContent>

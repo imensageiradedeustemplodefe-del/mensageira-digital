@@ -6,9 +6,11 @@ import DailyVerse from "@/components/DailyVerse";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Home = () => {
   const { toast } = useToast();
+  const { settings, loading: settingsLoading } = useSiteSettings();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [installable, setInstallable] = useState(false);
   
@@ -61,21 +63,21 @@ const Home = () => {
   const upcomingEvents = [
     {
       title: "Culto de Cura e Libertação",
-      date: "Sexta-feira",
-      time: "20:00",
+      date: "Sexta-feira", 
+      time: settings.friday_service_time,
       description: "Venha buscar a cura e libertação em Jesus Cristo"
     },
     {
       title: "Culto da Família",
       date: "Domingo",
-      time: "19:30",
+      time: settings.sunday_service_time,
       description: "Culto especial para toda a família"
     },
     {
-      title: "Santa Ceia",
-      date: "2º Domingo do Mês",
-      time: "19:30",
-      description: "Celebração da Santa Ceia do Senhor"
+      title: "Culto de Oração",
+      date: "Quarta-feira",
+      time: settings.wednesday_service_time,
+      description: "Momento de oração e comunhão"
     }
   ];
 
@@ -87,16 +89,15 @@ const Home = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-6">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-              Bem-vindos à
-              <span className="block text-primary">Mensageira de Deus</span>
+              {settings.hero_title}
+              <span className="block text-primary">{settings.church_name?.split(' - ')[0] || 'Mensageira de Deus'}</span>
               <span className="block text-lg sm:text-xl font-normal text-muted-foreground mt-2">
-                Templo de Fé
+                {settings.hero_subtitle}
               </span>
             </h1>
             
             <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed">
-              Uma igreja comprometida com a Palavra de Deus, onde vidas são transformadas 
-              e famílias são edificadas no amor de Cristo.
+              {settings.hero_description}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
