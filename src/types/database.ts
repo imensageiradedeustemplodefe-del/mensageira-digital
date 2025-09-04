@@ -14,6 +14,16 @@ export type PrayerRequest = Database['public']['Tables']['prayer_requests']['Row
 export type PrayerRequestInsert = Database['public']['Tables']['prayer_requests']['Insert'];
 export type PrayerRequestUpdate = Database['public']['Tables']['prayer_requests']['Update'];
 
+// Public prayer request type for secure public access (from view)
+export type PublicPrayerRequest = {
+  id: string;
+  display_name: string;  // Only first name shown
+  request_text: string;
+  is_urgent: boolean;
+  category: string;
+  created_at: string;
+};
+
 export type Testimony = Database['public']['Tables']['testimonies']['Row'];
 export type TestimonyInsert = Database['public']['Tables']['testimonies']['Insert'];
 export type TestimonyUpdate = Database['public']['Tables']['testimonies']['Update'];

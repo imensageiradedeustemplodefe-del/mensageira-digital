@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import PrayerRequestForm from "@/components/PrayerRequestForm";
 import { usePrayerRequests } from "@/hooks/usePrayerRequests";
-import { PrayerRequest } from "@/types/database";
+import { PublicPrayerRequest } from "@/types/database";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -34,6 +34,11 @@ const Prayer = () => {
       'geral': 'Geral'
     };
     return names[category] || 'Geral';
+  };
+
+  // Type guard to safely access properties
+  const getRequestName = (request: any): string => {
+    return request.display_name || request.name || 'Anônimo';
   };
 
   return (
@@ -102,7 +107,7 @@ const Prayer = () => {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg flex items-center">
                         <Heart className="w-4 h-4 mr-2 text-primary" />
-                        {request.name}
+                        {getRequestName(request)}
                       </CardTitle>
                       {request.is_urgent && (
                         <Badge variant="destructive" className="text-xs">

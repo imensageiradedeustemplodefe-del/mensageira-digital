@@ -1,23 +1,30 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { PrayerRequest, PrayerRequestInsert } from '@/types/database';
+import { PrayerRequest, PrayerRequestInsert, PublicPrayerRequest } from '@/types/database';
 
 export const usePrayerRequests = (approvedOnly = false) => {
-  const [requests, setRequests] = useState<PrayerRequest[]>([]);
+  const [requests, setRequests] = useState<(PrayerRequest | PublicPrayerRequest)[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const fetchPrayerRequests = async () => {
     try {
       setLoading(true);
-      let query = supabase
-        .from('prayer_requests')
-        .select('*')
-        .order('created_at', { ascending: false });
-
+      let query;
+      
       if (approvedOnly) {
-        query = query.eq('is_approved', true);
+        // Use the secure view for public access - only shows sanitized data
+        query = supabase
+          .from('public_prayer_requests')
+          .select('*')
+          .order('created_at', { ascending: false });
+      } else {
+        // Admin access - use full table with all data
+        query = supabase
+          .from('prayer_requests')
+          .select('*')
+          .order('created_at', { ascending: false });
       }
 
       const { data, error } = await query;
