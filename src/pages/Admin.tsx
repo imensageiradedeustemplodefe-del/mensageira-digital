@@ -8,7 +8,8 @@ import { TestimoniesManager } from '@/components/admin/TestimoniesManager';
 import { MediaManager } from '@/components/admin/MediaManager';
 import PrayerRequestsManager from '@/components/admin/PrayerRequestsManager';
 import EventsManager from '@/components/admin/EventsManager';
-import { LogOut, Image, Settings, MessageCircle, Music, Heart, Calendar } from 'lucide-react';
+import LiveStreamsManager from '@/components/admin/LiveStreamsManager';
+import { LogOut, Image, Settings, MessageCircle, Music, Heart, Calendar, Radio } from 'lucide-react';
 
 const Admin = () => {
   const { signOut } = useAuth();
@@ -47,7 +48,7 @@ const Admin = () => {
       <section className="py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs defaultValue="testimonies" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="testimonies" className="flex items-center">
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Testemunhos
@@ -67,6 +68,10 @@ const Admin = () => {
               <TabsTrigger value="prayers" className="flex items-center">
                 <Heart className="w-4 h-4 mr-2" />
                 Orações
+              </TabsTrigger>
+              <TabsTrigger value="live" className="flex items-center">
+                <Radio className="w-4 h-4 mr-2" />
+                Transmissões
               </TabsTrigger>
             </TabsList>
 
@@ -88,6 +93,10 @@ const Admin = () => {
 
             <TabsContent value="prayers" className="mt-6">
               <PrayerRequestsManager />
+            </TabsContent>
+            
+            <TabsContent value="live" className="mt-6">
+              <LiveStreamsManager />
             </TabsContent>
           </Tabs>
         </div>

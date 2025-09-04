@@ -163,6 +163,63 @@ export type Database = {
           },
         ]
       }
+      live_streams: {
+        Row: {
+          chat_enabled: boolean | null
+          created_at: string
+          description: string | null
+          embed_url: string | null
+          ended_at: string | null
+          id: string
+          is_active: boolean | null
+          is_live: boolean | null
+          platform: string
+          scheduled_at: string | null
+          started_at: string | null
+          stream_url: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          viewer_count: number | null
+        }
+        Insert: {
+          chat_enabled?: boolean | null
+          created_at?: string
+          description?: string | null
+          embed_url?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_live?: boolean | null
+          platform: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          stream_url: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          viewer_count?: number | null
+        }
+        Update: {
+          chat_enabled?: boolean | null
+          created_at?: string
+          description?: string | null
+          embed_url?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_live?: boolean | null
+          platform?: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          stream_url?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          viewer_count?: number | null
+        }
+        Relationships: []
+      }
       media_categories: {
         Row: {
           created_at: string

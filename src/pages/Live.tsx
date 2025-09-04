@@ -1,40 +1,83 @@
 import { useState, useEffect } from "react";
-import { Play, Calendar, Clock, Youtube, Users } from "lucide-react";
+import { Play, Calendar, Clock, Youtube, Users, Facebook, Globe, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { supabase } from "@/integrations/supabase/client";
+
+interface LiveStream {
+  id: string;
+  title: string;
+  description: string | null;
+  platform: 'youtube' | 'facebook' | 'custom';
+  stream_url: string;
+  embed_url: string | null;
+  is_active: boolean;
+  is_live: boolean;
+  scheduled_at: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  viewer_count: number;
+  chat_enabled: boolean;
+  thumbnail_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 const Live = () => {
   const { settings } = useSiteSettings();
-  const [isLive, setIsLive] = useState(false);
+  const [activeStream, setActiveStream] = useState<LiveStream | null>(null);
+  const [streams, setStreams] = useState<LiveStream[]>([]);
+  const [loading, setLoading] = useState(true);
   const [nextService, setNextService] = useState<string>("");
 
-  // Simulação para verificar se há transmissão ao vivo
+  // Buscar transmissões ativas
   useEffect(() => {
-    const checkLiveStatus = () => {
-      const now = new Date();
-      const day = now.getDay();
-      const hour = now.getHours();
-      const minute = now.getMinutes();
-      const currentTime = hour * 60 + minute;
-
-      // Sexta-feira (5) às 20:00 ou Domingo (0) às 19:30
-      const fridayService = day === 5 && currentTime >= 1200 && currentTime <= 1320; // 20:00 - 22:00
-      const sundayService = day === 0 && currentTime >= 1170 && currentTime <= 1290; // 19:30 - 21:30
-
-      setIsLive(fridayService || sundayService);
-    };
-
-    checkLiveStatus();
-    const interval = setInterval(checkLiveStatus, 60000); // Check every minute
-
-    return () => clearInterval(interval);
+    fetchActiveStreams();
   }, []);
+
+  const fetchActiveStreams = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('live_streams')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setStreams((data || []) as LiveStream[]);
+      
+      // Encontrar a transmissão ao vivo atual
+      const liveStream = data?.find(stream => stream.is_live);
+      setActiveStream((liveStream || data?.[0] || null) as LiveStream | null);
+      
+    } catch (error) {
+      console.error('Error fetching streams:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Calcular próximo culto
   useEffect(() => {
     const calculateNextService = () => {
+      // Primeiro verificar se há alguma transmissão agendada
+      const scheduledStreams = streams.filter(stream => 
+        stream.scheduled_at && new Date(stream.scheduled_at) > new Date()
+      ).sort((a, b) => 
+        new Date(a.scheduled_at!).getTime() - new Date(b.scheduled_at!).getTime()
+      );
+
+      if (scheduledStreams.length > 0) {
+        const nextStream = scheduledStreams[0];
+        const scheduledDate = new Date(nextStream.scheduled_at!);
+        setNextService(`${nextStream.title} - ${scheduledDate.toLocaleString()}`);
+        return;
+      }
+
+      // Fallback para horários regulares
       const now = new Date();
       const day = now.getDay();
       const hour = now.getHours();
@@ -64,7 +107,15 @@ const Live = () => {
     };
 
     calculateNextService();
-  }, [settings.friday_service_time, settings.sunday_service_time, settings.wednesday_service_time]);
+  }, [settings.friday_service_time, settings.sunday_service_time, settings.wednesday_service_time, streams]);
+
+  const getPlatformIcon = (platform: string) => {
+    switch (platform) {
+      case 'youtube': return <Youtube className="w-4 h-4" />;
+      case 'facebook': return <Facebook className="w-4 h-4" />;
+      default: return <Globe className="w-4 h-4" />;
+    }
+  };
 
   const services = [
     {
@@ -87,6 +138,17 @@ const Live = () => {
     }
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando transmissões...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -108,24 +170,33 @@ const Live = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center space-x-3">
-                  {isLive ? (
+                  {activeStream?.is_live ? (
                     <>
                       <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                       <Badge variant="destructive" className="animate-pulse">
                         AO VIVO
                       </Badge>
-                      <span className="text-foreground font-medium">Culto em andamento</span>
+                      <span className="text-foreground font-medium">{activeStream.title}</span>
+                      <div className="flex items-center space-x-1 text-sm">
+                        {getPlatformIcon(activeStream.platform)}
+                        <span className="capitalize">{activeStream.platform}</span>
+                      </div>
                     </>
                   ) : (
                     <>
                       <div className="w-3 h-3 bg-muted rounded-full"></div>
                       <Badge variant="secondary">OFFLINE</Badge>
-                      <span className="text-muted-foreground">Próximo culto: {nextService}</span>
+                      <span className="text-muted-foreground">Próximo: {nextService}</span>
                     </>
                   )}
                 </div>
-                <div className="flex items-center space-x-2 text-muted-foreground">
-                  <Users className="w-4 h-4" />
+                <div className="flex items-center space-x-4 text-muted-foreground">
+                  {activeStream?.is_live && (
+                    <div className="flex items-center space-x-1">
+                      <Users className="w-4 h-4" />
+                      <span className="text-sm">{activeStream.viewer_count} visualizando</span>
+                    </div>
+                  )}
                   <span className="text-sm">Canal: {settings.church_name || 'Mensageira de Deus Templo de Fé'}</span>
                 </div>
               </div>
@@ -140,15 +211,25 @@ const Live = () => {
           <Card className="overflow-hidden border-none shadow-lg">
             <CardContent className="p-0">
               <div className="aspect-video bg-muted/30 relative">
-                <iframe
-                  src="https://www.youtube.com/embed/live_stream?channel=UC_YOUR_CHANNEL_ID"
-                  title="Mensageira de Deus - Transmissão ao Vivo"
-                  className="absolute inset-0 w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+                {activeStream && activeStream.embed_url ? (
+                  <iframe
+                    src={activeStream.embed_url}
+                    title={activeStream.title}
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                ) : (
+                  <iframe
+                    src="https://www.youtube.com/embed/live_stream?channel=UC_YOUR_CHANNEL_ID"
+                    title="Mensageira de Deus - Transmissão ao Vivo"
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                )}
                 
-                {!isLive && (
+                {!activeStream?.is_live && (
                   <div className="absolute inset-0 flex items-center justify-center bg-muted/80 backdrop-blur-sm">
                     <div className="text-center space-y-4">
                       <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto">
@@ -156,11 +237,16 @@ const Live = () => {
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-foreground mb-2">
-                          Transmissão Offline
+                          {activeStream ? activeStream.title : "Transmissão Offline"}
                         </h3>
                         <p className="text-muted-foreground">
-                          A transmissão será iniciada nos horários dos cultos
+                          {activeStream ? activeStream.description || "Aguardando início da transmissão" : "A transmissão será iniciada nos horários dos cultos"}
                         </p>
+                        {activeStream?.scheduled_at && (
+                          <p className="text-sm text-primary mt-2">
+                            Agendado para: {new Date(activeStream.scheduled_at).toLocaleString()}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -169,18 +255,66 @@ const Live = () => {
             </CardContent>
           </Card>
 
-          {/* Channel Link */}
-          <div className="text-center mt-6">
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="border-primary text-primary hover:bg-primary/10"
-              onClick={() => window.open("https://www.youtube.com/@imensageiradedeustemlodefe", "_blank")}
-            >
-              <Youtube className="w-5 h-5 mr-2" />
-              Visitar Canal no YouTube
-            </Button>
+          {/* Stream Links */}
+          <div className="flex flex-wrap justify-center gap-4 mt-6">
+            {streams.length > 0 ? (
+              streams.map((stream) => (
+                <Button 
+                  key={stream.id}
+                  variant="outline" 
+                  size="lg" 
+                  className="border-primary text-primary hover:bg-primary/10"
+                  onClick={() => window.open(stream.stream_url, "_blank")}
+                >
+                  {getPlatformIcon(stream.platform)}
+                  <span className="ml-2">Ver em {stream.platform}</span>
+                  <ExternalLink className="w-4 h-4 ml-1" />
+                </Button>
+              ))
+            ) : (
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-primary text-primary hover:bg-primary/10"
+                onClick={() => window.open("https://www.youtube.com/@imensageiradedeustemlodefe", "_blank")}
+              >
+                <Youtube className="w-5 h-5 mr-2" />
+                Visitar Canal no YouTube
+              </Button>
+            )}
           </div>
+
+          {/* Available Streams */}
+          {streams.length > 1 && (
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-center mb-4">Outras Transmissões Disponíveis</h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                {streams.filter(stream => stream.id !== activeStream?.id).map((stream) => (
+                  <Card key={stream.id} className="hover:shadow-md transition-shadow cursor-pointer" 
+                        onClick={() => setActiveStream(stream)}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">{stream.title}</h4>
+                          <p className="text-sm text-muted-foreground">{stream.description}</p>
+                          <div className="flex items-center space-x-2 mt-2">
+                            {getPlatformIcon(stream.platform)}
+                            <span className="text-xs capitalize">{stream.platform}</span>
+                            {stream.is_live && (
+                              <Badge variant="destructive" className="text-xs">AO VIVO</Badge>
+                            )}
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          <Play className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
