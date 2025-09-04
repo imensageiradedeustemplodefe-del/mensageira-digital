@@ -437,7 +437,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_prayer_requests: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          is_urgent: boolean | null
+          request_text: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          display_name?: never
+          id?: string | null
+          is_urgent?: boolean | null
+          request_text?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          display_name?: never
+          id?: string | null
+          is_urgent?: boolean | null
+          request_text?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
