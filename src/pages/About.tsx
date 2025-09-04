@@ -37,15 +37,15 @@ const About = () => {
       icon: "👥"
     },
     {
-      name: "Obreiros",
+      name: "Guerreiros De Fé",
       leaders: "Marica Machado e Ademar Malmann",
       type: "Grupo de Oração",
       icon: "🙏"
     },
     {
-      name: "Mídia",
+      name: "Palavra Viva",
       leaders: "Jessica Vacelkoski",
-      type: "Comunicação",
+      type: "Ministério de Mídia",
       icon: "📱"
     },
     {

@@ -50,7 +50,7 @@ const Events = () => {
       schedule: "Ensaios: Quinta-feira | Cultos principais"
     },
     {
-      name: "Obreiros",
+      name: "Guerreiros De Fé",
       type: "Grupo de Oração",
       description: "Grupo dedicado à intercessão e oração pela igreja e comunidade",
       leaders: "Marica Machado e Ademar Malmann",
