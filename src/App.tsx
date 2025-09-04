@@ -18,7 +18,6 @@ import Testimonies from "./pages/Testimonies";
 import ComingSoon from "./pages/ComingSoon";
 import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
-import AdminSetup from "./pages/AdminSetup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,7 +43,6 @@ const App = () => (
                 <Route path="/testemunhos" element={<Testimonies />} />
                 <Route path="/em-breve" element={<ComingSoon />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/setup" element={<AdminSetup />} />
                 <Route path="/admin" element={
                   <ProtectedRoute>
                     <Admin />

@@ -72,7 +72,6 @@ export default function AdminLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="admin@mensageiradedeustemplodefe.com"
               />
             </div>
             
@@ -98,8 +97,8 @@ export default function AdminLogin() {
             </Button>
             
             <div className="text-center text-sm text-muted-foreground">
-              <p>Primeira vez? Entre em contato com o administrador</p>
-              <p className="mt-1">para criar sua conta segura.</p>
+              <p>Sistema de login único da igreja</p>
+              <p className="mt-1">Acesso exclusivo para administração.</p>
             </div>
           </form>
         </CardContent>
