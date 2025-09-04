@@ -1,259 +1,226 @@
-import { useState } from "react";
-import { Heart, Send, MessageCircle, Users, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, Users, Clock, MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import PrayerRequestForm from "@/components/PrayerRequestForm";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+interface PrayerRequest {
+  id: string;
+  name: string;
+  request_text: string;
+  is_urgent: boolean;
+  category: string;
+  created_at: string;
+}
 
 const Prayer = () => {
-  const { toast } = useToast();
-  const { settings } = useSiteSettings();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    prayerType: "",
-    request: "",
-    isUrgent: false,
-    allowSharing: true
-  });
+  const [approvedRequests, setApprovedRequests] = useState<PrayerRequest[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const subject = encodeURIComponent(`Pedido de Oração: ${formData.prayerType}`);
-    const body = encodeURIComponent(
-      `Nome: ${formData.name}\n` +
-      `E-mail: ${formData.email}\n` +
-      `Telefone: ${formData.phone || 'Não informado'}\n` +
-      `Tipo: ${formData.prayerType}\n` +
-      `Urgente: ${formData.isUrgent ? 'Sim' : 'Não'}\n` +
-      `Permite compartilhar: ${formData.allowSharing ? 'Sim' : 'Não'}\n\n` +
-      `Pedido de Oração:\n${formData.request}`
-    );
-    
-    const mailtoLink = `mailto:imensageiradedeustemplodefe@gmail.com?subject=${subject}&body=${body}`;
-    window.location.href = mailtoLink;
-    
-    toast({
-      title: "Pedido Enviado!",
-      description: "Seu pedido de oração foi enviado. Nossa equipe estará orando por você.",
-    });
+  useEffect(() => {
+    fetchApprovedRequests();
+  }, []);
 
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      prayerType: "",
-      request: "",
-      isUrgent: false,
-      allowSharing: true
-    });
+  const fetchApprovedRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('prayer_requests')
+        .select('id, name, request_text, is_urgent, category, created_at')
+        .eq('is_approved', true)
+        .order('created_at', { ascending: false })
+        .limit(12);
+
+      if (error) throw error;
+      setApprovedRequests(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar pedidos aprovados:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
-    setFormData({
-      ...formData,
-      [e.target.name]: value
-    });
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      'saude': 'bg-red-100 text-red-800',
+      'familia': 'bg-blue-100 text-blue-800',
+      'trabalho': 'bg-green-100 text-green-800',
+      'financeiro': 'bg-yellow-100 text-yellow-800',
+      'espiritual': 'bg-purple-100 text-purple-800',
+      'relacionamentos': 'bg-pink-100 text-pink-800',
+      'geral': 'bg-gray-100 text-gray-800'
+    };
+    return colors[category] || colors['geral'];
   };
-
-  const prayerTypes = [
-    "Cura Física",
-    "Cura Emocional", 
-    "Problemas Familiares",
-    "Questões Financeiras",
-    "Trabalho/Emprego",
-    "Relacionamentos",
-    "Decisões Importantes",
-    "Agradecimento",
-    "Outros"
-  ];
-
 
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary/10 to-peaceful-blue/20 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Heart className="w-12 h-12 text-primary mx-auto mb-6" />
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6">
-            {settings.prayer_page_title}
+            Casa de Oração
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
-            {settings.prayer_page_subtitle}
+            "A minha casa será chamada casa de oração para todos os povos" - Isaías 56:7
           </p>
         </div>
       </section>
 
-      {/* Prayer Request Form */}
+      {/* Prayer Request Form Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="bg-card/60 backdrop-blur border-none">
-            <CardHeader>
-              <CardTitle className="text-2xl text-foreground flex items-center">
-                <MessageCircle className="w-6 h-6 mr-2" />
-                {settings.prayer_form_title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome Completo *</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="Seu nome"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">E-mail *</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="seu@email.com"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone (Opcional)</Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder="(00) 00000-0000"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="prayerType">Tipo de Pedido *</Label>
-                    <select
-                      id="prayerType"
-                      name="prayerType"
-                      value={formData.prayerType}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
-                    >
-                      <option value="">Selecione o tipo</option>
-                      {prayerTypes.map((type) => (
-                        <option key={type} value={type}>{type}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="request">Seu Pedido de Oração *</Label>
-                  <Textarea
-                    id="request"
-                    name="request"
-                    value={formData.request}
-                    onChange={handleInputChange}
-                    required
-                    rows={5}
-                    placeholder="Compartilhe seu pedido de oração aqui..."
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="isUrgent"
-                      name="isUrgent"
-                      checked={formData.isUrgent}
-                      onChange={handleInputChange}
-                      className="w-4 h-4"
-                    />
-                    <Label htmlFor="isUrgent" className="text-sm">
-                      Este é um pedido urgente
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="allowSharing"
-                      name="allowSharing"
-                      checked={formData.allowSharing}
-                      onChange={handleInputChange}
-                      className="w-4 h-4"
-                    />
-                    <Label htmlFor="allowSharing" className="text-sm">
-                      Permito que este pedido seja compartilhado com a equipe de oração (sem identificação pessoal)
-                    </Label>
-                  </div>
-                </div>
-
-                <Button type="submit" size="lg" className="w-full">
-                  <Send className="w-4 h-4 mr-2" />
-                  Enviar Pedido de Oração
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
+              Compartilhe Sua Necessidade
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Nossa equipe pastoral estará intercedendo por você em oração.
+            </p>
+          </div>
+          <PrayerRequestForm />
         </div>
       </section>
 
-      {/* Prayer Guidelines */}
+      {/* Approved Prayer Requests */}
       <section className="py-16 bg-accent/30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-3 gap-8">
-            <Card className="text-center">
-              <CardHeader>
-                <Clock className="w-8 h-8 text-primary mx-auto mb-2" />
-                <CardTitle>{settings.prayer_schedule_title}</CardTitle>
-              </CardHeader>
-              <CardContent>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
+              Pedidos da Comunidade
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Vamos interceder uns pelos outros em comunhão.
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+              <span className="text-muted-foreground">Carregando pedidos...</span>
+            </div>
+          ) : approvedRequests.length === 0 ? (
+            <Card className="max-w-2xl mx-auto">
+              <CardContent className="p-8 text-center">
+                <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Nenhum pedido público no momento
+                </h3>
                 <p className="text-muted-foreground">
-                  {settings.prayer_schedule_description}
+                  Seja o primeiro a compartilhar uma necessidade de oração com a comunidade.
                 </p>
               </CardContent>
             </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {approvedRequests.map((request) => (
+                <Card key={request.id} className="hover:shadow-lg transition-all duration-300">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg flex items-center">
+                        <Heart className="w-4 h-4 mr-2 text-primary" />
+                        {request.name}
+                      </CardTitle>
+                      {request.is_urgent && (
+                        <Badge variant="destructive" className="text-xs">
+                          Urgente
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-muted-foreground leading-relaxed line-clamp-4">
+                      {request.request_text}
+                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <Badge className={getCategoryColor(request.category)}>
+                        {request.category.charAt(0).toUpperCase() + request.category.slice(1)}
+                      </Badge>
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3 mr-1" />
+                        {format(new Date(request.created_at), "dd 'de' MMM", { locale: ptBR })}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
-            <Card className="text-center">
+      {/* Prayer Groups and Times */}
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
+              Momentos de Oração
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Participe dos nossos encontros de oração e intercessão.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="text-center hover:shadow-lg transition-all duration-300">
               <CardHeader>
-                <Users className="w-8 h-8 text-primary mx-auto mb-2" />
-                <CardTitle>{settings.prayer_team_title}</CardTitle>
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle>Guerreiros de Fé</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  {settings.prayer_team_description}
+                <p className="text-muted-foreground mb-4">
+                  Grupo de intercessão dedicado à oração pela igreja e comunidade.
                 </p>
+                <div className="text-sm text-muted-foreground">
+                  <p><strong>Quando:</strong> Terça-feira às 19h</p>
+                  <p><strong>Local:</strong> Templo Principal</p>
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="text-center">
+            <Card className="text-center hover:shadow-lg transition-all duration-300">
               <CardHeader>
-                <Heart className="w-8 h-8 text-primary mx-auto mb-2" />
-                <CardTitle>{settings.prayer_confidentiality_title}</CardTitle>
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle>Oração Matinal</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  {settings.prayer_confidentiality_description}
+                <p className="text-muted-foreground mb-4">
+                  Começe o dia buscando a presença de Deus em oração.
                 </p>
+                <div className="text-sm text-muted-foreground">
+                  <p><strong>Quando:</strong> Segunda à Sexta às 6h</p>
+                  <p><strong>Local:</strong> Templo Principal</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center hover:shadow-lg transition-all duration-300">
+              <CardHeader>
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageCircle className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle>Vigília Mensal</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  Uma noite inteira dedicada à oração e comunhão com Deus.
+                </p>
+                <div className="text-sm text-muted-foreground">
+                  <p><strong>Quando:</strong> Primeira sexta do mês</p>
+                  <p><strong>Local:</strong> Templo Principal</p>
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
-
     </div>
   );
 };

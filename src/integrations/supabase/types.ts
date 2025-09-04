@@ -195,6 +195,51 @@ export type Database = {
           },
         ]
       }
+      prayer_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          category: string | null
+          created_at: string
+          email: string | null
+          id: string
+          is_approved: boolean | null
+          is_urgent: boolean | null
+          name: string
+          phone: string | null
+          request_text: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_urgent?: boolean | null
+          name: string
+          phone?: string | null
+          request_text: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_urgent?: boolean | null
+          name?: string
+          phone?: string | null
+          request_text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
