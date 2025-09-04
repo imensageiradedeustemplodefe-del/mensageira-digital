@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ export default function AdminLogin() {
     const { error } = await signIn(username, password);
     
     if (error) {
-      setError('Usuário ou senha incorretos');
+      setError(error);
     }
     
     setIsSubmitting(false);
@@ -69,7 +69,7 @@ export default function AdminLogin() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                placeholder="Digite seu usuário"
+                placeholder="Pablo, Elisa, Wellika ou Jessica"
               />
             </div>
             

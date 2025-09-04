@@ -9,7 +9,6 @@ interface AdminUser {
 
 interface AuthContextType {
   user: AdminUser | null;
-  session: any | null;
   signIn: (username: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   loading: boolean;
@@ -31,15 +30,13 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<AdminUser | null>(null);
-  const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in from localStorage
-    const savedUser = localStorage.getItem('adminUser');
+    // Check for existing session in localStorage
+    const savedUser = localStorage.getItem('admin_user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
-      setSession({ user: JSON.parse(savedUser) });
     }
     setLoading(false);
   }, []);
@@ -48,7 +45,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const { data, error } = await supabase
         .from('admin_users')
-        .select('*')
+        .select('id, username, name')
         .eq('username', username)
         .eq('password', password)
         .single();
@@ -57,15 +54,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return { error: 'Usuário ou senha incorretos' };
       }
 
-      const adminUser = {
-        id: data.id,
-        username: data.username,
-        name: data.name
-      };
-
+      const adminUser = { id: data.id, username: data.username, name: data.name };
       setUser(adminUser);
-      setSession({ user: adminUser });
-      localStorage.setItem('adminUser', JSON.stringify(adminUser));
+      localStorage.setItem('admin_user', JSON.stringify(adminUser));
       
       return { error: null };
     } catch (error) {
@@ -75,13 +66,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signOut = async () => {
     setUser(null);
-    setSession(null);
-    localStorage.removeItem('adminUser');
+    localStorage.removeItem('admin_user');
   };
 
   const value = {
     user,
-    session,
     signIn,
     signOut,
     loading,
