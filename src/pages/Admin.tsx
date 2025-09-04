@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GalleryManager } from '@/components/admin/GalleryManager';
 import { TestimoniesManager } from '@/components/admin/TestimoniesManager';
-import { SiteSettingsManager } from '@/components/admin/SiteSettingsManager';
 import { LogOut, Image, Settings, MessageCircle } from 'lucide-react';
 
 const Admin = () => {
@@ -45,7 +44,7 @@ const Admin = () => {
       <section className="py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs defaultValue="testimonies" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="testimonies" className="flex items-center">
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Testemunhos
@@ -53,10 +52,6 @@ const Admin = () => {
               <TabsTrigger value="gallery" className="flex items-center">
                 <Image className="w-4 h-4 mr-2" />
                 Galeria
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="flex items-center">
-                <Settings className="w-4 h-4 mr-2" />
-                Configurações
               </TabsTrigger>
             </TabsList>
 
@@ -66,10 +61,6 @@ const Admin = () => {
 
             <TabsContent value="gallery" className="mt-6">
               <GalleryManager />
-            </TabsContent>
-
-            <TabsContent value="settings" className="mt-6">
-              <SiteSettingsManager />
             </TabsContent>
           </Tabs>
         </div>
