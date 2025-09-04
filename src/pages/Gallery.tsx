@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 interface Category {
   id: string;
@@ -25,6 +26,7 @@ interface Photo {
 }
 
 const Gallery = () => {
+  const { settings } = useSiteSettings();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -108,10 +110,10 @@ const Gallery = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Camera className="w-12 h-12 text-primary mx-auto mb-6" />
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6">
-            Galeria de Fotos
+            {settings.gallery_page_title}
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
-            Reviva os momentos especiais de nossa comunidade de fé através destas imagens.
+            {settings.gallery_page_subtitle}
           </p>
         </div>
       </section>
@@ -195,19 +197,19 @@ const Gallery = () => {
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
               <div className="text-3xl font-bold text-primary mb-2">{photos.length}</div>
-              <div className="text-muted-foreground">Fotos na Galeria</div>
+              <div className="text-muted-foreground">{settings.gallery_stats_photos}</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary mb-2">
                 {categories.length - 1}
               </div>
-              <div className="text-muted-foreground">Categorias</div>
+              <div className="text-muted-foreground">{settings.gallery_stats_categories}</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary mb-2">
                 {photos.reduce((total, photo) => total + photo.participants, 0)}
               </div>
-              <div className="text-muted-foreground">Pessoas nas Fotos</div>
+              <div className="text-muted-foreground">{settings.gallery_stats_people}</div>
             </div>
           </div>
         </div>

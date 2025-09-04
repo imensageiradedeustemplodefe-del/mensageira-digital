@@ -1,8 +1,11 @@
 import { Calendar, Clock, MapPin, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Events = () => {
+  const { settings, loading: settingsLoading } = useSiteSettings();
+  
   const regularSchedule = [
     {
       title: "Culto de Cura e Libertação",
@@ -82,10 +85,10 @@ const Events = () => {
       <section className="bg-gradient-to-br from-primary/10 to-peaceful-blue/20 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6">
-            Eventos e Programação
+            {settings.events_page_title}
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
-            Participe da nossa programação semanal e fortaleça sua fé em comunidade.
+            {settings.events_page_subtitle}
           </p>
         </div>
       </section>
@@ -95,10 +98,10 @@ const Events = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">
-              Programação Regular
+              {settings.events_section_title}
             </h2>
             <p className="text-lg text-muted-foreground">
-              Nossa programação semanal e mensal de cultos e eventos especiais.
+              {settings.events_section_description}
             </p>
           </div>
 
@@ -149,10 +152,10 @@ const Events = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">
-              Atividades dos Ministérios
+              {settings.ministries_section_title}
             </h2>
             <p className="text-lg text-muted-foreground">
-              Conheça os diferentes ministérios e suas atividades na igreja.
+              {settings.ministries_section_description}
             </p>
           </div>
 
@@ -199,11 +202,10 @@ const Events = () => {
       <section className="py-16 bg-gradient-to-br from-primary/5 to-peaceful-blue/10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-foreground mb-6">
-            Venha Participar Conosco
+            {settings.events_cta_title}
           </h2>
           <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-            Todos são bem-vindos em nossa igreja! Venha adorar, aprender e crescer 
-            espiritualmente em nossa comunidade de fé.
+            {settings.events_cta_description}
           </p>
           
           <Card className="bg-card/60 backdrop-blur border-none max-w-2xl mx-auto">

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 interface Testimony {
   id: string;
@@ -18,6 +19,7 @@ interface Testimony {
 }
 
 const Testimonies = () => {
+  const { settings } = useSiteSettings();
   const [testimonies, setTestimonies] = useState<Testimony[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -97,10 +99,10 @@ const Testimonies = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Heart className="w-12 h-12 text-primary mx-auto mb-6" />
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6">
-            Testemunhos
+            {settings.testimonies_page_title}
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
-            Veja como Deus tem transformado vidas em nossa comunidade e compartilhe seu próprio testemunho.
+            {settings.testimonies_page_subtitle}
           </p>
         </div>
       </section>
@@ -113,7 +115,7 @@ const Testimonies = () => {
           {testimonies.length > 0 && (
             <>
               <h2 className="text-3xl font-bold text-center text-foreground mb-12">
-                Testemunhos em Destaque
+                {settings.testimonies_featured_title}
               </h2>
               <div className="grid lg:grid-cols-2 gap-8 mb-12">
                 {testimonies.slice(0, 2).map((testimony) => (
@@ -151,7 +153,7 @@ const Testimonies = () => {
       <section className="py-16 bg-accent/30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center text-foreground mb-12">
-            Todos os Testemunhos
+            {settings.testimonies_all_title}
           </h2>
           
           {testimonies.length > 0 ? (
@@ -179,7 +181,7 @@ const Testimonies = () => {
             <div className="text-center py-12">
               <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-lg text-muted-foreground">
-                Nenhum testemunho publicado ainda. Seja o primeiro a compartilhar!
+                {settings.testimonies_empty_message}
               </p>
             </div>
           )}
@@ -193,10 +195,10 @@ const Testimonies = () => {
             <CardHeader>
               <CardTitle className="text-2xl text-foreground flex items-center justify-center">
                 <Send className="w-6 h-6 mr-2" />
-                Compartilhe seu Testemunho
+                {settings.testimonies_form_title}
               </CardTitle>
               <p className="text-center text-muted-foreground">
-                Conte-nos como Deus tem agido em sua vida. Seu testemunho pode encorajar outros!
+                {settings.testimonies_form_description}
               </p>
             </CardHeader>
             <CardContent>

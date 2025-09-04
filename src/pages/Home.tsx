@@ -62,22 +62,22 @@ const Home = () => {
 
   const upcomingEvents = [
     {
-      title: "Culto de Cura e Libertação",
+      title: settings.event_healing_title,
       date: "Sexta-feira", 
       time: settings.friday_service_time,
-      description: "Venha buscar a cura e libertação em Jesus Cristo"
+      description: settings.event_healing_description
     },
     {
-      title: "Culto da Família",
+      title: settings.event_family_title,
       date: "Domingo",
       time: settings.sunday_service_time,
-      description: "Culto especial para toda a família"
+      description: settings.event_family_description
     },
     {
-      title: "Culto de Oração",
+      title: settings.event_prayer_title,
       date: "Quarta-feira",
       time: settings.wednesday_service_time,
-      description: "Momento de oração e comunhão"
+      description: settings.event_prayer_description
     }
   ];
 
@@ -139,10 +139,10 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Próximos Eventos
+              {settings.home_events_title}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Participe da nossa programação semanal e fortaleça sua fé em comunidade.
+              {settings.home_events_description}
             </p>
           </div>
 
@@ -183,15 +183,14 @@ const Home = () => {
       <section className="py-16 bg-background">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
-            Visite Nossa Igreja
+            {settings.home_visit_title}
           </h2>
           <div className="flex items-center justify-center text-muted-foreground mb-6">
             <MapPin className="w-5 h-5 mr-2" />
-            <span>R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000</span>
+            <span>{settings.church_address || 'R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000'}</span>
           </div>
           <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-            Venha fazer parte da nossa família! Todos são bem-vindos para adorar 
-            e crescer juntos na presença do Senhor.
+            {settings.home_visit_description}
           </p>
           <Link to="/contato">
             <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">

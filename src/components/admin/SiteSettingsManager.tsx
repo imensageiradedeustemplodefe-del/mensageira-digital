@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Settings, Church, Phone, Users, Calendar, Video, Info } from 'lucide-react';
+import { Settings, Church, Phone, Users, Calendar, Video, Info, FileText, Home } from 'lucide-react';
 
 interface SiteSetting {
   id: string;
@@ -130,6 +130,9 @@ export function SiteSettingsManager() {
       case 'schedule': return Calendar;
       case 'live': return Video;
       case 'about': return Info;
+      case 'pages': return FileText;
+      case 'events': return Calendar;
+      case 'home': return Home;
       default: return Settings;
     }
   };
@@ -142,6 +145,9 @@ export function SiteSettingsManager() {
       case 'schedule': return 'Horários de Culto';
       case 'live': return 'Transmissão ao Vivo';
       case 'about': return 'Sobre a Igreja';
+      case 'pages': return 'Conteúdo das Páginas';
+      case 'events': return 'Eventos e Cultos';
+      case 'home': return 'Página Inicial';
       default: return 'Configurações';
     }
   };
@@ -162,11 +168,11 @@ export function SiteSettingsManager() {
       </div>
 
       <Tabs defaultValue={categories[0]} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+        <TabsList className="flex flex-wrap justify-start gap-1 h-auto p-1 bg-muted/50">
           {categories.map((category) => {
             const Icon = getCategoryIcon(category);
             return (
-              <TabsTrigger key={category} value={category} className="flex items-center text-xs">
+              <TabsTrigger key={category} value={category} className="flex items-center text-xs px-3 py-2 whitespace-nowrap">
                 <Icon className="w-3 h-3 mr-1" />
                 {getCategoryTitle(category)}
               </TabsTrigger>

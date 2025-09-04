@@ -7,9 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Prayer = () => {
   const { toast } = useToast();
+  const { settings } = useSiteSettings();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -81,10 +83,10 @@ const Prayer = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Heart className="w-12 h-12 text-primary mx-auto mb-6" />
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6">
-            Pedidos de Oração
+            {settings.prayer_page_title}
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
-            Compartilhe seus pedidos de oração conosco. Nossa equipe estará intercedendo por você.
+            {settings.prayer_page_subtitle}
           </p>
         </div>
       </section>
@@ -96,7 +98,7 @@ const Prayer = () => {
             <CardHeader>
               <CardTitle className="text-2xl text-foreground flex items-center">
                 <MessageCircle className="w-6 h-6 mr-2" />
-                Envie seu Pedido de Oração
+                {settings.prayer_form_title}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -216,12 +218,11 @@ const Prayer = () => {
             <Card className="text-center">
               <CardHeader>
                 <Clock className="w-8 h-8 text-primary mx-auto mb-2" />
-                <CardTitle>Horários de Oração</CardTitle>
+                <CardTitle>{settings.prayer_schedule_title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Nossas reuniões de oração acontecem todas as terças-feiras. 
-                  Participe conosco!
+                  {settings.prayer_schedule_description}
                 </p>
               </CardContent>
             </Card>
@@ -229,12 +230,11 @@ const Prayer = () => {
             <Card className="text-center">
               <CardHeader>
                 <Users className="w-8 h-8 text-primary mx-auto mb-2" />
-                <CardTitle>Equipe de Intercessão</CardTitle>
+                <CardTitle>{settings.prayer_team_title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Nossa equipe de oração está sempre intercedendo pelos pedidos recebidos.
-                  Você não está sozinho!
+                  {settings.prayer_team_description}
                 </p>
               </CardContent>
             </Card>
@@ -242,11 +242,11 @@ const Prayer = () => {
             <Card className="text-center">
               <CardHeader>
                 <Heart className="w-8 h-8 text-primary mx-auto mb-2" />
-                <CardTitle>Confidencialidade</CardTitle>
+                <CardTitle>{settings.prayer_confidentiality_title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Todos os pedidos são tratados com total confidencialidade e amor cristão.
+                  {settings.prayer_confidentiality_description}
                 </p>
               </CardContent>
             </Card>
