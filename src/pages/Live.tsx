@@ -4,61 +4,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { supabase } from "@/integrations/supabase/client";
-
-interface LiveStream {
-  id: string;
-  title: string;
-  description: string | null;
-  platform: 'youtube' | 'facebook' | 'custom';
-  stream_url: string;
-  embed_url: string | null;
-  is_active: boolean;
-  is_live: boolean;
-  scheduled_at: string | null;
-  started_at: string | null;
-  ended_at: string | null;
-  viewer_count: number;
-  chat_enabled: boolean;
-  thumbnail_url: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import { useLiveStreams } from "@/hooks/useLiveStreams";
+import { LiveStream } from "@/types/database";
 
 const Live = () => {
   const { settings } = useSiteSettings();
+  const { streams, loading } = useLiveStreams(true);
   const [activeStream, setActiveStream] = useState<LiveStream | null>(null);
-  const [streams, setStreams] = useState<LiveStream[]>([]);
-  const [loading, setLoading] = useState(true);
   const [nextService, setNextService] = useState<string>("");
 
   // Buscar transmissões ativas
   useEffect(() => {
-    fetchActiveStreams();
-  }, []);
-
-  const fetchActiveStreams = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('live_streams')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      
-      setStreams((data || []) as LiveStream[]);
-      
+    if (!loading && streams.length > 0) {
       // Encontrar a transmissão ao vivo atual
-      const liveStream = data?.find(stream => stream.is_live);
-      setActiveStream((liveStream || data?.[0] || null) as LiveStream | null);
-      
-    } catch (error) {
-      console.error('Error fetching streams:', error);
-    } finally {
-      setLoading(false);
+      const liveStream = streams.find(stream => stream.is_live);
+      setActiveStream(liveStream || streams[0] || null);
     }
-  };
+  }, [streams, loading]);
 
   // Calcular próximo culto
   useEffect(() => {

@@ -1,98 +1,14 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
 import { Check, X, Trash2, MessageCircle } from 'lucide-react';
-
-interface Testimony {
-  id: string;
-  name: string;
-  content: string;
-  is_approved: boolean;
-  created_at: string;
-}
+import { useTestimonies } from '@/hooks/useTestimonies';
+import { Testimony } from '@/types/database';
 
 export function TestimoniesManager() {
-  const [testimonies, setTestimonies] = useState<Testimony[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchTestimonies();
-  }, []);
-
-  const fetchTestimonies = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('testimonies')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setTestimonies(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar testemunhos:', error);
-      toast.error('Erro ao carregar testemunhos');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleApprove = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('testimonies')
-        .update({ is_approved: true })
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      toast.success('Testemunho aprovado!');
-      fetchTestimonies();
-    } catch (error) {
-      console.error('Erro ao aprovar testemunho:', error);
-      toast.error('Erro ao aprovar testemunho');
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('testimonies')
-        .update({ is_approved: false })
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      toast.success('Testemunho rejeitado!');
-      fetchTestimonies();
-    } catch (error) {
-      console.error('Erro ao rejeitar testemunho:', error);
-      toast.error('Erro ao rejeitar testemunho');
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este testemunho permanentemente?')) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('testimonies')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      toast.success('Testemunho excluído!');
-      fetchTestimonies();
-    } catch (error) {
-      console.error('Erro ao excluir testemunho:', error);
-      toast.error('Erro ao excluir testemunho');
-    }
-  };
+  const { testimonies, loading, approveTestimony, deleteTestimony } = useTestimonies();
+  const [expandedTestimony, setExpandedTestimony] = useState<string | null>(null);
 
   if (loading) {
     return <div className="p-6">Carregando...</div>;
@@ -139,26 +55,43 @@ export function TestimoniesManager() {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <p className="text-sm mb-4 leading-relaxed">
-                    {testimony.content}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleApprove(testimony.id)}
-                      className="bg-green-600 hover:bg-green-700"
+                  <div className="flex items-center justify-between">
+                    <p 
+                      className={`${
+                        (expandedTestimony === testimony.id || testimony.content.length <= 200) 
+                          ? '' 
+                          : 'line-clamp-3'
+                      } text-muted-foreground cursor-pointer`}
+                      onClick={() => {
+                        if (testimony.content.length > 200) {
+                          setExpandedTestimony(
+                            expandedTestimony === testimony.id ? null : testimony.id
+                          );
+                        }
+                      }}
                     >
-                      <Check className="w-4 h-4 mr-1" />
-                      Aprovar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDelete(testimony.id)}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Excluir
-                    </Button>
+                      {testimony.content}
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-center mt-4">
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => approveTestimony(testimony.id)} 
+                        size="sm" 
+                        className="mr-2"
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        Aprovar
+                      </Button>
+                      <Button 
+                        onClick={() => deleteTestimony(testimony.id)} 
+                        variant="destructive" 
+                        size="sm"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Excluir
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -195,26 +128,35 @@ export function TestimoniesManager() {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <p className="text-sm mb-4 leading-relaxed">
-                    {testimony.content}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleReject(testimony.id)}
+                  <div className="flex items-center justify-between">
+                    <p 
+                      className={`${
+                        (expandedTestimony === testimony.id || testimony.content.length <= 200) 
+                          ? '' 
+                          : 'line-clamp-3'
+                      } text-muted-foreground cursor-pointer`}
+                      onClick={() => {
+                        if (testimony.content.length > 200) {
+                          setExpandedTestimony(
+                            expandedTestimony === testimony.id ? null : testimony.id
+                          );
+                        }
+                      }}
                     >
-                      <X className="w-4 h-4 mr-1" />
-                      Desaprovar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDelete(testimony.id)}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Excluir
-                    </Button>
+                      {testimony.content}
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-center mt-4">
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => deleteTestimony(testimony.id)} 
+                        variant="destructive" 
+                        size="sm"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Excluir
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

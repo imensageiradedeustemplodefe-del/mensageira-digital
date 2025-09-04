@@ -1,58 +1,39 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Heart, Users, Clock, MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import PrayerRequestForm from "@/components/PrayerRequestForm";
-import { supabase } from "@/integrations/supabase/client";
+import { usePrayerRequests } from "@/hooks/usePrayerRequests";
+import { PrayerRequest } from "@/types/database";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-interface PrayerRequest {
-  id: string;
-  name: string;
-  request_text: string;
-  is_urgent: boolean;
-  category: string;
-  created_at: string;
-}
-
 const Prayer = () => {
-  const [approvedRequests, setApprovedRequests] = useState<PrayerRequest[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchApprovedRequests();
-  }, []);
-
-  const fetchApprovedRequests = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('prayer_requests')
-        .select('id, name, request_text, is_urgent, category, created_at')
-        .eq('is_approved', true)
-        .order('created_at', { ascending: false })
-        .limit(12);
-
-      if (error) throw error;
-      setApprovedRequests(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar pedidos aprovados:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { requests, loading } = usePrayerRequests(true);
+  const [expandedRequest, setExpandedRequest] = useState<string | null>(null);
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      'saude': 'bg-red-100 text-red-800',
-      'familia': 'bg-blue-100 text-blue-800',
-      'trabalho': 'bg-green-100 text-green-800',
-      'financeiro': 'bg-yellow-100 text-yellow-800',
-      'espiritual': 'bg-purple-100 text-purple-800',
-      'relacionamentos': 'bg-pink-100 text-pink-800',
-      'geral': 'bg-gray-100 text-gray-800'
+      'saude': 'text-red-600',
+      'familia': 'text-blue-600', 
+      'trabalho': 'text-green-600',
+      'financeiro': 'text-yellow-600',
+      'espiritual': 'text-purple-600',
+      'geral': 'text-gray-600'
     };
     return colors[category] || colors['geral'];
+  };
+
+  const getCategoryName = (category: string) => {
+    const names: Record<string, string> = {
+      'saude': 'Saúde',
+      'familia': 'Família',
+      'trabalho': 'Trabalho', 
+      'financeiro': 'Financeiro',
+      'espiritual': 'Espiritual',
+      'geral': 'Geral'
+    };
+    return names[category] || 'Geral';
   };
 
   return (
@@ -101,7 +82,7 @@ const Prayer = () => {
               <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
               <span className="text-muted-foreground">Carregando pedidos...</span>
             </div>
-          ) : approvedRequests.length === 0 ? (
+          ) : requests.length === 0 ? (
             <Card className="max-w-2xl mx-auto">
               <CardContent className="p-8 text-center">
                 <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -115,7 +96,7 @@ const Prayer = () => {
             </Card>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {approvedRequests.map((request) => (
+              {requests.map((request) => (
                 <Card key={request.id} className="hover:shadow-lg transition-all duration-300">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">

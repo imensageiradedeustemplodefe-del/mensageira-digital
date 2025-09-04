@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus, Edit, Trash2, Play, Square, Youtube, Facebook, Globe, Clock, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,39 +9,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-
-interface LiveStream {
-  id: string;
-  title: string;
-  description: string | null;
-  platform: 'youtube' | 'facebook' | 'custom';
-  stream_url: string;
-  embed_url: string | null;
-  is_active: boolean;
-  is_live: boolean;
-  scheduled_at: string | null;
-  started_at: string | null;
-  ended_at: string | null;
-  viewer_count: number;
-  chat_enabled: boolean;
-  thumbnail_url: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import { useLiveStreams } from "@/hooks/useLiveStreams";
+import { LiveStream, StreamPlatform } from "@/types/database";
 
 const LiveStreamsManager = () => {
-  const { toast } = useToast();
-  const [streams, setStreams] = useState<LiveStream[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { streams, loading, createStream, updateStream, deleteStream, toggleLiveStatus } = useLiveStreams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStream, setEditingStream] = useState<LiveStream | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    platform: 'youtube' as LiveStream['platform'],
+    platform: 'youtube' as StreamPlatform,
     stream_url: '',
     embed_url: '',
     is_active: true,
@@ -50,36 +29,11 @@ const LiveStreamsManager = () => {
     thumbnail_url: ''
   });
 
-  useEffect(() => {
-    fetchStreams();
-  }, []);
-
-  const fetchStreams = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('live_streams')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setStreams((data || []) as LiveStream[]);
-    } catch (error) {
-      console.error('Error fetching streams:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao carregar transmissões",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const resetForm = () => {
     setFormData({
       title: '',
       description: '',
-      platform: 'youtube',
+      platform: 'youtube' as StreamPlatform,
       stream_url: '',
       embed_url: '',
       is_active: true,
@@ -94,7 +48,7 @@ const LiveStreamsManager = () => {
     setFormData({
       title: stream.title,
       description: stream.description || '',
-      platform: stream.platform,
+      platform: stream.platform as StreamPlatform,
       stream_url: stream.stream_url,
       embed_url: stream.embed_url || '',
       is_active: stream.is_active,
@@ -108,105 +62,35 @@ const LiveStreamsManager = () => {
 
   const handleSubmit = async () => {
     if (!formData.title.trim() || !formData.stream_url.trim()) {
-      toast({
-        title: "Erro",
-        description: "Título e URL da transmissão são obrigatórios",
-        variant: "destructive",
-      });
       return;
     }
 
-    try {
-      const streamData = {
-        ...formData,
-        scheduled_at: formData.scheduled_at ? new Date(formData.scheduled_at).toISOString() : null,
-        embed_url: formData.embed_url || generateEmbedUrl(formData.platform, formData.stream_url),
-      };
+    const streamData = {
+      ...formData,
+      scheduled_at: formData.scheduled_at ? new Date(formData.scheduled_at).toISOString() : null,
+      embed_url: formData.embed_url || generateEmbedUrl(formData.platform, formData.stream_url),
+    };
 
-      if (editingStream) {
-        const { error } = await supabase
-          .from('live_streams')
-          .update(streamData)
-          .eq('id', editingStream.id);
+    let success;
+    if (editingStream) {
+      success = await updateStream(editingStream.id, streamData);
+    } else {
+      success = await createStream(streamData);
+    }
 
-        if (error) throw error;
-        toast({ title: "Sucesso", description: "Transmissão atualizada com sucesso!" });
-      } else {
-        const { error } = await supabase
-          .from('live_streams')
-          .insert([streamData]);
-
-        if (error) throw error;
-        toast({ title: "Sucesso", description: "Transmissão criada com sucesso!" });
-      }
-
+    if (success) {
       setIsDialogOpen(false);
       resetForm();
-      fetchStreams();
-    } catch (error) {
-      console.error('Error saving stream:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar transmissão",
-        variant: "destructive",
-      });
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta transmissão?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('live_streams')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      toast({ title: "Sucesso", description: "Transmissão excluída com sucesso!" });
-      fetchStreams();
-    } catch (error) {
-      console.error('Error deleting stream:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao excluir transmissão",
-        variant: "destructive",
-      });
-    }
+    await deleteStream(id);
   };
 
-  const toggleLiveStatus = async (stream: LiveStream) => {
-    try {
-      const updates: Partial<LiveStream> = {
-        is_live: !stream.is_live,
-      };
-
-      if (!stream.is_live) {
-        updates.started_at = new Date().toISOString();
-      } else {
-        updates.ended_at = new Date().toISOString();
-      }
-
-      const { error } = await supabase
-        .from('live_streams')
-        .update(updates)
-        .eq('id', stream.id);
-
-      if (error) throw error;
-      
-      toast({
-        title: "Sucesso",
-        description: `Transmissão ${updates.is_live ? 'iniciada' : 'finalizada'}!`,
-      });
-      fetchStreams();
-    } catch (error) {
-      console.error('Error updating live status:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar status da transmissão",
-        variant: "destructive",
-      });
-    }
+  const handleToggleLive = async (stream: LiveStream) => {
+    await toggleLiveStatus(stream.id, !stream.is_live);
   };
 
   const generateEmbedUrl = (platform: string, streamUrl: string): string => {
@@ -277,7 +161,7 @@ const LiveStreamsManager = () => {
                 </div>
                 <div>
                   <Label htmlFor="platform">Plataforma *</Label>
-                  <Select value={formData.platform} onValueChange={(value: LiveStream['platform']) => 
+                  <Select value={formData.platform} onValueChange={(value: StreamPlatform) => 
                     setFormData(prev => ({ ...prev, platform: value }))}>
                     <SelectTrigger>
                       <SelectValue />
@@ -429,7 +313,7 @@ const LiveStreamsManager = () => {
                     <Button
                       variant={stream.is_live ? "destructive" : "default"}
                       size="sm"
-                      onClick={() => toggleLiveStatus(stream)}
+                      onClick={() => handleToggleLive(stream)}
                     >
                       {stream.is_live ? (
                         <>
