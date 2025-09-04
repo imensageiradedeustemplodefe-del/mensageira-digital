@@ -10,7 +10,7 @@ import { Loader2 } from 'lucide-react';
 
 export default function AdminLogin() {
   const { user, signIn, loading } = useAuth();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,10 +25,10 @@ export default function AdminLogin() {
     setError('');
     setIsSubmitting(true);
 
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(username, password);
     
     if (error) {
-      setError('Email ou senha incorretos');
+      setError('Usuário ou senha incorretos');
     }
     
     setIsSubmitting(false);
@@ -62,14 +62,14 @@ export default function AdminLogin() {
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Usuário</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
-                placeholder="admin@exemplo.com"
+                placeholder="Digite seu usuário"
               />
             </div>
             
