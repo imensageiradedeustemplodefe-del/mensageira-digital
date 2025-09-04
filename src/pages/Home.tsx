@@ -63,22 +63,22 @@ const Home = () => {
 
   const upcomingEvents = [
     {
-      title: settings.event_healing_title,
+      title: "Culto de Cura e Libertação",
       date: "Sexta-feira", 
-      time: settings.friday_service_time,
-      description: settings.event_healing_description
+      time: "20:00",
+      description: "Noite de oração especial para cura física, emocional e espiritual. Venha buscar a libertação em Jesus Cristo."
     },
     {
-      title: settings.event_family_title,
+      title: "Culto da Família",
       date: "Domingo",
-      time: settings.sunday_service_time,
-      description: settings.event_family_description
+      time: "19:30",
+      description: "Culto especial para toda a família, com mensagens edificantes e momentos de adoração em comunidade."
     },
     {
-      title: settings.event_prayer_title,
-      date: "Quarta-feira",
-      time: settings.wednesday_service_time,
-      description: settings.event_prayer_description
+      title: "Santa Ceia",
+      date: "2º Domingo do Mês",
+      time: "19:30",
+      description: "Celebração da Santa Ceia do Senhor, momento sagrado de comunhão e renovação espiritual."
     }
   ];
 
@@ -90,15 +90,16 @@ const Home = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-6">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-              {settings.hero_title}
-              <span className="block text-primary">{settings.church_name?.split(' - ')[0] || 'Mensageira de Deus'}</span>
+              Bem-vindos à
+              <span className="block text-primary">Mensageira de Deus Templo de Fé</span>
               <span className="block text-lg sm:text-xl font-normal text-muted-foreground mt-2">
-                {settings.hero_subtitle}
+                Uma igreja comprometida com a Palavra de Deus
               </span>
             </h1>
             
             <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed">
-              {settings.hero_description}
+              Venha fazer parte da nossa família de fé. Aqui você encontrará acolhimento, 
+              crescimento espiritual e uma comunidade que se importa com você.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
@@ -147,10 +148,10 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              {settings.home_events_title}
+              Próximos Eventos
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {settings.home_events_description}
+              Participe dos nossos cultos e atividades. Todos são bem-vindos!
             </p>
           </div>
 
@@ -191,14 +192,15 @@ const Home = () => {
       <section className="py-16 bg-background">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
-            {settings.home_visit_title}
+            Venha nos Visitar
           </h2>
           <div className="flex items-center justify-center text-muted-foreground mb-6">
             <MapPin className="w-5 h-5 mr-2" />
-            <span>{settings.church_address || 'R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000'}</span>
+            <span>R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000</span>
           </div>
           <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-            {settings.home_visit_description}
+            Estamos de portas abertas para recebê-lo em nossa casa. 
+            Venha conhecer nossa comunidade e participar dos nossos cultos.
           </p>
           <Link to="/contato">
             <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
