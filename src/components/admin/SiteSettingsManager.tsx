@@ -7,23 +7,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Save, Settings, Phone, Share2, Clock, Info, Tv } from 'lucide-react';
+import { Settings, Church, Phone, Users, Calendar, Video, Info } from 'lucide-react';
 
 interface SiteSetting {
   id: string;
   setting_key: string;
-  setting_value: string;
+  setting_value: string | null;
   setting_type: string;
   category: string;
   display_name: string;
-  description: string;
+  description: string | null;
+}
+
+interface SettingsByCategory {
+  [category: string]: SiteSetting[];
 }
 
 export function SiteSettingsManager() {
-  const [settings, setSettings] = useState<SiteSetting[]>([]);
+  const [settings, setSettings] = useState<SettingsByCategory>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchSettings();
@@ -34,19 +37,20 @@ export function SiteSettingsManager() {
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')
-        .order('category, display_name');
+        .order('category, setting_key');
 
       if (error) throw error;
-      
-      const settingsData = data || [];
-      setSettings(settingsData);
-      
-      // Initialize form data
-      const initialFormData: Record<string, string> = {};
-      settingsData.forEach(setting => {
-        initialFormData[setting.setting_key] = setting.setting_value || '';
-      });
-      setFormData(initialFormData);
+
+      // Group settings by category
+      const grouped = (data || []).reduce((acc: SettingsByCategory, setting) => {
+        if (!acc[setting.category]) {
+          acc[setting.category] = [];
+        }
+        acc[setting.category].push(setting);
+        return acc;
+      }, {});
+
+      setSettings(grouped);
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
       toast.error('Erro ao carregar configurações');
@@ -55,20 +59,30 @@ export function SiteSettingsManager() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSettingChange = (settingKey: string, value: string) => {
+    setSettings(prev => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach(category => {
+        updated[category] = updated[category].map(setting =>
+          setting.setting_key === settingKey
+            ? { ...setting, setting_value: value }
+            : setting
+        );
+      });
+      return updated;
+    });
+  };
+
+  const saveSettings = async () => {
     setSaving(true);
     try {
-      // Update all settings
-      const updates = Object.keys(formData).map(key => ({
-        setting_key: key,
-        setting_value: formData[key]
-      }));
-
-      for (const update of updates) {
+      const allSettings = Object.values(settings).flat();
+      
+      for (const setting of allSettings) {
         const { error } = await supabase
           .from('site_settings')
-          .update({ setting_value: update.setting_value })
-          .eq('setting_key', update.setting_key);
+          .update({ setting_value: setting.setting_value })
+          .eq('setting_key', setting.setting_key);
 
         if (error) throw error;
       }
@@ -82,85 +96,40 @@ export function SiteSettingsManager() {
     }
   };
 
-  const handleInputChange = (key: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  };
+  const renderFormField = (setting: SiteSetting) => {
+    const { setting_key, setting_value, setting_type, display_name, description } = setting;
 
-  const renderInput = (setting: SiteSetting) => {
-    const value = formData[setting.setting_key] || '';
-    
-    switch (setting.setting_type) {
+    const commonProps = {
+      id: setting_key,
+      value: setting_value || '',
+      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
+        handleSettingChange(setting_key, e.target.value),
+    };
+
+    switch (setting_type) {
       case 'textarea':
-        return (
-          <Textarea
-            value={value}
-            onChange={(e) => handleInputChange(setting.setting_key, e.target.value)}
-            placeholder={setting.description}
-            rows={3}
-          />
-        );
+        return <Textarea {...commonProps} rows={3} />;
       case 'email':
-        return (
-          <Input
-            type="email"
-            value={value}
-            onChange={(e) => handleInputChange(setting.setting_key, e.target.value)}
-            placeholder={setting.description}
-          />
-        );
+        return <Input {...commonProps} type="email" />;
       case 'url':
-        return (
-          <Input
-            type="url"
-            value={value}
-            onChange={(e) => handleInputChange(setting.setting_key, e.target.value)}
-            placeholder={setting.description}
-          />
-        );
+        return <Input {...commonProps} type="url" />;
       case 'time':
-        return (
-          <Input
-            type="time"
-            value={value}
-            onChange={(e) => handleInputChange(setting.setting_key, e.target.value)}
-          />
-        );
+        return <Input {...commonProps} type="time" />;
       case 'number':
-        return (
-          <Input
-            type="number"
-            value={value}
-            onChange={(e) => handleInputChange(setting.setting_key, e.target.value)}
-            placeholder={setting.description}
-          />
-        );
+        return <Input {...commonProps} type="number" />;
       default:
-        return (
-          <Input
-            type="text"
-            value={value}
-            onChange={(e) => handleInputChange(setting.setting_key, e.target.value)}
-            placeholder={setting.description}
-          />
-        );
+        return <Input {...commonProps} type="text" />;
     }
-  };
-
-  const getSettingsByCategory = (category: string) => {
-    return settings.filter(setting => setting.category === category);
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'general': return Settings;
+      case 'general': return Church;
       case 'contact': return Phone;
-      case 'social': return Share2;
-      case 'schedule': return Clock;
+      case 'social': return Users;
+      case 'schedule': return Calendar;
+      case 'live': return Video;
       case 'about': return Info;
-      case 'live': return Tv;
       default: return Settings;
     }
   };
@@ -170,10 +139,10 @@ export function SiteSettingsManager() {
       case 'general': return 'Informações Gerais';
       case 'contact': return 'Contato';
       case 'social': return 'Redes Sociais';
-      case 'schedule': return 'Horários dos Cultos';
+      case 'schedule': return 'Horários de Culto';
+      case 'live': return 'Transmissão ao Vivo';
       case 'about': return 'Sobre a Igreja';
-      case 'live': return 'Transmissão Ao Vivo';
-      default: return category;
+      default: return 'Configurações';
     }
   };
 
@@ -181,27 +150,20 @@ export function SiteSettingsManager() {
     return <div className="p-6">Carregando configurações...</div>;
   }
 
-  const categories = ['general', 'contact', 'social', 'schedule', 'live', 'about'];
+  const categories = Object.keys(settings);
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Configurações do Site</h2>
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? (
-            <>Salvando...</>
-          ) : (
-            <>
-              <Save className="w-4 h-4 mr-2" />
-              Salvar Alterações
-            </>
-          )}
+        <Button onClick={saveSettings} disabled={saving}>
+          {saving ? 'Salvando...' : 'Salvar Alterações'}
         </Button>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          {categories.map(category => {
+      <Tabs defaultValue={categories[0]} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+          {categories.map((category) => {
             const Icon = getCategoryIcon(category);
             return (
               <TabsTrigger key={category} value={category} className="flex items-center text-xs">
@@ -212,7 +174,7 @@ export function SiteSettingsManager() {
           })}
         </TabsList>
 
-        {categories.map(category => (
+        {categories.map((category) => (
           <TabsContent key={category} value={category}>
             <Card>
               <CardHeader>
@@ -221,13 +183,13 @@ export function SiteSettingsManager() {
                   {getCategoryTitle(category)}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {getSettingsByCategory(category).map(setting => (
-                  <div key={setting.id} className="space-y-2">
-                    <Label htmlFor={setting.setting_key}>
+              <CardContent className="space-y-6">
+                {settings[category]?.map((setting) => (
+                  <div key={setting.setting_key} className="space-y-2">
+                    <Label htmlFor={setting.setting_key} className="text-sm font-medium">
                       {setting.display_name}
                     </Label>
-                    {renderInput(setting)}
+                    {renderFormField(setting)}
                     {setting.description && (
                       <p className="text-xs text-muted-foreground">
                         {setting.description}

@@ -2,12 +2,11 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GalleryManager } from '@/components/admin/GalleryManager';
 import { TestimoniesManager } from '@/components/admin/TestimoniesManager';
 import { SiteSettingsManager } from '@/components/admin/SiteSettingsManager';
-import { LogOut, Users, Image, Settings, MessageCircle } from 'lucide-react';
+import { LogOut, Image, Settings, MessageCircle } from 'lucide-react';
 
 const Admin = () => {
   const { signOut } = useAuth();
