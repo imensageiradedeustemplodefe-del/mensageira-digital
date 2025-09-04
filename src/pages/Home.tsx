@@ -3,6 +3,7 @@ import { Calendar, Clock, MapPin, Youtube, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DailyVerse from "@/components/DailyVerse";
+import { MediaPlayer } from "@/components/MediaPlayer";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
@@ -134,8 +135,15 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Media Player Section */}
+      <section className="py-12 bg-accent/30">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <MediaPlayer />
+        </div>
+      </section>
+
       {/* Upcoming Events */}
-      <section className="py-16 bg-accent/30">
+      <section className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, BookOpen, GraduationCap, Music, ChevronDown } from "lucide-react";
+import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -22,9 +22,6 @@ const Navigation = () => {
     { name: "Pedidos de Oração", href: "/oracoes", icon: Heart },
     { name: "Galeria", href: "/galeria", icon: Camera },
     { name: "Testemunhos", href: "/testemunhos", icon: MessageCircle },
-    { name: "Mídia", href: "/midia", icon: Music },
-    { name: "Sermões", href: "/em-breve", icon: BookOpen, comingSoon: true },
-    { name: "Estudos Bíblicos", href: "/em-breve", icon: GraduationCap, comingSoon: true },
   ];
 
   const isActive = (href: string) => location.pathname === href;
@@ -100,11 +97,6 @@ const Navigation = () => {
                         >
                           <Icon className="w-4 h-4 mr-3" />
                           {item.name}
-                          {item.comingSoon && (
-                            <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
-                              em breve
-                            </span>
-                          )}
                         </Link>
                       );
                     })}
@@ -170,11 +162,6 @@ const Navigation = () => {
                     >
                       <Icon className="w-4 h-4 mr-3" />
                       {item.name}
-                      {item.comingSoon && (
-                        <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
-                          em breve
-                        </span>
-                      )}
                     </Link>
                   );
                 })}
