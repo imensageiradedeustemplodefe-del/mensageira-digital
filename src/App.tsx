@@ -43,7 +43,6 @@ const App = () => (
                 <Route path="/testemunhos" element={<Testimonies />} />
                 <Route path="/em-breve" element={<ComingSoon />} />
                 <Route path="/login" element={<AdminLogin />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={
                   <ProtectedRoute>
                     <Admin />

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GalleryManager } from '@/components/admin/GalleryManager';
 import { TestimoniesManager } from '@/components/admin/TestimoniesManager';
+import { SiteSettingsManager } from '@/components/admin/SiteSettingsManager';
 import { LogOut, Users, Image, Settings, MessageCircle } from 'lucide-react';
 
 const Admin = () => {
@@ -69,21 +70,7 @@ const Admin = () => {
             </TabsContent>
 
             <TabsContent value="settings" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Configurações do Site</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Informações Gerais</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Configurações básicas do site serão implementadas em breve.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <SiteSettingsManager />
             </TabsContent>
           </Tabs>
         </div>
