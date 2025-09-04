@@ -112,6 +112,89 @@ export type Database = {
           },
         ]
       }
+      media_categories: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      media_items: {
+        Row: {
+          artist: string | null
+          category_id: string | null
+          created_at: string
+          description: string | null
+          duration: number | null
+          id: string
+          is_published: boolean | null
+          is_radio: boolean | null
+          media_url: string
+          play_count: number | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          artist?: string | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          id?: string
+          is_published?: boolean | null
+          is_radio?: boolean | null
+          media_url: string
+          play_count?: number | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          artist?: string | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          id?: string
+          is_published?: boolean | null
+          is_radio?: boolean | null
+          media_url?: string
+          play_count?: number | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "media_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string

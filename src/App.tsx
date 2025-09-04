@@ -15,6 +15,7 @@ import Contact from "./pages/Contact";
 import Prayer from "./pages/Prayer";
 import Gallery from "./pages/Gallery";
 import Testimonies from "./pages/Testimonies";
+import Media from "./pages/Media";
 import ComingSoon from "./pages/ComingSoon";
 import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
@@ -41,6 +42,7 @@ const App = () => (
                 <Route path="/oracoes" element={<Prayer />} />
                 <Route path="/galeria" element={<Gallery />} />
                 <Route path="/testemunhos" element={<Testimonies />} />
+                <Route path="/midia" element={<Media />} />
                 <Route path="/em-breve" element={<ComingSoon />} />
                 <Route path="/login" element={<AdminLogin />} />
                 <Route path="/admin" element={

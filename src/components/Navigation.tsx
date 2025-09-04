@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, BookOpen, GraduationCap, ChevronDown } from "lucide-react";
+import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, BookOpen, GraduationCap, Music, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -22,6 +22,7 @@ const Navigation = () => {
     { name: "Pedidos de Oração", href: "/oracoes", icon: Heart },
     { name: "Galeria", href: "/galeria", icon: Camera },
     { name: "Testemunhos", href: "/testemunhos", icon: MessageCircle },
+    { name: "Mídia", href: "/midia", icon: Music },
     { name: "Sermões", href: "/em-breve", icon: BookOpen, comingSoon: true },
     { name: "Estudos Bíblicos", href: "/em-breve", icon: GraduationCap, comingSoon: true },
   ];
