@@ -18,6 +18,7 @@ import Testimonies from "./pages/Testimonies";
 import ComingSoon from "./pages/ComingSoon";
 import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
+import AdminSetup from "./pages/AdminSetup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,7 +43,8 @@ const App = () => (
                 <Route path="/galeria" element={<Gallery />} />
                 <Route path="/testemunhos" element={<Testimonies />} />
                 <Route path="/em-breve" element={<ComingSoon />} />
-                <Route path="/login" element={<AdminLogin />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/setup" element={<AdminSetup />} />
                 <Route path="/admin" element={
                   <ProtectedRoute>
                     <Admin />
@@ -51,6 +53,8 @@ const App = () => (
                 {/* Redirect old routes to coming soon */}
                 <Route path="/sermoes" element={<ComingSoon />} />
                 <Route path="/estudos" element={<ComingSoon />} />
+                {/* Legacy login redirect */}
+                <Route path="/login" element={<AdminLogin />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

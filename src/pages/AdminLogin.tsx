@@ -6,17 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Shield } from 'lucide-react';
 
 export default function AdminLogin() {
-  const { user, signIn, loading } = useAuth();
-  const [username, setUsername] = useState('');
+  const { user, profile, signIn, loading } = useAuth();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Redirect if already logged in
-  if (user) {
+  // Redirect if already logged in as admin
+  if (user && profile?.role === 'admin') {
     return <Navigate to="/admin" replace />;
   }
 
@@ -25,7 +25,7 @@ export default function AdminLogin() {
     setError('');
     setIsSubmitting(true);
 
-    const { error } = await signIn(username, password);
+    const { error } = await signIn(email, password);
     
     if (error) {
       setError(error);
@@ -46,11 +46,14 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+            <Shield className="w-6 h-6 text-primary" />
+          </div>
           <CardTitle className="text-2xl font-bold">
             Painel Administrativo
           </CardTitle>
           <p className="text-muted-foreground">
-            Acesse para gerenciar o site
+            Sistema de autenticação segura
           </p>
         </CardHeader>
         <CardContent>
@@ -62,14 +65,14 @@ export default function AdminLogin() {
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="username">Usuário</Label>
+              <Label htmlFor="email">E-mail</Label>
               <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Pablo, Elisa, Wellika ou Jessica"
+                placeholder="admin@mensageiradedeustemplodefe.com"
               />
             </div>
             
@@ -91,8 +94,13 @@ export default function AdminLogin() {
               disabled={isSubmitting}
             >
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Entrar
+              Entrar com Segurança
             </Button>
+            
+            <div className="text-center text-sm text-muted-foreground">
+              <p>Primeira vez? Entre em contato com o administrador</p>
+              <p className="mt-1">para criar sua conta segura.</p>
+            </div>
           </form>
         </CardContent>
       </Card>
