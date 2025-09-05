@@ -48,7 +48,7 @@ export function GalleryManager() {
     description: '',
     image_url: '',
     category_id: '',
-    album_id: '',
+    album_id: "none",
     event_date: '',
     participants: 0
   });
@@ -97,10 +97,15 @@ export function GalleryManager() {
     e.preventDefault();
 
     try {
+      const submitData = {
+        ...formData,
+        album_id: formData.album_id === "none" ? null : formData.album_id
+      };
+
       if (editingPhoto) {
         const { error } = await supabase
           .from('gallery_photos')
-          .update(formData)
+          .update(submitData)
           .eq('id', editingPhoto.id);
 
         if (error) throw error;
@@ -108,7 +113,7 @@ export function GalleryManager() {
       } else {
         const { error } = await supabase
           .from('gallery_photos')
-          .insert([formData]);
+          .insert([submitData]);
 
         if (error) throw error;
         toast.success('Foto adicionada com sucesso!');
@@ -167,7 +172,7 @@ export function GalleryManager() {
       description: photo.description || '',
       image_url: photo.image_url,
       category_id: photo.category_id,
-      album_id: photo.album_id || '',
+      album_id: photo.album_id || "none",
       event_date: photo.event_date || '',
       participants: photo.participants
     });
@@ -180,7 +185,7 @@ export function GalleryManager() {
       description: '',
       image_url: '',
       category_id: '',
-      album_id: '',
+      album_id: "none",
       event_date: '',
       participants: 0
     });
@@ -266,7 +271,7 @@ export function GalleryManager() {
                     <SelectValue placeholder="Selecione um álbum" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sem álbum</SelectItem>
+                    <SelectItem value="none">Sem álbum</SelectItem>
                     {albums.map((album) => (
                       <SelectItem key={album.id} value={album.id}>
                         <div className="flex items-center">
