@@ -41,9 +41,7 @@ interface Event {
   location?: string;
   category: string;
   is_published: boolean;
-  max_participants?: number;
   registration_required: boolean;
-  contact_info?: string;
   image_url?: string;
   created_at: string;
 }
@@ -63,9 +61,7 @@ export default function EventsManager() {
     location: '',
     category: 'geral',
     is_published: false,
-    max_participants: '',
     registration_required: false,
-    contact_info: '',
     image_url: ''
   });
 
@@ -103,9 +99,7 @@ export default function EventsManager() {
       location: '',
       category: 'geral',
       is_published: false,
-      max_participants: '',
       registration_required: false,
-      contact_info: '',
       image_url: ''
     });
     setEditingEvent(null);
@@ -113,17 +107,19 @@ export default function EventsManager() {
 
   const handleEdit = (event: Event) => {
     setEditingEvent(event);
+    // Fix timezone issue by using the date string directly for datetime-local input
+    const eventDate = new Date(event.event_date);
+    const endDate = event.end_date ? new Date(event.end_date) : null;
+    
     setFormData({
       title: event.title,
       description: event.description || '',
-      event_date: format(new Date(event.event_date), "yyyy-MM-dd'T'HH:mm"),
-      end_date: event.end_date ? format(new Date(event.end_date), "yyyy-MM-dd'T'HH:mm") : '',
+      event_date: eventDate.toISOString().slice(0, 16), // yyyy-MM-ddTHH:mm format for datetime-local
+      end_date: endDate ? endDate.toISOString().slice(0, 16) : '',
       location: event.location || '',
       category: event.category,
       is_published: event.is_published,
-      max_participants: event.max_participants?.toString() || '',
       registration_required: event.registration_required,
-      contact_info: event.contact_info || '',
       image_url: event.image_url || ''
     });
     setIsDialogOpen(true);
@@ -140,9 +136,7 @@ export default function EventsManager() {
       location: formData.location || null,
       category: formData.category,
       is_published: formData.is_published,
-      max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
       registration_required: formData.registration_required,
-      contact_info: formData.contact_info || null,
       image_url: formData.image_url || null
     };
 
@@ -323,35 +317,13 @@ export default function EventsManager() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="location">Local</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData({...formData, location: e.target.value})}
-                    placeholder="Local do evento"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="max_participants">Máximo de Participantes</Label>
-                  <Input
-                    id="max_participants"
-                    type="number"
-                    value={formData.max_participants}
-                    onChange={(e) => setFormData({...formData, max_participants: e.target.value})}
-                    placeholder="Deixe vazio se ilimitado"
-                  />
-                </div>
-              </div>
-
               <div className="space-y-2">
-                <Label htmlFor="contact_info">Informações de Contato</Label>
+                <Label htmlFor="location">Local</Label>
                 <Input
-                  id="contact_info"
-                  value={formData.contact_info}
-                  onChange={(e) => setFormData({...formData, contact_info: e.target.value})}
-                  placeholder="Telefone, email ou outras informações"
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => setFormData({...formData, location: e.target.value})}
+                  placeholder="Local do evento"
                 />
               </div>
 
@@ -452,12 +424,6 @@ export default function EventsManager() {
                           <div className="flex items-center">
                             <MapPin className="w-3 h-3 mr-1" />
                             {event.location}
-                          </div>
-                        )}
-                        {event.max_participants && (
-                          <div className="flex items-center">
-                            <Users className="w-3 h-3 mr-1" />
-                            Máx: {event.max_participants}
                           </div>
                         )}
                       </div>
