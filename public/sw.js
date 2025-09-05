@@ -1,5 +1,6 @@
 // Service Worker for Mensageira de Deus Templo de Fé PWA
-const CACHE_NAME = 'mensageira-deus-v' + Date.now(); // Versão dinâmica baseada no timestamp
+const CACHE_VERSION = 'mensageira-deus-v' + Date.now();
+const CACHE_NAME = CACHE_VERSION;
 const urlsToCache = [
   '/',
   '/sobre',
@@ -10,6 +11,18 @@ const urlsToCache = [
   '/static/css/main.css',
   '/manifest.json'
 ];
+
+// Função para limpar todos os caches
+function clearAllCaches() {
+  return caches.keys().then(cacheNames => {
+    return Promise.all(
+      cacheNames.map(cacheName => {
+        console.log('Service Worker: Clearing cache', cacheName);
+        return caches.delete(cacheName);
+      })
+    );
+  });
+}
 
 // Install event - força atualização imediata
 self.addEventListener('install', function(event) {
@@ -82,5 +95,31 @@ self.addEventListener('fetch', function(event) {
 self.addEventListener('message', function(event) {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  }
+  
+  // Força limpeza completa do cache
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    event.waitUntil(
+      clearAllCaches().then(() => {
+        // Notifica o cliente que o cache foi limpo
+        event.ports[0].postMessage({ success: true });
+      })
+    );
+  }
+  
+  // Força atualização e limpeza
+  if (event.data && event.data.type === 'FORCE_UPDATE') {
+    event.waitUntil(
+      clearAllCaches().then(() => {
+        return self.clients.matchAll();
+      }).then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'CACHE_CLEARED',
+            message: 'Cache limpo com sucesso!'
+          });
+        });
+      })
+    );
   }
 });

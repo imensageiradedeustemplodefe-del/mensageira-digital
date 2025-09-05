@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
+import { useCacheManager } from "@/hooks/useCacheManager";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Events from "./pages/Events";
@@ -22,6 +24,45 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  // Ativa gerenciamento automático de cache
+  useServiceWorkerUpdate();
+  useCacheManager();
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navigation />
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/sobre" element={<About />} />
+          <Route path="/eventos" element={<Events />} />
+          <Route path="/live" element={<Live />} />
+          <Route path="/contato" element={<Contact />} />
+          <Route path="/oracoes" element={<Prayer />} />
+          <Route path="/galeria" element={<Gallery />} />
+          <Route path="/testemunhos" element={<Testimonies />} />
+          <Route path="/em-breve" element={<ComingSoon />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
+          } />
+          {/* Redirect old routes to coming soon */}
+          <Route path="/sermoes" element={<ComingSoon />} />
+          <Route path="/estudos" element={<ComingSoon />} />
+          {/* Legacy login redirect */}
+          <Route path="/login" element={<AdminLogin />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -29,36 +70,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen flex flex-col">
-            <Navigation />
-            <main className="flex-1">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/sobre" element={<About />} />
-                <Route path="/eventos" element={<Events />} />
-                <Route path="/live" element={<Live />} />
-                <Route path="/contato" element={<Contact />} />
-                <Route path="/oracoes" element={<Prayer />} />
-                <Route path="/galeria" element={<Gallery />} />
-                <Route path="/testemunhos" element={<Testimonies />} />
-                <Route path="/em-breve" element={<ComingSoon />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin" element={
-                  <ProtectedRoute>
-                    <Admin />
-                  </ProtectedRoute>
-                } />
-                {/* Redirect old routes to coming soon */}
-                <Route path="/sermoes" element={<ComingSoon />} />
-                <Route path="/estudos" element={<ComingSoon />} />
-                {/* Legacy login redirect */}
-                <Route path="/login" element={<AdminLogin />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
+          <AppContent />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>

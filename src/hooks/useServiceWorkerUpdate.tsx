@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useCacheManager } from './useCacheManager';
 
 export const useServiceWorkerUpdate = () => {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const { toast } = useToast();
+  const { clearCacheAutomatically } = useCacheManager();
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -19,7 +21,8 @@ export const useServiceWorkerUpdate = () => {
             duration: 5000,
           });
 
-          // Recarrega a página após um breve delay para aplicar as mudanças
+          // Limpa cache e recarrega a página após um breve delay
+          clearCacheAutomatically();
           setTimeout(() => {
             window.location.reload();
           }, 2000);
