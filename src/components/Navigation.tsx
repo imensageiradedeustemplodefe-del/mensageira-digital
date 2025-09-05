@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, ChevronDown } from "lucide-react";
+import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, ChevronDown, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -107,8 +107,16 @@ const Navigation = () => {
             </div>
             
             {/* Theme Toggle */}
-            <ThemeToggle />
-          </div>
+        <div className="flex items-center gap-2">
+          <Link 
+            to="/admin/login" 
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+          </Link>
+          <ThemeToggle />
+        </div>
+      </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
