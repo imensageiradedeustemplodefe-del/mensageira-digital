@@ -231,12 +231,15 @@ const DashboardStats = () => {
     }
   };
 
+  // Criar dados do gráfico pizza com validações
   const pieData = [
-    { name: 'Testemunhos', value: stats.totalTestimonies, color: '#8884d8' },
-    { name: 'Orações', value: stats.totalPrayerRequests, color: '#82ca9d' },
-    { name: 'Eventos', value: stats.totalEvents, color: '#ffc658' },
-    { name: 'Fotos', value: stats.totalPhotos, color: '#ff7c7c' },
-  ];
+    { name: 'Testemunhos', value: Math.max(stats.totalTestimonies, 0), color: '#8884d8' },
+    { name: 'Orações', value: Math.max(stats.totalPrayerRequests, 0), color: '#82ca9d' },
+    { name: 'Eventos', value: Math.max(stats.totalEvents, 0), color: '#ffc658' },
+    { name: 'Fotos', value: Math.max(stats.totalPhotos, 0), color: '#ff7c7c' },
+  ].filter(item => item.value > 0); // Remove itens com valor 0
+
+  const hasAnyData = pieData.some(item => item.value > 0);
 
   if (loading) {
     return (
@@ -254,55 +257,55 @@ const DashboardStats = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Testemunhos</CardTitle>
-            <MessageCircle className="h-4 w-4 text-muted-foreground" />
+            <MessageCircle className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalTestimonies}</div>
+            <div className="text-2xl font-bold text-foreground">{stats.totalTestimonies}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.approvedTestimonies} aprovados
+              {stats.approvedTestimonies} aprovados de {stats.totalTestimonies}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pedidos de Oração</CardTitle>
-            <Heart className="h-4 w-4 text-muted-foreground" />
+            <Heart className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPrayerRequests}</div>
+            <div className="text-2xl font-bold text-foreground">{stats.totalPrayerRequests}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.pendingPrayerRequests} pendentes
+              {stats.pendingPrayerRequests} aguardando aprovação
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Eventos</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalEvents}</div>
+            <div className="text-2xl font-bold text-foreground">{stats.totalEvents}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.upcomingEvents} próximos
+              {stats.upcomingEvents} próximos eventos
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Transmissões</CardTitle>
-            <Radio className="h-4 w-4 text-muted-foreground" />
+            <Radio className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalStreams}</div>
+            <div className="text-2xl font-bold text-foreground">{stats.totalStreams}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.liveStreams} ao vivo
+              {stats.liveStreams} ativa{stats.liveStreams !== 1 ? 's' : ''} agora
             </p>
           </CardContent>
         </Card>
@@ -319,18 +322,28 @@ const DashboardStats = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="testimonies" stroke="#8884d8" name="Testemunhos" />
-                <Line type="monotone" dataKey="prayers" stroke="#82ca9d" name="Orações" />
-                <Line type="monotone" dataKey="events" stroke="#ffc658" name="Eventos" />
-              </LineChart>
-            </ResponsiveContainer>
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="testimonies" stroke="#8884d8" name="Testemunhos" strokeWidth={2} />
+                  <Line type="monotone" dataKey="prayers" stroke="#82ca9d" name="Orações" strokeWidth={2} />
+                  <Line type="monotone" dataKey="events" stroke="#ffc658" name="Eventos" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center">
+                <div className="text-center">
+                  <TrendingUp className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Sem dados de atividade ainda</p>
+                  <p className="text-sm text-muted-foreground">Os dados aparecerão quando houver conteúdo</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -343,25 +356,35 @@ const DashboardStats = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {hasAnyData ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value} itens`, 'Quantidade']} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center">
+                <div className="text-center">
+                  <Eye className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Ainda não há conteúdo</p>
+                  <p className="text-sm text-muted-foreground">Comece criando testemunhos, eventos ou fotos</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
