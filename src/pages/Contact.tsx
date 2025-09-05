@@ -99,7 +99,7 @@ const Contact = () => {
       {/* Contact Info Cards */}
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-16">
             {contactInfo.map((info, index) => {
               const Icon = info.icon;
               return (
@@ -142,7 +142,7 @@ const Contact = () => {
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="name">Nome Completo</Label>
                         <Input
@@ -152,6 +152,7 @@ const Contact = () => {
                           onChange={handleInputChange}
                           required
                           placeholder="Seu nome"
+                          className="w-full"
                         />
                       </div>
                       <div className="space-y-2">
@@ -164,11 +165,12 @@ const Contact = () => {
                           onChange={handleInputChange}
                           required
                           placeholder="seu@email.com"
+                          className="w-full"
                         />
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="phone">Telefone (Opcional)</Label>
                         <Input
@@ -177,6 +179,7 @@ const Contact = () => {
                           value={formData.phone}
                           onChange={handleInputChange}
                           placeholder="(00) 00000-0000"
+                          className="w-full"
                         />
                       </div>
                       <div className="space-y-2">
@@ -188,6 +191,7 @@ const Contact = () => {
                           onChange={handleInputChange}
                           required
                           placeholder="Assunto da mensagem"
+                          className="w-full"
                         />
                       </div>
                     </div>

@@ -114,7 +114,7 @@ const Events = () => {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                     {upcomingEvents.map((event) => (
                       <Card key={event.id} className="hover:shadow-lg transition-all duration-300 border-primary/20">
                         {event.image_url && (
@@ -195,7 +195,7 @@ const Events = () => {
                     </p>
                   </div>
 
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                     {pastEvents.slice(0, 6).map((event) => (
                       <Card key={event.id} className="hover:shadow-lg transition-all duration-300 opacity-75">
                         {event.image_url && (

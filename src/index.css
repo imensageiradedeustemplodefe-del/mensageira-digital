@@ -128,4 +128,69 @@ All colors MUST be HSL. Based on church brand colors.
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Responsive Typography */
+  h1, .text-4xl, .text-5xl, .text-6xl {
+    @apply leading-tight;
+  }
+  
+  /* Responsive Spacing */
+  .section-padding {
+    @apply py-12 sm:py-16 lg:py-20;
+  }
+  
+  /* Responsive Container */
+  .container-responsive {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Better Mobile Touch Targets */
+  button, .btn, [role="button"] {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Responsive Grid Helpers */
+  .grid-responsive-2 {
+    @apply grid sm:grid-cols-2 gap-4 sm:gap-6;
+  }
+  
+  .grid-responsive-3 {
+    @apply grid sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6;
+  }
+  
+  .grid-responsive-4 {
+    @apply grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6;
+  }
+  
+  /* Better Mobile Forms */
+  input, textarea, select {
+    @apply text-base; /* Prevents zoom on iOS */
+  }
+  
+  /* Responsive Text */
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+  
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+  
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl;
+  }
+  
+  /* Better Mobile Cards */
+  .card-responsive {
+    @apply p-4 sm:p-6;
+  }
+  
+  /* Mobile-first margins */
+  .mb-responsive {
+    @apply mb-8 sm:mb-12;
+  }
+  
+  .mt-responsive {
+    @apply mt-8 sm:mt-12;
+  }
 }

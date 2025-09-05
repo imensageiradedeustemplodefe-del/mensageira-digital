@@ -100,7 +100,7 @@ const Prayer = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {requests.map((request) => (
                 <Card key={request.id} className="hover:shadow-lg transition-all duration-300">
                   <CardHeader className="pb-3">
@@ -150,7 +150,7 @@ const Prayer = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <Card className="text-center hover:shadow-lg transition-all duration-300">
               <CardHeader>
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">

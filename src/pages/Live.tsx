@@ -218,7 +218,7 @@ const Live = () => {
           </Card>
 
           {/* Stream Links */}
-          <div className="flex flex-wrap justify-center gap-4 mt-6">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6 px-4">
             {streams.length > 0 ? (
               streams.map((stream) => (
                 <Button 
@@ -249,8 +249,8 @@ const Live = () => {
           {/* Available Streams */}
           {streams.length > 1 && (
             <div className="mt-8">
-              <h3 className="text-lg font-semibold text-center mb-4">Outras Transmissões Disponíveis</h3>
-              <div className="grid md:grid-cols-2 gap-4">
+              <h3 className="text-lg font-semibold text-center mb-4 px-4">Outras Transmissões Disponíveis</h3>
+              <div className="grid sm:grid-cols-2 gap-4">
                 {streams.filter(stream => stream.id !== activeStream?.id).map((stream) => (
                   <Card key={stream.id} className="hover:shadow-md transition-shadow cursor-pointer" 
                         onClick={() => setActiveStream(stream)}>
@@ -292,7 +292,7 @@ const Live = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {services.map((service, index) => (
               <Card key={index} className="hover:shadow-lg transition-all duration-300 bg-card/60 backdrop-blur">
                 <CardHeader className="pb-3">
@@ -329,7 +329,7 @@ const Live = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground">
-              <div className="grid md:grid-cols-3 gap-6 text-center">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 text-center">
                 <div>
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <span className="text-xl font-bold text-primary">1</span>

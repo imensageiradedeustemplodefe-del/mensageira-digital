@@ -148,7 +148,7 @@ const Gallery = () => {
       {/* Photo Grid */}
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {filteredPhotos.map((photo) => (
               <Card key={photo.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
                 <div className="aspect-video overflow-hidden">

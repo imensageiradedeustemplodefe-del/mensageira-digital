@@ -102,9 +102,9 @@ const Home = () => {
               crescimento espiritual e uma comunidade que se importa com você.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
-              <Link to="/live">
-                <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-6 px-4">
+              <Link to="/live" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
                   <Youtube className="w-5 h-5 mr-2" />
                   Assistir ao Vivo
                 </Button>
@@ -112,16 +112,18 @@ const Home = () => {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-primary text-primary hover:bg-primary/10"
+                className="w-full sm:w-auto border-primary text-primary hover:bg-primary/10"
                 onClick={handleInstallClick}
               >
                 <Download className="w-5 h-5 mr-2" />
-                {installable ? 'Instalar App' : 'Instalar App'}
+                <span className="hidden sm:inline">{installable ? 'Instalar App' : 'Instalar App'}</span>
+                <span className="sm:hidden">Instalar</span>
               </Button>
-              <Link to="/eventos">
-                <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/10">
+              <Link to="/eventos" className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto border-primary text-primary hover:bg-primary/10">
                   <Calendar className="w-5 h-5 mr-2" />
-                  Ver Programação
+                  <span className="hidden sm:inline">Ver Programação</span>
+                  <span className="sm:hidden">Programação</span>
                 </Button>
               </Link>
             </div>
@@ -155,19 +157,19 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {upcomingEvents.map((event, index) => (
               <Card key={index} className="hover:shadow-lg transition-all duration-300 border-none bg-card/60 backdrop-blur">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg text-foreground">{event.title}</CardTitle>
+                  <CardTitle className="text-base sm:text-lg text-foreground leading-tight">{event.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center text-muted-foreground">
-                    <Calendar className="w-4 h-4 mr-2" />
+                    <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
                     <span className="text-sm">{event.date}</span>
                   </div>
                   <div className="flex items-center text-muted-foreground">
-                    <Clock className="w-4 h-4 mr-2" />
+                    <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
                     <span className="text-sm">{event.time}</span>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">

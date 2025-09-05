@@ -117,7 +117,7 @@ const Testimonies = () => {
               <h2 className="text-3xl font-bold text-center text-foreground mb-12">
                 {settings.testimonies_featured_title}
               </h2>
-              <div className="grid lg:grid-cols-2 gap-8 mb-12">
+              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8 mb-8 sm:mb-12">
                 {testimonies.slice(0, 2).map((testimony) => (
                   <Card key={testimony.id} className="bg-gradient-to-br from-primary/5 to-peaceful-blue/10 border-none hover:shadow-lg transition-all duration-300">
                     <CardHeader>
@@ -157,7 +157,7 @@ const Testimonies = () => {
           </h2>
           
           {testimonies.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {testimonies.map((testimony) => (
                 <Card key={testimony.id} className="hover:shadow-lg transition-all duration-300">
                   <CardHeader className="pb-3">

@@ -105,7 +105,7 @@ const About = () => {
           <h2 className="text-3xl font-bold text-center text-foreground mb-12">
             Nossos Valores
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {values.map((value, index) => {
               const Icon = value.icon;
               return (
@@ -140,7 +140,7 @@ const About = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {pastors.map((pastor, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-all duration-300">
                 <CardHeader>
@@ -175,7 +175,7 @@ const About = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {ministries.map((ministry, index) => (
               <Card key={index} className="hover:shadow-lg transition-all duration-300">
                 <CardHeader>
