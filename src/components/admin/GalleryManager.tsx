@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useGalleryAlbums } from '@/hooks/useGalleryAlbums';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Plus, Eye, EyeOff, Trash2, Edit, Upload } from 'lucide-react';
+import { Plus, Eye, EyeOff, Trash2, Edit, Upload, FolderOpen } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -24,16 +25,19 @@ interface Photo {
   description: string;
   image_url: string;
   category_id: string;
+  album_id?: string;
   event_date: string;
   participants: number;
   is_published: boolean;
   created_at: string;
   gallery_categories?: { name: string };
+  gallery_albums?: { name: string };
 }
 
 export function GalleryManager() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const { albums } = useGalleryAlbums();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,6 +48,7 @@ export function GalleryManager() {
     description: '',
     image_url: '',
     category_id: '',
+    album_id: '',
     event_date: '',
     participants: 0
   });
@@ -59,7 +64,8 @@ export function GalleryManager() {
         .from('gallery_photos')
         .select(`
           *,
-          gallery_categories(name)
+          gallery_categories(name),
+          gallery_albums(name)
         `)
         .order('created_at', { ascending: false });
 
@@ -161,6 +167,7 @@ export function GalleryManager() {
       description: photo.description || '',
       image_url: photo.image_url,
       category_id: photo.category_id,
+      album_id: photo.album_id || '',
       event_date: photo.event_date || '',
       participants: photo.participants
     });
@@ -173,6 +180,7 @@ export function GalleryManager() {
       description: '',
       image_url: '',
       category_id: '',
+      album_id: '',
       event_date: '',
       participants: 0
     });
@@ -249,6 +257,28 @@ export function GalleryManager() {
                 </Select>
               </div>
               <div>
+                <Label htmlFor="album">Álbum (Opcional)</Label>
+                <Select
+                  value={formData.album_id}
+                  onValueChange={(value) => setFormData({ ...formData, album_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um álbum" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Sem álbum</SelectItem>
+                    {albums.map((album) => (
+                      <SelectItem key={album.id} value={album.id}>
+                        <div className="flex items-center">
+                          <FolderOpen className="w-4 h-4 mr-2" />
+                          {album.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label htmlFor="event_date">Data do Evento</Label>
                 <Input
                   id="event_date"
@@ -301,6 +331,12 @@ export function GalleryManager() {
                         <Badge variant="outline">
                           {photo.gallery_categories?.name}
                         </Badge>
+                        {photo.gallery_albums?.name && (
+                          <Badge variant="secondary">
+                            <FolderOpen className="w-3 h-3 mr-1" />
+                            {photo.gallery_albums.name}
+                          </Badge>
+                        )}
                         {photo.event_date && (
                           <Badge variant="outline">
                             {new Date(photo.event_date).toLocaleDateString('pt-BR')}

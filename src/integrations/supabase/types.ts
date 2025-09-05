@@ -89,6 +89,39 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_albums: {
+        Row: {
+          cover_photo_url: string | null
+          created_at: string
+          description: string | null
+          event_date: string | null
+          id: string
+          is_published: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          cover_photo_url?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          is_published?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          cover_photo_url?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          is_published?: boolean | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gallery_categories: {
         Row: {
           created_at: string
@@ -118,6 +151,7 @@ export type Database = {
       }
       gallery_photos: {
         Row: {
+          album_id: string | null
           category_id: string | null
           created_at: string
           description: string | null
@@ -130,6 +164,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          album_id?: string | null
           category_id?: string | null
           created_at?: string
           description?: string | null
@@ -142,6 +177,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          album_id?: string | null
           category_id?: string | null
           created_at?: string
           description?: string | null
@@ -154,6 +190,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "gallery_photos_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_albums"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "gallery_photos_category_id_fkey"
             columns: ["category_id"]

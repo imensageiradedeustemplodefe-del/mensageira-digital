@@ -4,13 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GalleryManager } from '@/components/admin/GalleryManager';
+import { AlbumsManager } from '@/components/admin/AlbumsManager';
 import { TestimoniesManager } from '@/components/admin/TestimoniesManager';
 import { MediaManager } from '@/components/admin/MediaManager';
 import PrayerRequestsManager from '@/components/admin/PrayerRequestsManager';
 import EventsManager from '@/components/admin/EventsManager';
 import LiveStreamsManager from '@/components/admin/LiveStreamsManager';
 import DashboardStats from '@/components/admin/DashboardStats';
-import { LogOut, Image, Settings, MessageCircle, Music, Heart, Calendar, Radio, BarChart3 } from 'lucide-react';
+import { LogOut, Image, Settings, MessageCircle, Music, Heart, Calendar, Radio, BarChart3, FolderOpen } from 'lucide-react';
 
 const Admin = () => {
   const { signOut } = useAuth();
@@ -50,11 +51,16 @@ const Admin = () => {
       <section className="py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs defaultValue="dashboard" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 h-auto p-2">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 gap-2 h-auto p-2">
               <TabsTrigger value="dashboard" className="flex items-center justify-center flex-col sm:flex-row p-3 text-xs sm:text-sm">
                 <BarChart3 className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Dashboard</span>
                 <span className="sm:hidden mt-1">Stats</span>
+              </TabsTrigger>
+              <TabsTrigger value="albums" className="flex items-center justify-center flex-col sm:flex-row p-3 text-xs sm:text-sm">
+                <FolderOpen className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Álbuns</span>
+                <span className="sm:hidden mt-1">Álbuns</span>
               </TabsTrigger>
               <TabsTrigger value="testimonies" className="flex items-center justify-center flex-col sm:flex-row p-3 text-xs sm:text-sm">
                 <MessageCircle className="w-4 h-4 sm:mr-2" />
@@ -63,7 +69,7 @@ const Admin = () => {
               </TabsTrigger>
               <TabsTrigger value="gallery" className="flex items-center justify-center flex-col sm:flex-row p-3 text-xs sm:text-sm">
                 <Image className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Galeria</span>
+                <span className="hidden sm:inline">Fotos</span>
                 <span className="sm:hidden mt-1">Fotos</span>
               </TabsTrigger>
               <TabsTrigger value="media" className="flex items-center justify-center flex-col sm:flex-row p-3 text-xs sm:text-sm">
@@ -90,6 +96,10 @@ const Admin = () => {
 
             <TabsContent value="dashboard" className="mt-6">
               <DashboardStats />
+            </TabsContent>
+
+            <TabsContent value="albums" className="mt-6">
+              <AlbumsManager />
             </TabsContent>
 
             <TabsContent value="testimonies" className="mt-6">
