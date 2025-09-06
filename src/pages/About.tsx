@@ -7,10 +7,10 @@ const About = () => {
   
   const pastors = [
     {
-      name: settings.pastor_principal_name || "Pr. Gilmar Radaelli",
-      role: "Pastor Responsável",
-      description: settings.pastor_principal_description || "Líder espiritual dedicado ao crescimento da igreja e ao cuidado pastoral das famílias.",
-      image: "/lovable-uploads/5544ccb1-0c80-408a-8c5c-46805e2d6676.png"
+      name: "Profeta José",
+      role: "Profeta (in memoriam)",
+      description: "Uma pessoa especial que continua sendo importante no ministério, mesmo não estando mais entre nós.",
+      image: "/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png"
     },
     {
       name: settings.pastora_name || "Pra. Vera Lucia Radaelli",
@@ -19,16 +19,16 @@ const About = () => {
       image: "/lovable-uploads/b6dd3c88-7992-4063-ace2-78cf8de87b61.png"
     },
     {
+      name: settings.pastor_principal_name || "Pr. Gilmar Radaelli",
+      role: "Pastor Responsável",
+      description: settings.pastor_principal_description || "Líder espiritual dedicado ao crescimento da igreja e ao cuidado pastoral das famílias.",
+      image: "/lovable-uploads/5544ccb1-0c80-408a-8c5c-46805e2d6676.png"
+    },
+    {
       name: settings.pastor_auxiliar_name || "Pr. João Ezequiel Batista",
       role: "Pastor Auxiliar",
       description: settings.pastor_auxiliar_description || "Apoio pastoral e liderança em diversas atividades da congregação.",
       image: "/lovable-uploads/3d072e4d-3492-4762-92ab-9d3f39dc18ab.png"
-    },
-    {
-      name: "Profeta José",
-      role: "Profeta (in memoriam)",
-      description: "Uma pessoa especial que continua sendo importante no ministério, mesmo não estando mais entre nós.",
-      image: "/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png"
     }
   ];
 
