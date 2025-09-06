@@ -203,47 +203,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* Declaration of Faith */}
-      <section className="py-16 bg-gradient-to-br from-primary/5 to-peaceful-blue/10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Declaração de Fé
-            </h2>
-          </div>
-          
-          <Card className="bg-card/60 backdrop-blur border-none">
-            <CardContent className="p-8">
-              <div className="space-y-4 text-muted-foreground leading-relaxed">
-                <p>
-                  <strong className="text-foreground">• Cremos</strong> na Bíblia Sagrada como a Palavra de Deus, 
-                  inspirada e infalível, autoridade suprema em matéria de fé e prática cristã.
-                </p>
-                <p>
-                  <strong className="text-foreground">• Cremos</strong> na Trindade: Pai, Filho e Espírito Santo, 
-                  três pessoas distintas em uma só essência divina.
-                </p>
-                <p>
-                  <strong className="text-foreground">• Cremos</strong> em Jesus Cristo como nosso único Salvador, 
-                  verdadeiro Deus e verdadeiro homem.
-                </p>
-                <p>
-                  <strong className="text-foreground">• Cremos</strong> na salvação pela graça mediante a fé, 
-                  não por obras, mas como dom gratuito de Deus.
-                </p>
-                <p>
-                  <strong className="text-foreground">• Cremos</strong> no batismo nas águas por imersão e na 
-                  Santa Ceia como ordenanças deixadas por Cristo.
-                </p>
-                <p>
-                  <strong className="text-foreground">• Cremos</strong> na segunda vinda de Jesus Cristo e 
-                  na ressurreição dos mortos.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
     </div>
   );
 };
