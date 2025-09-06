@@ -221,24 +221,37 @@ export default function PrayerRequestsManager() {
           </div>
         )}
 
-        {showActions && !request.is_approved && (
+        {showActions && (
           <div className="flex gap-2">
-            <Button
-              size="sm"
-              onClick={() => handleApprove(request.id)}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Check className="w-3 h-3 mr-1" />
-              Aprovar
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => handleReject(request.id)}
-            >
-              <X className="w-3 h-3 mr-1" />
-              Rejeitar
-            </Button>
+            {!request.is_approved ? (
+              <>
+                <Button
+                  size="sm"
+                  onClick={() => handleApprove(request.id)}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Check className="w-3 h-3 mr-1" />
+                  Aprovar
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => handleReject(request.id)}
+                >
+                  <X className="w-3 h-3 mr-1" />
+                  Rejeitar
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => handleReject(request.id)}
+              >
+                <X className="w-3 h-3 mr-1" />
+                Excluir
+              </Button>
+            )}
           </div>
         )}
       </CardContent>
@@ -310,7 +323,7 @@ export default function PrayerRequestsManager() {
           ) : (
             <div className="space-y-4">
               {approvedRequests.map(request => (
-                <RequestCard key={request.id} request={request} showActions={false} />
+                <RequestCard key={request.id} request={request} showActions={true} />
               ))}
             </div>
           )}
