@@ -27,7 +27,7 @@ const About = () => {
     {
       name: settings.pastor_auxiliar_name || "Pr. João Ezequiel Batista",
       role: "Pastor Auxiliar",
-      description: settings.pastor_auxiliar_description || "Apoio pastoral e liderança em diversas atividades da congregação.",
+      description: "Dá suporte aos pastores responsáveis e atua especialmente na área de ensinamento bíblico.",
       image: "/lovable-uploads/3d072e4d-3492-4762-92ab-9d3f39dc18ab.png"
     }
   ];
