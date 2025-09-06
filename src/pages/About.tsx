@@ -7,7 +7,7 @@ const About = () => {
   
   const pastors = [
     {
-      name: "Profeta José",
+      name: "Profeta João",
       role: "Profeta (in memoriam)",
       description: "Uma pessoa especial que continua sendo importante no ministério, mesmo não estando mais entre nós.",
       image: "/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png"
