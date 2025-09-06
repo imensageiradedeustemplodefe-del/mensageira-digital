@@ -9,17 +9,20 @@ const About = () => {
     {
       name: settings.pastor_principal_name || "Pr. Gilmar Radaelli",
       role: "Pastor Responsável",
-      description: settings.pastor_principal_description || "Líder espiritual dedicado ao crescimento da igreja e ao cuidado pastoral das famílias."
+      description: settings.pastor_principal_description || "Líder espiritual dedicado ao crescimento da igreja e ao cuidado pastoral das famílias.",
+      image: "/lovable-uploads/5544ccb1-0c80-408a-8c5c-46805e2d6676.png"
     },
     {
       name: settings.pastora_name || "Pra. Vera Lucia Radaelli",
       role: "Pastora Responsável",
-      description: settings.pastora_description || "Comprometida com o ministério de mulheres e o ensino da Palavra de Deus."
+      description: settings.pastora_description || "Comprometida com o ministério de mulheres e o ensino da Palavra de Deus.",
+      image: "/lovable-uploads/b6dd3c88-7992-4063-ace2-78cf8de87b61.png"
     },
     {
       name: settings.pastor_auxiliar_name || "Pr. João Ezequiel Batista",
       role: "Pastor Auxiliar",
-      description: settings.pastor_auxiliar_description || "Apoio pastoral e liderança em diversas atividades da congregação."
+      description: settings.pastor_auxiliar_description || "Apoio pastoral e liderança em diversas atividades da congregação.",
+      image: "/lovable-uploads/3d072e4d-3492-4762-92ab-9d3f39dc18ab.png"
     }
   ];
 
@@ -144,10 +147,12 @@ const About = () => {
             {pastors.map((pastor, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-all duration-300">
                 <CardHeader>
-                  <div className="w-24 h-24 bg-gradient-to-br from-primary to-primary-light rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-white">
-                      {pastor.name.charAt(3)}
-                    </span>
+                  <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden">
+                    <img 
+                      src={pastor.image} 
+                      alt={pastor.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <CardTitle className="text-xl">{pastor.name}</CardTitle>
                   <p className="text-primary font-medium">{pastor.role}</p>
