@@ -12,7 +12,8 @@ import {
   AlertTriangle,
   Eye,
   Mail,
-  Phone
+  Phone,
+  CheckCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -26,9 +27,11 @@ interface PrayerRequest {
   request_text: string;
   is_approved: boolean;
   is_urgent: boolean;
+  is_completed: boolean;
   category: string;
   created_at: string;
   approved_at: string | null;
+  completed_at: string | null;
 }
 
 export default function PrayerRequestsManager() {
@@ -121,6 +124,40 @@ export default function PrayerRequestsManager() {
     }
   };
 
+  const handleComplete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('prayer_requests')
+        .update({ 
+          is_completed: true,
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setRequests(prev => 
+        prev.map(req => 
+          req.id === id 
+            ? { ...req, is_completed: true, completed_at: new Date().toISOString() }
+            : req
+        )
+      );
+
+      toast({
+        title: "Intercessão Finalizada",
+        description: "O pedido foi marcado como intercessão finalizada.",
+      });
+    } catch (error) {
+      console.error('Erro ao finalizar:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao finalizar intercessão.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       'saude': 'bg-red-100 text-red-800',
@@ -135,7 +172,8 @@ export default function PrayerRequestsManager() {
   };
 
   const pendingRequests = requests.filter(req => !req.is_approved);
-  const approvedRequests = requests.filter(req => req.is_approved);
+  const approvedRequests = requests.filter(req => req.is_approved && !req.is_completed);
+  const completedRequests = requests.filter(req => req.is_completed);
 
   if (loading) {
     return (
@@ -173,12 +211,18 @@ export default function PrayerRequestsManager() {
           <Badge className={getCategoryColor(request.category)}>
             {request.category.charAt(0).toUpperCase() + request.category.slice(1)}
           </Badge>
-          {request.is_approved && (
-            <Badge variant="secondary" className="bg-green-100 text-green-800">
-              <Check className="w-3 h-3 mr-1" />
-              Aprovado
-            </Badge>
-          )}
+            {request.is_approved && !request.is_completed && (
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <Check className="w-3 h-3 mr-1" />
+                Aprovado
+              </Badge>
+            )}
+            {request.is_completed && (
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Finalizado
+              </Badge>
+            )}
         </div>
 
         <div className="mb-3">
@@ -242,6 +286,25 @@ export default function PrayerRequestsManager() {
                   Rejeitar
                 </Button>
               </>
+            ) : request.is_approved && !request.is_completed ? (
+              <>
+                <Button
+                  size="sm"
+                  onClick={() => handleComplete(request.id)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Finalizar Intercessão
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => handleReject(request.id)}
+                >
+                  <X className="w-3 h-3 mr-1" />
+                  Excluir
+                </Button>
+              </>
             ) : (
               <Button
                 size="sm"
@@ -274,6 +337,9 @@ export default function PrayerRequestsManager() {
           <Badge variant="outline">
             {approvedRequests.length} aprovados
           </Badge>
+          <Badge variant="outline" className="bg-blue-50">
+            {completedRequests.length} finalizados
+          </Badge>
         </div>
       </div>
 
@@ -286,6 +352,10 @@ export default function PrayerRequestsManager() {
           <TabsTrigger value="approved" className="flex items-center gap-2">
             <Check className="w-4 h-4" />
             Aprovados ({approvedRequests.length})
+          </TabsTrigger>
+          <TabsTrigger value="completed" className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4" />
+            Finalizados ({completedRequests.length})
           </TabsTrigger>
         </TabsList>
 
@@ -323,6 +393,26 @@ export default function PrayerRequestsManager() {
           ) : (
             <div className="space-y-4">
               {approvedRequests.map(request => (
+                <RequestCard key={request.id} request={request} showActions={true} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="completed">
+          {completedRequests.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <CheckCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Nenhuma intercessão finalizada</h3>
+                <p className="text-muted-foreground">
+                  Pedidos com intercessão finalizada aparecerão aqui.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {completedRequests.map(request => (
                 <RequestCard key={request.id} request={request} showActions={true} />
               ))}
             </div>

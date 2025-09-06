@@ -351,10 +351,12 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           category: string | null
+          completed_at: string | null
           created_at: string
           email: string | null
           id: string
           is_approved: boolean | null
+          is_completed: boolean | null
           is_urgent: boolean | null
           name: string
           phone: string | null
@@ -365,10 +367,12 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           category?: string | null
+          completed_at?: string | null
           created_at?: string
           email?: string | null
           id?: string
           is_approved?: boolean | null
+          is_completed?: boolean | null
           is_urgent?: boolean | null
           name: string
           phone?: string | null
@@ -379,10 +383,12 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           category?: string | null
+          completed_at?: string | null
           created_at?: string
           email?: string | null
           id?: string
           is_approved?: boolean | null
+          is_completed?: boolean | null
           is_urgent?: boolean | null
           name?: string
           phone?: string | null
