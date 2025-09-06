@@ -23,6 +23,12 @@ const About = () => {
       role: "Pastor Auxiliar",
       description: settings.pastor_auxiliar_description || "Apoio pastoral e liderança em diversas atividades da congregação.",
       image: "/lovable-uploads/3d072e4d-3492-4762-92ab-9d3f39dc18ab.png"
+    },
+    {
+      name: "Profeta José",
+      role: "Profeta (in memoriam)",
+      description: "Uma pessoa especial que continua sendo importante no ministério, mesmo não estando mais entre nós.",
+      image: "/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png"
     }
   ];
 
@@ -143,7 +149,7 @@ const About = () => {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {pastors.map((pastor, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-all duration-300">
                 <CardHeader>
