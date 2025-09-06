@@ -15,13 +15,13 @@ const About = () => {
     {
       name: "Pra. Vera Lucia",
       role: "Pastora Responsável",
-      description: "Lidera a igreja juntamente com o Pastor Gilmar, atuando especialmente na área de libertação e no ministério de mulheres.",
+      description: "Lidera a igreja juntamente com o Pastor Gilmar, atuando especialmente na área de libertação.",
       image: "/lovable-uploads/b6dd3c88-7992-4063-ace2-78cf8de87b61.png"
     },
     {
       name: settings.pastor_principal_name || "Pr. Gilmar Radaelli",
       role: "Pastor Responsável", 
-      description: "Lidera a igreja em conjunto com a Pastora Vera, atuando especialmente na área de prosperidade e no cuidado pastoral das famílias.",
+      description: "Lidera a igreja em conjunto com a Pastora Vera, atuando especialmente na área de prosperidade.",
       image: "/lovable-uploads/5544ccb1-0c80-408a-8c5c-46805e2d6676.png"
     },
     {
