@@ -120,6 +120,12 @@ const Navigation = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
+            <Link 
+              to="/admin/login" 
+              className="inline-flex items-center gap-1 text-muted-foreground/60 hover:text-muted-foreground transition-colors p-1"
+            >
+              <Settings className="w-4 h-4" />
+            </Link>
             <ThemeToggle />
             <Button
               variant="ghost"
