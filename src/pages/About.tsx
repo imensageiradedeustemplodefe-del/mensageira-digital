@@ -25,9 +25,9 @@ const About = () => {
       image: "/lovable-uploads/5544ccb1-0c80-408a-8c5c-46805e2d6676.png"
     },
     {
-      name: settings.pastor_auxiliar_name || "Pr. João Ezequiel Batista",
+      name: settings.pastor_auxiliar_name || "Pr. João Batista",
       role: "Pastor Auxiliar",
-      description: "Dá suporte aos pastores responsáveis e atua especialmente na área de ensinamento bíblico.",
+      description: "Dá suporte aos pastores responsáveis, atuando especialmente na área de ensinamento bíblico.",
       image: "/lovable-uploads/3d072e4d-3492-4762-92ab-9d3f39dc18ab.png"
     }
   ];
@@ -36,37 +36,49 @@ const About = () => {
     {
       name: "Geração de Samuel",
       leaders: "André Dale Laste e Silvano Cardoso",
-      type: "Banda de Louvor",
+      type: "Grupo De Louvor",
       icon: "🎵"
     },
     {
       name: "Jovens Adoradores",
       leaders: "Silvano e Leonice Cardoso",
-      type: "Grupo de Jovens",
+      type: "Grupo De Jovens",
       icon: "👥"
     },
     {
+      name: "Mirian's",
+      leaders: "Leonice Cardoso",
+      type: "Grupo De Meninas",
+      icon: "🩰"
+    }
+    {
       name: "Guerreiros De Fé",
-      leaders: "Márcia Machado e Ademar Malmann",
-      type: "Grupo de Oração",
+      leaders: "Márcia e Ademar Malmann",
+      type: "Grupo De Oração",
       icon: "🙏"
     },
     {
       name: "Palavra Viva",
       leaders: "Jessica Vacelkoski",
-      type: "Ministério de Mídia",
+      type: "Mídia",
       icon: "📱"
     },
     {
       name: "Ourinhos de Cristo",
       leaders: "Leonice Cardoso e Elen Dale Laste",
-      type: "Ministério Infantil",
+      type: "Grupo De Crianças",
+      icon: "👶"
+    },
+    {
+      name: "Nova Geração Kids",
+      leaders: "Leonice Cardoso e Elen Dale Laste",
+      type: "Grupo De Crianças",
       icon: "👶"
     },
     {
       name: "Mensageira Do Cristo Rei",
       leaders: "Ana Venconi e Gisele Segatto",
-      type: "Grupo de Mulheres",
+      type: "Grupo De Mulheres",
       icon: "👩"
     }
   ];
