@@ -1,7 +1,6 @@
 {
-  "name": "Mensageira de Deus Templo de Fé",
+  "name": "Mensageira de Deus",
   "short_name": "Mensageira de Deus",
-  "description": "Igreja Mensageira de Deus Templo de Fé - Comunidade de fé, cultos ao vivo e palavra de Deus",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -9,7 +8,6 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "pt-BR",
-  "categories": ["religion", "lifestyle", "social"],
   "icons": [
     {
       "src": "/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png",
@@ -22,46 +20,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Assistir ao Vivo",
-      "short_name": "Live",
-      "description": "Acesse a transmissão ao vivo dos cultos",
-      "url": "/live",
-      "icons": [
-        {
-          "src": "/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Programação",
-      "short_name": "Eventos",
-      "description": "Veja a programação de cultos e eventos",
-      "url": "/eventos",
-      "icons": [
-        {
-          "src": "/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/placeholder.svg",
-      "type": "image/svg+xml", 
-      "sizes": "540x720",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/placeholder.svg",
-      "type": "image/svg+xml",
-      "sizes": "720x540", 
-      "form_factor": "wide"
     }
   ]
 }
