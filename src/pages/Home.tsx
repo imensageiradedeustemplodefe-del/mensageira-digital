@@ -31,26 +31,7 @@ const Home = () => {
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      // Tenta detectar se está em iOS/Safari e oferece instruções específicas
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-      
-      if (isIOS || isSafari) {
-        toast({
-          title: "Instalar App",
-          description: "Toque no ícone de compartilhar e selecione 'Adicionar à Tela de Início'.",
-          variant: "default"
-        });
-      } else {
-        toast({
-          title: "Instalar App", 
-          description: "Use o menu do navegador (⋮) e selecione 'Instalar app' ou 'Adicionar à tela inicial'.",
-          variant: "default"
-        });
-      }
-      return;
-    }
+    if (!deferredPrompt) return;
 
     const promptEvent = deferredPrompt;
     setDeferredPrompt(null);
@@ -67,11 +48,6 @@ const Home = () => {
     } else {
       setInstallable(true);
       setDeferredPrompt(promptEvent);
-      toast({
-        title: "Instalação cancelada",
-        description: "A instalação foi cancelada. Tente novamente quando quiser.",
-        variant: "default"
-      });
     }
   };
 
