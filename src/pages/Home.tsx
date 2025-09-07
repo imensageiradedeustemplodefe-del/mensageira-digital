@@ -32,11 +32,23 @@ const Home = () => {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      toast({
-        title: "Instalação não disponível",
-        description: "Use o menu do seu navegador para adicionar à tela inicial ou instalar o app.",
-        variant: "default"
-      });
+      // Tenta detectar se está em iOS/Safari e oferece instruções específicas
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+      
+      if (isIOS || isSafari) {
+        toast({
+          title: "Instalar App",
+          description: "Toque no ícone de compartilhar e selecione 'Adicionar à Tela de Início'.",
+          variant: "default"
+        });
+      } else {
+        toast({
+          title: "Instalar App", 
+          description: "Use o menu do navegador (⋮) e selecione 'Instalar app' ou 'Adicionar à tela inicial'.",
+          variant: "default"
+        });
+      }
       return;
     }
 
@@ -53,9 +65,11 @@ const Home = () => {
         description: "O app foi instalado com sucesso em seu dispositivo.",
       });
     } else {
+      setInstallable(true);
+      setDeferredPrompt(promptEvent);
       toast({
         title: "Instalação cancelada",
-        description: "A instalação foi cancelada. Você pode instalar mais tarde pelo menu do navegador.",
+        description: "A instalação foi cancelada. Tente novamente quando quiser.",
         variant: "default"
       });
     }
