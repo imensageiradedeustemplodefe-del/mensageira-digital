@@ -1,13 +1,24 @@
-import { useState, useEffect } from "react";
-import { Calendar, Clock, MapPin, Youtube, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import DailyVerse from "@/components/DailyVerse";
-import { MediaPlayer } from "@/components/MediaPlayer";
-import { Link } from "react-router-dom";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Lazy loading dos componentes
+const DailyVerse = lazy(() => import("@/components/DailyVerse"));
+const MediaPlayer = lazy(() => import("@/components/MediaPlayer").then(module => ({ default: module.MediaPlayer })));
+const HeroSection = lazy(() => import("@/components/home/HeroSection").then(module => ({ default: module.HeroSection })));
+const UpcomingEvents = lazy(() => import("@/components/home/UpcomingEvents").then(module => ({ default: module.UpcomingEvents })));
+const ContactSection = lazy(() => import("@/components/home/ContactSection").then(module => ({ default: module.ContactSection })));
+
+// Componente de loading skeleton
+const SectionSkeleton = ({ className }: { className?: string }) => (
+  <section className={className}>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Skeleton className="h-20 w-full rounded-lg" />
+    </div>
+  </section>
+);
 
 const Home = () => {
   const { toast } = useToast();
@@ -51,156 +62,40 @@ const Home = () => {
     }
   };
 
-  const upcomingEvents = [
-    {
-      title: "Culto de Cura e Libertação",
-      date: "Sexta-feira", 
-      time: "20:00",
-      description: "Noite de oração especial para cura física, emocional e espiritual. Venha buscar a libertação em Jesus Cristo."
-    },
-    {
-      title: "Culto da Família",
-      date: "Domingo",
-      time: "19:30",
-      description: "Culto especial para toda a família, com mensagens edificantes e momentos de adoração em comunidade."
-    },
-    {
-      title: "Santa Ceia",
-      date: "2º Domingo do Mês",
-      time: "19:30",
-      description: "Celebração da Santa Ceia do Senhor, momento sagrado de comunhão e renovação espiritual."
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/10 via-background to-peaceful-blue/20 py-16 sm:py-24">
-        <div className="absolute inset-0 bg-gradient-to-r from-spiritual-glow/5 to-transparent"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-6">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-              Bem-vindos à
-              <span className="block text-primary">Mensageira de Deus Templo de Fé</span>
-              <span className="block text-lg sm:text-xl font-normal text-muted-foreground mt-2">
-                Uma igreja comprometida com a Palavra de Deus
-              </span>
-            </h1>
-            
-            <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed">
-              Venha fazer parte da nossa família de fé. Aqui você encontrará acolhimento, 
-              crescimento espiritual e uma comunidade que se importa com você.
-            </p>
+      {/* Hero Section com Suspense */}
+      <Suspense fallback={<SectionSkeleton className="py-16 sm:py-24 bg-gradient-to-br from-primary/10 via-background to-peaceful-blue/20" />}>
+        <HeroSection installable={installable} onInstallClick={handleInstallClick} />
+      </Suspense>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-6 px-4">
-              <Link to="/live" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                  <Youtube className="w-5 h-5 mr-2" />
-                  Assistir ao Vivo
-                </Button>
-              </Link>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="w-full sm:w-auto border-primary text-primary hover:bg-primary/10"
-                onClick={handleInstallClick}
-              >
-                <Download className="w-5 h-5 mr-2" />
-                <span className="hidden sm:inline">{installable ? 'Instalar App' : 'Instalar App'}</span>
-                <span className="sm:hidden">Instalar</span>
-              </Button>
-              <Link to="/eventos" className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto border-primary text-primary hover:bg-primary/10">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  <span className="hidden sm:inline">Ver Programação</span>
-                  <span className="sm:hidden">Programação</span>
-                </Button>
-              </Link>
-            </div>
+      {/* Daily Verse Section com Suspense */}
+      <Suspense fallback={<SectionSkeleton className="py-12 bg-background" />}>
+        <section className="py-12 bg-background">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <DailyVerse />
           </div>
-        </div>
-      </section>
+        </section>
+      </Suspense>
 
-      {/* Daily Verse Section */}
-      <section className="py-12 bg-background">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <DailyVerse />
-        </div>
-      </section>
-
-      {/* Media Player Section */}
-      <section className="py-12 bg-accent/30">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <MediaPlayer />
-        </div>
-      </section>
-
-      {/* Upcoming Events */}
-      <section className="py-16 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Próximos Eventos
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Participe dos nossos cultos e atividades. Todos são bem-vindos!
-            </p>
+      {/* Media Player Section com Suspense */}
+      <Suspense fallback={<SectionSkeleton className="py-12 bg-accent/30" />}>
+        <section className="py-12 bg-accent/30">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <MediaPlayer />
           </div>
+        </section>
+      </Suspense>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {upcomingEvents.map((event, index) => (
-              <Card key={index} className="hover:shadow-lg transition-all duration-300 border-none bg-card/60 backdrop-blur">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base sm:text-lg text-foreground leading-tight">{event.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center text-muted-foreground">
-                    <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span className="text-sm">{event.date}</span>
-                  </div>
-                  <div className="flex items-center text-muted-foreground">
-                    <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span className="text-sm">{event.time}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {event.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      {/* Upcoming Events com Suspense */}
+      <Suspense fallback={<SectionSkeleton className="py-16 bg-background" />}>
+        <UpcomingEvents loading={settingsLoading} />
+      </Suspense>
 
-          <div className="text-center mt-10">
-            <Link to="/eventos">
-              <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/10">
-                Ver Todos os Eventos
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Info */}
-      <section className="py-16 bg-background">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
-            Venha nos Visitar
-          </h2>
-          <div className="flex items-center justify-center text-muted-foreground mb-6">
-            <MapPin className="w-5 h-5 mr-2" />
-            <span>R. Elias Biasi, 49 - Berger, Caçador - SC, 89500-000</span>
-          </div>
-          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-            Estamos de portas abertas para recebê-lo em nossa casa. 
-            Venha conhecer nossa comunidade e participar dos nossos cultos.
-          </p>
-          <Link to="/contato">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              Entre em Contato
-            </Button>
-          </Link>
-        </div>
-      </section>
+      {/* Contact Info com Suspense */}
+      <Suspense fallback={<SectionSkeleton className="py-16 bg-background" />}>
+        <ContactSection />
+      </Suspense>
     </div>
   );
 };

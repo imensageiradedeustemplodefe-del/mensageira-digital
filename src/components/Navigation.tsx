@@ -81,7 +81,7 @@ const Navigation = () => {
               </Button>
               
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-background border border-border rounded-lg shadow-lg z-50">
+                <div className="absolute right-0 mt-2 w-56 bg-background/95 backdrop-blur-md border border-border rounded-lg shadow-xl z-[100]">
                   <div className="py-2">
                     {ministryPages.map((item) => {
                       const Icon = item.icon;
@@ -193,7 +193,7 @@ const Navigation = () => {
       {/* Backdrop for dropdown */}
       {isDropdownOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-[90]"
           onClick={() => setIsDropdownOpen(false)}
         />
       )}
