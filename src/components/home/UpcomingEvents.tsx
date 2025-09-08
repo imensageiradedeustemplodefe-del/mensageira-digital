@@ -2,6 +2,7 @@ import { Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ShareButton } from "@/components/ShareButton";
 import { Link } from "react-router-dom";
 
 const upcomingEvents = [
@@ -67,9 +68,17 @@ export const UpcomingEvents = ({ loading = false }: UpcomingEventsProps) => {
                   <CardTitle className="text-base sm:text-lg text-foreground leading-tight">{event.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center text-muted-foreground">
-                    <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span className="text-sm">{event.date}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center text-muted-foreground">
+                      <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="text-sm">{event.date}</span>
+                    </div>
+                    <ShareButton
+                      title={event.title}
+                      text={event.description}
+                      size="sm"
+                      variant="ghost"
+                    />
                   </div>
                   <div className="flex items-center text-muted-foreground">
                     <Clock className="w-4 h-4 mr-2 flex-shrink-0" />

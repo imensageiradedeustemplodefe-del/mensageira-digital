@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, ChevronDown, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SearchBar } from "@/components/SearchBar";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Navigation = () => {
@@ -106,8 +107,20 @@ const Navigation = () => {
               )}
             </div>
             
+            {/* Search Bar */}
+            <div className="hidden lg:block">
+              <SearchBar className="w-64" />
+            </div>
+            
             {/* Theme Toggle */}
         <div className="flex items-center gap-2">
+          <Link 
+            to="/notificacoes" 
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+            title="Configurações de Notificações"
+          >
+            <span className="text-sm">🔔</span>
+          </Link>
           <Link 
             to="/admin/login" 
             className="inline-flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
@@ -141,7 +154,12 @@ const Navigation = () => {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden pb-4">
-            <div className="space-y-1">
+            {/* Mobile Search */}
+            <div className="px-4 py-3 border-b border-border">
+              <SearchBar />
+            </div>
+            
+            <div className="space-y-1 pt-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 return (

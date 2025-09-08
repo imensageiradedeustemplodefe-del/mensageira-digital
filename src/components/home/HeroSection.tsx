@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
 import { Youtube, Download, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 
 interface HeroSectionProps {
   installable: boolean;
