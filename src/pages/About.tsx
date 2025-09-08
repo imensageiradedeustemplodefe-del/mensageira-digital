@@ -50,7 +50,7 @@ const About = () => {
       leaders: "Leonice Cardoso",
       type: "Grupo De Meninas",
       icon: "🩰"
-    }
+    },
     {
       name: "Guerreiros De Fé",
       leaders: "Márcia e Ademar Malmann",
