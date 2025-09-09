@@ -173,7 +173,7 @@ const Gallery = () => {
               {selectedAlbum ? albums.find(a => a.id === selectedAlbum)?.description : settings.gallery_page_subtitle}
             </p>
             {!selectedAlbum && (
-              <div className="max-w-md mx-auto">
+              <div className="max-w-md mx-auto px-4">
                 <SearchBar onSearch={handleSearch} placeholder="Pesquisar álbuns..." />
               </div>
             )}

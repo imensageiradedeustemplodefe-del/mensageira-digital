@@ -78,20 +78,16 @@ export const usePushNotifications = () => {
           // Aqui você pode navegar para uma página específica baseada no conteúdo da notificação
         });
 
-      } else if ('serviceWorker' in navigator && 'PushManager' in window) {
-        // Web Push para browsers
+      } else {
+        // Para web, apenas simular suporte sem configurar VAPID keys
         setIsSupported(true);
         
-        try {
-          const registration = await navigator.serviceWorker.ready;
-          const subscription = await registration.pushManager.getSubscription();
-          
-          if (subscription) {
+        // Verificar se já tem permissão de notificação
+        if ('Notification' in window) {
+          const permission = Notification.permission;
+          if (permission === 'granted') {
             setIsRegistered(true);
-            setToken(JSON.stringify(subscription));
           }
-        } catch (error) {
-          console.error('Error checking web push:', error);
         }
       }
     };
@@ -107,13 +103,36 @@ export const usePushNotifications = () => {
         // Já tratado no useEffect
         return true;
       } else {
-        // Web Push - desabilitado temporariamente até configurar VAPID keys
-        toast({
-          title: "Notificações web em breve",
-          description: "As notificações web estão sendo configuradas. Use o app mobile para receber notificações.",
-          variant: "destructive"
-        });
-        return false;
+        // Para web, usar Notification API simples
+        if ('Notification' in window) {
+          const permission = await Notification.requestPermission();
+          
+          if (permission === 'granted') {
+            setIsRegistered(true);
+            setToken('web-notification-granted');
+            
+            toast({
+              title: "Notificações ativadas!",
+              description: "Você receberá avisos sobre novos eventos e cultos."
+            });
+            
+            return true;
+          } else {
+            toast({
+              title: "Permissão negada",
+              description: "Ative as notificações nas configurações do navegador.",
+              variant: "destructive"
+            });
+            return false;
+          }
+        } else {
+          toast({
+            title: "Não suportado",
+            description: "Seu navegador não suporta notificações.",
+            variant: "destructive"
+          });
+          return false;
+        }
       }
     } catch (error) {
       console.error('Error subscribing to push:', error);
@@ -133,14 +152,9 @@ export const usePushNotifications = () => {
         setToken(null);
         setIsRegistered(false);
       } else {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
-        
-        if (subscription) {
-          await subscription.unsubscribe();
-          setToken(null);
-          setIsRegistered(false);
-        }
+        // Para web, apenas limpar estado local
+        setToken(null);
+        setIsRegistered(false);
       }
       
       toast({

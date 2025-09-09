@@ -95,7 +95,7 @@ const Events = () => {
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-8">
             Acompanhe nossa programação de eventos especiais e atividades
           </p>
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto px-4">
             <SearchBar onSearch={handleSearch} placeholder="Pesquisar eventos..." />
           </div>
         </div>

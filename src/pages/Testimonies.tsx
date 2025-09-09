@@ -120,7 +120,7 @@ const Testimonies = () => {
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-8">
             {settings.testimonies_page_subtitle}
           </p>
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto px-4">
             <SearchBar onSearch={handleSearch} placeholder="Pesquisar testemunhos..." />
           </div>
         </div>

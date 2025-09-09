@@ -147,9 +147,9 @@ export const SearchBar = ({
   };
 
   return (
-    <div className={`relative w-full max-w-md ${className}`}>
+    <div className={`relative w-full ${className}`}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 z-10" />
         <Input
           ref={inputRef}
           type="text"
@@ -162,14 +162,14 @@ export const SearchBar = ({
             }
           }}
           onFocus={() => !isLocalSearch && setIsOpen(true)}
-          className="pl-10 pr-10"
+          className="pl-10 pr-10 w-full"
         />
         {query && (
           <Button
             variant="ghost"
             size="sm"
             onClick={clearSearch}
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 z-10"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -179,17 +179,18 @@ export const SearchBar = ({
       {/* Backdrop - só mostra para busca global */}
       {isOpen && !isLocalSearch && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-40 bg-black/20"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Results - só mostra para busca global */}
       {isOpen && !isLocalSearch && (query || results.length > 0) && (
-        <Card className="absolute top-full mt-2 w-full z-50 max-h-96 overflow-y-auto">
+        <Card className="absolute top-full mt-2 w-full z-50 max-h-96 overflow-y-auto bg-background border shadow-lg">
           <CardContent className="p-0">
             {isLoading ? (
               <div className="p-4 text-center text-muted-foreground">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
                 Buscando...
               </div>
             ) : results.length > 0 ? (
@@ -198,19 +199,19 @@ export const SearchBar = ({
                   <button
                     key={result.id}
                     onClick={() => handleResultClick(result)}
-                    className="w-full text-left px-4 py-3 hover:bg-accent transition-colors flex items-start gap-3"
+                    className="w-full text-left px-4 py-3 hover:bg-accent transition-colors flex items-start gap-3 border-b border-border/50 last:border-b-0"
                   >
-                    <span className="text-lg" role="img" aria-label={result.type}>
+                    <span className="text-lg flex-shrink-0" role="img" aria-label={result.type}>
                       {getResultIcon(result.type)}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-foreground text-sm">
+                      <div className="font-medium text-foreground text-sm mb-1">
                         {result.title}
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      <div className="text-xs text-muted-foreground mb-2 line-clamp-2">
                         {result.description}
                       </div>
-                      <div className="text-xs text-primary mt-1 capitalize">
+                      <div className="text-xs text-primary capitalize font-medium">
                         {result.type === 'event' ? 'Evento' : 
                          result.type === 'testimony' ? 'Testemunho' : 'Página'}
                       </div>
@@ -219,12 +220,15 @@ export const SearchBar = ({
                 ))}
               </div>
             ) : query ? (
-              <div className="p-4 text-center text-muted-foreground">
-                Nenhum resultado encontrado para "{query}"
+              <div className="p-6 text-center text-muted-foreground">
+                <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Nenhum resultado encontrado para "<strong>{query}</strong>"</p>
+                <p className="text-xs mt-1">Tente usar outras palavras-chave</p>
               </div>
             ) : (
-              <div className="p-4 text-center text-muted-foreground">
-                Digite para buscar...
+              <div className="p-6 text-center text-muted-foreground">
+                <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Digite para buscar...</p>
               </div>
             )}
           </CardContent>
