@@ -107,22 +107,13 @@ export const usePushNotifications = () => {
         // Já tratado no useEffect
         return true;
       } else {
-        // Web Push
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: 'YOUR_VAPID_PUBLIC_KEY' // Substitua pela sua chave VAPID
-        });
-        
-        setToken(JSON.stringify(subscription));
-        setIsRegistered(true);
-        
+        // Web Push - desabilitado temporariamente até configurar VAPID keys
         toast({
-          title: "Notificações ativadas!",
-          description: "Você receberá avisos sobre novos eventos e cultos."
+          title: "Notificações web em breve",
+          description: "As notificações web estão sendo configuradas. Use o app mobile para receber notificações.",
+          variant: "destructive"
         });
-        
-        return true;
+        return false;
       }
     } catch (error) {
       console.error('Error subscribing to push:', error);
