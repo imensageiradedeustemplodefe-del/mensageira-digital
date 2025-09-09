@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Calendar, MapPin, Clock, Users, Heart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SearchBar } from "@/components/SearchBar";
+import { ShareButton } from "@/components/ShareButton";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO, isBefore, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -23,6 +25,7 @@ interface Event {
 
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,6 +42,7 @@ const Events = () => {
 
       if (error) throw error;
       setEvents(data || []);
+      setFilteredEvents(data || []);
     } catch (error) {
       console.error('Erro ao buscar eventos:', error);
     } finally {
@@ -63,8 +67,22 @@ const Events = () => {
     return isBefore(parseISO(eventDate), startOfDay(new Date()));
   };
 
-  const upcomingEvents = events.filter(event => !isEventPast(event.event_date));
-  const pastEvents = events.filter(event => isEventPast(event.event_date));
+  const handleSearch = (query: string) => {
+    if (!query.trim()) {
+      setFilteredEvents(events);
+    } else {
+      const filtered = events.filter(event =>
+        event.title.toLowerCase().includes(query.toLowerCase()) ||
+        event.description?.toLowerCase().includes(query.toLowerCase()) ||
+        event.category.toLowerCase().includes(query.toLowerCase()) ||
+        event.location?.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredEvents(filtered);
+    }
+  };
+
+  const upcomingEvents = filteredEvents.filter(event => !isEventPast(event.event_date));
+  const pastEvents = filteredEvents.filter(event => isEventPast(event.event_date));
 
   return (
     <div className="min-h-screen bg-background">
@@ -74,9 +92,12 @@ const Events = () => {
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6">
             Eventos e Programação
           </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
+          <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-8">
             Acompanhe nossa programação de eventos especiais e atividades
           </p>
+          <div className="max-w-md mx-auto">
+            <SearchBar onSearch={handleSearch} placeholder="Pesquisar eventos..." />
+          </div>
         </div>
       </section>
 
@@ -236,8 +257,18 @@ const Events = () => {
                                 <MapPin className="w-4 h-4 mr-2 text-primary" />
                                 {event.location}
                               </div>
-                            )}
-                          </div>
+                           )}
+                         </div>
+                         
+                         <div className="pt-4 border-t">
+                           <ShareButton
+                             title={event.title}
+                             text={`Participe do evento: ${event.title}\n${event.description || ''}`}
+                             variant="outline"
+                             size="sm"
+                             className="w-full"
+                           />
+                         </div>
                         </CardContent>
                       </Card>
                     ))}

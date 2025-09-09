@@ -16,15 +16,23 @@ interface SearchResult {
 interface SearchBarProps {
   placeholder?: string;
   className?: string;
+  onSearch?: (query: string) => void; // Callback para busca local nas páginas
 }
 
-export const SearchBar = ({ placeholder = "Buscar eventos, testemunhos...", className = "" }: SearchBarProps) => {
+export const SearchBar = ({ 
+  placeholder = "Buscar eventos, testemunhos...", 
+  className = "",
+  onSearch 
+}: SearchBarProps) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  // Se onSearch é fornecido, usa busca local. Senão usa busca global
+  const isLocalSearch = !!onSearch;
 
   // Dados simulados para busca - em produção seria da API
   const searchData: SearchResult[] = [
@@ -73,6 +81,13 @@ export const SearchBar = ({ placeholder = "Buscar eventos, testemunhos...", clas
   ];
 
   const performSearch = (searchQuery: string) => {
+    if (isLocalSearch) {
+      // Para busca local, apenas chama o callback
+      onSearch!(searchQuery);
+      return;
+    }
+
+    // Busca global original
     if (!searchQuery.trim()) {
       setResults([]);
       return;
@@ -93,12 +108,18 @@ export const SearchBar = ({ placeholder = "Buscar eventos, testemunhos...", clas
   };
 
   useEffect(() => {
-    const debounceTimer = setTimeout(() => {
+    if (isLocalSearch) {
+      // Para busca local, chama imediatamente sem debounce
       performSearch(query);
-    }, 300);
+    } else {
+      // Para busca global, usa debounce
+      const debounceTimer = setTimeout(() => {
+        performSearch(query);
+      }, 300);
 
-    return () => clearTimeout(debounceTimer);
-  }, [query]);
+      return () => clearTimeout(debounceTimer);
+    }
+  }, [query, isLocalSearch]);
 
   const handleResultClick = (result: SearchResult) => {
     navigate(result.url);
@@ -136,9 +157,11 @@ export const SearchBar = ({ placeholder = "Buscar eventos, testemunhos...", clas
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
-            setIsOpen(true);
+            if (!isLocalSearch) {
+              setIsOpen(true);
+            }
           }}
-          onFocus={() => setIsOpen(true)}
+          onFocus={() => !isLocalSearch && setIsOpen(true)}
           className="pl-10 pr-10"
         />
         {query && (
@@ -153,16 +176,16 @@ export const SearchBar = ({ placeholder = "Buscar eventos, testemunhos...", clas
         )}
       </div>
 
-      {/* Backdrop */}
-      {isOpen && (
+      {/* Backdrop - só mostra para busca global */}
+      {isOpen && !isLocalSearch && (
         <div
           className="fixed inset-0 z-40"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      {/* Results */}
-      {isOpen && (query || results.length > 0) && (
+      {/* Results - só mostra para busca global */}
+      {isOpen && !isLocalSearch && (query || results.length > 0) && (
         <Card className="absolute top-full mt-2 w-full z-50 max-h-96 overflow-y-auto">
           <CardContent className="p-0">
             {isLoading ? (

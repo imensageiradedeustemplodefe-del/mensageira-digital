@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { SearchBar } from "@/components/SearchBar";
+import { ShareButton } from "@/components/ShareButton";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -21,6 +23,7 @@ interface Testimony {
 const Testimonies = () => {
   const { settings } = useSiteSettings();
   const [testimonies, setTestimonies] = useState<Testimony[]>([]);
+  const [filteredTestimonies, setFilteredTestimonies] = useState<Testimony[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -42,6 +45,7 @@ const Testimonies = () => {
 
       if (error) throw error;
       setTestimonies(data || []);
+      setFilteredTestimonies(data || []);
     } catch (error) {
       console.error('Erro ao buscar testemunhos:', error);
     } finally {
@@ -84,6 +88,18 @@ const Testimonies = () => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
+  const handleSearch = (query: string) => {
+    if (!query.trim()) {
+      setFilteredTestimonies(testimonies);
+    } else {
+      const filtered = testimonies.filter(testimony =>
+        testimony.name.toLowerCase().includes(query.toLowerCase()) ||
+        testimony.content.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredTestimonies(filtered);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -101,9 +117,12 @@ const Testimonies = () => {
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6">
             {settings.testimonies_page_title}
           </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
+          <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-8">
             {settings.testimonies_page_subtitle}
           </p>
+          <div className="max-w-md mx-auto">
+            <SearchBar onSearch={handleSearch} placeholder="Pesquisar testemunhos..." />
+          </div>
         </div>
       </section>
 
@@ -112,13 +131,13 @@ const Testimonies = () => {
       {/* Featured Testimonies */}
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {testimonies.length > 0 && (
+          {filteredTestimonies.length > 0 && (
             <>
               <h2 className="text-3xl font-bold text-center text-foreground mb-12">
                 {settings.testimonies_featured_title}
               </h2>
               <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8 mb-8 sm:mb-12">
-                {testimonies.slice(0, 2).map((testimony) => (
+                {filteredTestimonies.slice(0, 2).map((testimony) => (
                   <Card key={testimony.id} className="bg-gradient-to-br from-primary/5 to-peaceful-blue/10 border-none hover:shadow-lg transition-all duration-300">
                     <CardHeader>
                       <div className="flex items-center justify-between">
@@ -140,6 +159,15 @@ const Testimonies = () => {
                           {testimony.content}
                         </p>
                       </div>
+                      <div className="pt-4 border-t">
+                        <ShareButton
+                          title="Testemunho - Mensageira de Deus"
+                          text={`${testimony.content} - Por ${testimony.name}`}
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                        />
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -156,9 +184,9 @@ const Testimonies = () => {
             {settings.testimonies_all_title}
           </h2>
           
-          {testimonies.length > 0 ? (
+          {filteredTestimonies.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {testimonies.map((testimony) => (
+              {filteredTestimonies.map((testimony) => (
                 <Card key={testimony.id} className="hover:shadow-lg transition-all duration-300">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">

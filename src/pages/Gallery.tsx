@@ -3,6 +3,8 @@ import { Camera, Calendar, Users, Heart, Image as ImageIcon, Filter, FolderOpen,
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SearchBar } from "@/components/SearchBar";
+import { ShareButton } from "@/components/ShareButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useGalleryAlbums } from "@/hooks/useGalleryAlbums";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -34,6 +36,7 @@ const Gallery = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [filteredAlbums, setFilteredAlbums] = useState<any[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -122,6 +125,23 @@ const Gallery = () => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
+  const handleSearch = (query: string) => {
+    if (!query.trim()) {
+      setFilteredAlbums(albums);
+    } else {
+      const filtered = albums.filter(album =>
+        album.name.toLowerCase().includes(query.toLowerCase()) ||
+        album.description?.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredAlbums(filtered);
+    }
+  };
+
+  // Update filtered albums when albums change
+  useEffect(() => {
+    setFilteredAlbums(albums);
+  }, [albums]);
+
   const getIconComponent = (iconName: string) => {
     const icons: { [key: string]: any } = {
       ImageIcon,
@@ -149,9 +169,14 @@ const Gallery = () => {
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6">
               {selectedAlbum ? albums.find(a => a.id === selectedAlbum)?.name : settings.gallery_page_title}
             </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
+            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-8">
               {selectedAlbum ? albums.find(a => a.id === selectedAlbum)?.description : settings.gallery_page_subtitle}
             </p>
+            {!selectedAlbum && (
+              <div className="max-w-md mx-auto">
+                <SearchBar onSearch={handleSearch} placeholder="Pesquisar álbuns..." />
+              </div>
+            )}
             {selectedAlbum && (
               <Button
                 variant="outline"
@@ -195,7 +220,7 @@ const Gallery = () => {
                   </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                    {albums.map((album) => (
+                    {filteredAlbums.map((album) => (
                       <Card
                         key={album.id}
                         className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
@@ -233,10 +258,19 @@ const Gallery = () => {
                               {album.description}
                             </p>
                           )}
-                          <div className="flex items-center text-xs text-muted-foreground">
-                            <ImageIcon className="w-3 h-3 mr-1" />
-                            {album.photos?.length || 0} fotos
+                          <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
+                            <div className="flex items-center">
+                              <ImageIcon className="w-3 h-3 mr-1" />
+                              {album.photos?.length || 0} fotos
+                            </div>
                           </div>
+                          <ShareButton
+                            title={`Álbum: ${album.name}`}
+                            text={`Confira as fotos do álbum "${album.name}" da Mensageira de Deus`}
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                          />
                         </CardContent>
                       </Card>
                     ))}
