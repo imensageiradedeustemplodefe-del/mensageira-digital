@@ -96,11 +96,8 @@ const MobileMenuPage = () => {
         {/* App Info */}
         <div className="pt-6 border-t border-border">
           <div className="text-center text-muted-foreground">
-            <p className="text-sm">
-              © 2025 {settings.church_name?.split(' - ')[0] || 'Mensageira de Deus'}
-            </p>
-            <p className="text-xs mt-1">
-              Desenvolvido com ❤️ por Palavra Viva
+            <p className="text-xs">
+              Desenvolvido por Palavra Viva
             </p>
           </div>
         </div>
