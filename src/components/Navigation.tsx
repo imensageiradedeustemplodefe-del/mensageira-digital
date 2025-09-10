@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, ChevronDown, Settings } from "lucide-react";
+import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, ChevronDown, Settings, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SearchBar } from "@/components/SearchBar";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navigation = () => {
   const { settings } = useSiteSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const navigation = [
     { name: "Início", href: "/", icon: Home },
@@ -28,8 +30,52 @@ const Navigation = () => {
 
   const isActive = (href: string) => location.pathname === href;
 
+  // Mobile app-style header for specific pages
+  const showMobileAppHeader = isMobile && location.pathname !== "/";
+  const getPageTitle = () => {
+    const titles = {
+      "/eventos": "Eventos",
+      "/live": "Live",
+      "/oracoes": "Pedidos de Oração",
+      "/sobre": "Sobre",
+      "/contato": "Contato",
+      "/galeria": "Galeria",
+      "/testemunhos": "Testemunhos",
+      "/notificacoes": "Notificações",
+      "/menu": "Menu"
+    };
+    return titles[location.pathname as keyof typeof titles] || "Página";
+  };
+
+  if (showMobileAppHeader) {
+    return (
+      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.history.back()}
+                className="p-2"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <h1 className="text-lg font-semibold text-foreground">
+                {getPageTitle()}
+              </h1>
+            </div>
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
   return (
-    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Logo */}

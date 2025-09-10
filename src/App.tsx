@@ -6,9 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import MobileBottomNav from "@/components/MobileBottomNav";
+import MobileMenuPage from "@/components/MobileMenuPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 import { useCacheManager } from "@/hooks/useCacheManager";
+import { useIsMobile } from "@/hooks/use-mobile";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Events from "./pages/Events";
@@ -29,11 +32,12 @@ const AppContent = () => {
   // Ativa gerenciamento automático de cache
   useServiceWorkerUpdate();
   useCacheManager();
+  const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
-      <main className="flex-1">
+      <main className={`flex-1 ${isMobile ? 'pb-20' : ''}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/sobre" element={<About />} />
@@ -44,6 +48,7 @@ const AppContent = () => {
           <Route path="/galeria" element={<Gallery />} />
           <Route path="/testemunhos" element={<Testimonies />} />
           <Route path="/notificacoes" element={<NotificationSettingsPage />} />
+          <Route path="/menu" element={<MobileMenuPage />} />
           <Route path="/em-breve" element={<ComingSoon />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={
@@ -60,7 +65,8 @@ const AppContent = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      <Footer />
+      {!isMobile && <Footer />}
+      {isMobile && <MobileBottomNav />}
     </div>
   );
 };

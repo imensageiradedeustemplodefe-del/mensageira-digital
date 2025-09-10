@@ -193,4 +193,39 @@ All colors MUST be HSL. Based on church brand colors.
   .mt-responsive {
     @apply mt-8 sm:mt-12;
   }
+
+  /* Mobile app utilities */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  /* Touch feedback */
+  .touch-feedback {
+    @apply active:scale-95 transition-transform duration-100;
+  }
+  
+  /* App-like scrolling */
+  .app-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Hide scrollbars but keep functionality */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mobile app card styling */
+  .app-card {
+    @apply bg-card rounded-xl shadow-sm border border-border/50 hover:shadow-md transition-all duration-200;
+  }
 }
