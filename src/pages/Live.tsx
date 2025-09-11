@@ -44,9 +44,8 @@ const Live = () => {
       const day = now.getDay();
       const hour = now.getHours();
       
-      const fridayTime = settings.friday_service_time || "19:30";
-      const sundayTime = settings.sunday_service_time || "19:30";
-      const wednesdayTime = settings.wednesday_service_time || "19:30";
+      const fridayTime = "20:00";
+      const sundayTime = "19:30";
       
       const [fridayHour] = fridayTime.split(':').map(Number);
       const [sundayHour] = sundayTime.split(':').map(Number);
@@ -55,8 +54,6 @@ const Live = () => {
         setNextService(`Hoje às ${fridayTime} - Culto de Cura e Libertação`);
       } else if (day === 0 && hour < sundayHour) {
         setNextService(`Hoje às ${sundayTime} - Culto da Família`);
-      } else if (day === 3) {
-        setNextService(`Hoje às ${wednesdayTime} - Culto de Oração`);
       } else if (day < 5) {
         setNextService(`Sexta-feira às ${fridayTime} - Culto de Cura e Libertação`);
       } else if (day === 5 && hour >= fridayHour) {
@@ -69,7 +66,7 @@ const Live = () => {
     };
 
     calculateNextService();
-  }, [settings.friday_service_time, settings.sunday_service_time, settings.wednesday_service_time, streams]);
+  }, [streams]);
 
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
@@ -83,20 +80,20 @@ const Live = () => {
     {
       name: "Culto de Cura e Libertação",
       day: "Sexta-feira",
-      time: settings.friday_service_time || "19:30",
-      description: "Noite especial de oração e libertação"
+      time: "20:00",
+      description: "Noite de oração especial para cura física, emocional e espiritual. Venha buscar a libertação em Jesus Cristo."
     },
     {
       name: "Culto da Família",
       day: "Domingo", 
-      time: settings.sunday_service_time || "19:30",
-      description: "Culto para toda a família"
+      time: "19:30",
+      description: "Culto especial para toda a família, com mensagens edificantes e momentos de adoração em comunidade."
     },
     {
-      name: "Culto de Oração",
-      day: "Quarta-feira",
-      time: settings.wednesday_service_time || "19:30",
-      description: "Momento de oração e comunhão"
+      name: "Santa Ceia",
+      day: "2º Domingo do Mês",
+      time: "19:30",
+      description: "Celebração da Santa Ceia do Senhor, momento sagrado de comunhão e renovação espiritual."
     }
   ];
 
