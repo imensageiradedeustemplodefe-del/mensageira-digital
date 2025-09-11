@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, ChevronDown, Settings, ArrowLeft } from "lucide-react";
+import { Menu, X, Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, ChevronDown, User, ArrowLeft, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SearchBar } from "@/components/SearchBar";
@@ -89,19 +89,19 @@ const Navigation = () => {
               {/* Mobile: Nome mais compacto */}
               <div className="sm:hidden">
                 <h1 className="text-sm font-bold text-foreground truncate">
-                  {settings.church_name?.split(' - ')[0] || 'Mensageira de Deus'}
+                  Mensageira de Deus
                 </h1>
                 <p className="text-xs text-muted-foreground truncate -mt-0.5">
-                  {settings.church_name?.split(' - ')[1] || 'Templo de Fé'}
+                  Templo de Fé
                 </p>
               </div>
               {/* Desktop: Nome completo */}
               <div className="hidden sm:block">
                 <h1 className="text-lg font-bold text-foreground">
-                  {settings.church_name?.split(' - ')[0] || 'Mensageira de Deus'}
+                  Mensageira de Deus
                 </h1>
                 <p className="text-sm text-muted-foreground -mt-1">
-                  {settings.church_name?.split(' - ')[1] || 'Templo de Fé'}
+                  Templo de Fé
                 </p>
               </div>
             </div>
@@ -170,45 +170,62 @@ const Navigation = () => {
               <SearchBar className="w-64" />
             </div>
             
-            {/* Theme Toggle */}
-        <div className="flex items-center gap-2">
-          <Link 
-            to="/notificacoes" 
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-            title="Configurações de Notificações"
-          >
-            <span className="text-sm">🔔</span>
-          </Link>
-          <Link 
-            to="/admin/login" 
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-          </Link>
-          <ThemeToggle />
-        </div>
+            {/* Right Icons */}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="relative"
+                title="Notificações"
+              >
+                <Link to="/notificacoes">
+                  <Bell className="h-[1.2rem] w-[1.2rem]" />
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="relative"
+                title="Perfil"
+              >
+                <Link to="/admin/login">
+                  <User className="h-[1.2rem] w-[1.2rem]" />
+                </Link>
+              </Button>
+              <ThemeToggle />
+            </div>
       </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-1 flex-shrink-0">
-            <Link 
-              to="/notificacoes" 
-              className="inline-flex items-center gap-1 text-muted-foreground/60 hover:text-muted-foreground transition-colors p-2"
+          <div className="md:hidden flex items-center gap-1 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="relative"
               title="Notificações"
             >
-              <span className="text-sm">🔔</span>
-            </Link>
-            <Link 
-              to="/admin/login" 
-              className="inline-flex items-center gap-1 text-muted-foreground/60 hover:text-muted-foreground transition-colors p-2"
-              title="Admin"
+              <Link to="/notificacoes">
+                <Bell className="h-[1.2rem] w-[1.2rem]" />
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="relative"
+              title="Perfil"
             >
-              <Settings className="w-4 h-4" />
-            </Link>
+              <Link to="/admin/login">
+                <User className="h-[1.2rem] w-[1.2rem]" />
+              </Link>
+            </Button>
             <ThemeToggle />
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle menu"
               className="ml-1"
