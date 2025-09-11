@@ -161,7 +161,7 @@ const Testimonies = () => {
                       </div>
                       <div className="pt-4 border-t">
                         <ShareButton
-                          title="Testemunho - Mensageira de Deus"
+                          title="Testemunho - Mensageira de Deus Templo de Fé"
                           text={`${testimony.content} - Por ${testimony.name}`}
                           variant="outline"
                           size="sm"

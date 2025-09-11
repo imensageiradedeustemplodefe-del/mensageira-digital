@@ -30,10 +30,10 @@ const MobileMenuPage = () => {
             />
             <div>
               <h1 className="text-lg font-bold text-foreground">
-                {settings.church_name?.split(' - ')[0] || 'Mensageira de Deus'}
+                Mensageira de Deus
               </h1>
               <p className="text-sm text-muted-foreground">
-                {settings.church_name?.split(' - ')[1] || 'Templo de Fé'}
+                Templo de Fé
               </p>
             </div>
           </div>

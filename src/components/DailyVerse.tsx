@@ -79,7 +79,7 @@ const DailyVerse = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Palavra do Dia - Mensageira de Deus',
+          title: 'Palavra do Dia - Mensageira de Deus Templo de Fé',
           text: shareText,
           url: window.location.href
         });

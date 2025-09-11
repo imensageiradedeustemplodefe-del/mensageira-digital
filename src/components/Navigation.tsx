@@ -79,43 +79,31 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 flex-1 min-w-0 max-w-md">
+          <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
             <img 
               src="/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png" 
               alt="Logo Igreja Mensageira de Deus Templo de Fé" 
-              className="w-8 h-8 sm:w-10 sm:h-10 object-contain flex-shrink-0"
+              className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
             />
-            <div className="min-w-0 flex-1">
-              {/* Mobile: Nome mais compacto */}
-              <div className="sm:hidden">
-                <h1 className="text-sm font-bold text-foreground truncate">
-                  Mensageira de Deus
-                </h1>
-                <p className="text-xs text-muted-foreground truncate -mt-0.5">
-                  Templo de Fé
-                </p>
-              </div>
-              {/* Desktop: Nome completo */}
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-foreground">
-                  Mensageira de Deus
-                </h1>
-                <p className="text-sm text-muted-foreground -mt-1">
-                  Templo de Fé
-                </p>
-              </div>
+            <div className="hidden sm:block">
+              <h1 className="text-lg font-bold text-foreground">
+                Mensageira de Deus
+              </h1>
+              <p className="text-sm text-muted-foreground -mt-1">
+                Templo de Fé
+              </p>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-1 items-center">
+          <div className="hidden md:flex items-center space-x-1 flex-1 justify-center max-w-2xl mx-4">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     isActive(item.href)
                       ? "bg-primary text-primary-foreground shadow-md"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -131,7 +119,7 @@ const Navigation = () => {
             <div className="relative">
               <Button
                 variant="ghost"
-                className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent"
+                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
                 <Heart className="w-4 h-4 mr-2" />
@@ -166,12 +154,14 @@ const Navigation = () => {
             </div>
             
             {/* Search Bar */}
-            <div className="hidden lg:block">
-              <SearchBar className="w-64" />
+            <div className="hidden lg:block ml-4">
+              <SearchBar className="w-48" />
             </div>
-            
-            {/* Right Icons */}
-            <div className="flex items-center gap-1">
+          </div>
+
+          {/* Right Icons */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="hidden md:flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
@@ -196,42 +186,41 @@ const Navigation = () => {
               </Button>
               <ThemeToggle />
             </div>
-      </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center gap-1 flex-shrink-0">
-            <Button
-              variant="ghost"
-              size="icon"
-              asChild
-              className="relative"
-              title="Notificações"
-            >
-              <Link to="/notificacoes">
-                <Bell className="h-[1.2rem] w-[1.2rem]" />
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              asChild
-              className="relative"
-              title="Perfil"
-            >
-              <Link to="/admin/login">
-                <User className="h-[1.2rem] w-[1.2rem]" />
-              </Link>
-            </Button>
-            <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label="Toggle menu"
-              className="ml-1"
-            >
-              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
+            {/* Mobile menu */}
+            <div className="md:hidden flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="relative"
+                title="Notificações"
+              >
+                <Link to="/notificacoes">
+                  <Bell className="h-[1.2rem] w-[1.2rem]" />
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="relative"
+                title="Perfil"
+              >
+                <Link to="/admin/login">
+                  <User className="h-[1.2rem] w-[1.2rem]" />
+                </Link>
+              </Button>
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label="Toggle menu"
+              >
+                {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </Button>
+            </div>
           </div>
         </div>
 

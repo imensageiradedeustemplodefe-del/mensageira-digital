@@ -159,7 +159,7 @@ const Live = () => {
                       <span className="text-sm">{activeStream.viewer_count} visualizando</span>
                     </div>
                   )}
-                  <span className="text-sm">Canal: {settings.church_name || 'Mensageira de Deus Templo de Fé'}</span>
+                  <span className="text-sm">Canal: Mensageira de Deus Templo de Fé</span>
                 </div>
               </div>
             </CardContent>

@@ -266,7 +266,7 @@ const Gallery = () => {
                           </div>
                           <ShareButton
                             title={`Álbum: ${album.name}`}
-                            text={`Confira as fotos do álbum "${album.name}" da Mensageira de Deus`}
+                            text={`Confira as fotos do álbum "${album.name}" da Mensageira de Deus Templo de Fé`}
                             variant="outline"
                             size="sm"
                             className="w-full"
