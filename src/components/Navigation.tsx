@@ -79,7 +79,7 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 flex-1 min-w-0">
+          <Link to="/" className="flex items-center space-x-3 flex-1 min-w-0 max-w-md">
             <img 
               src="/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png" 
               alt="Logo Igreja Mensageira de Deus Templo de Fé" 
