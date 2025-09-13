@@ -107,15 +107,19 @@ export default function EventsManager() {
 
   const handleEdit = (event: Event) => {
     setEditingEvent(event);
-    // Fix timezone issue by using the date string directly for datetime-local input
+    // Convert to local timezone for datetime-local input
     const eventDate = new Date(event.event_date);
     const endDate = event.end_date ? new Date(event.end_date) : null;
+    
+    // Adjust for timezone offset to maintain the same local time
+    const localEventDate = new Date(eventDate.getTime() - (eventDate.getTimezoneOffset() * 60000));
+    const localEndDate = endDate ? new Date(endDate.getTime() - (endDate.getTimezoneOffset() * 60000)) : null;
     
     setFormData({
       title: event.title,
       description: event.description || '',
-      event_date: eventDate.toISOString().slice(0, 16), // yyyy-MM-ddTHH:mm format for datetime-local
-      end_date: endDate ? endDate.toISOString().slice(0, 16) : '',
+      event_date: localEventDate.toISOString().slice(0, 16), // yyyy-MM-ddTHH:mm format for datetime-local
+      end_date: localEndDate ? localEndDate.toISOString().slice(0, 16) : '',
       location: event.location || '',
       category: event.category,
       is_published: event.is_published,
@@ -128,11 +132,15 @@ export default function EventsManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Convert datetime-local to ISO string maintaining local timezone
+    const eventDate = formData.event_date ? new Date(formData.event_date).toISOString() : null;
+    const endDate = formData.end_date ? new Date(formData.end_date).toISOString() : null;
+    
     const eventData = {
       title: formData.title,
       description: formData.description || null,
-      event_date: formData.event_date,
-      end_date: formData.end_date || null,
+      event_date: eventDate,
+      end_date: endDate,
       location: formData.location || null,
       category: formData.category,
       is_published: formData.is_published,

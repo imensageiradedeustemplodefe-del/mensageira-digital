@@ -8,6 +8,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO, isBefore, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+// Helper function to format date in local timezone
+const formatEventDate = (dateString: string, formatStr: string) => {
+  const date = new Date(dateString);
+  return format(date, formatStr, { locale: ptBR });
+};
+
 interface Event {
   id: string;
   title: string;
@@ -64,7 +70,7 @@ const Events = () => {
   };
 
   const isEventPast = (eventDate: string) => {
-    return isBefore(parseISO(eventDate), startOfDay(new Date()));
+    return isBefore(new Date(eventDate), startOfDay(new Date()));
   };
 
   const handleSearch = (query: string) => {
@@ -154,7 +160,7 @@ const Events = () => {
                             </Badge>
                             <div className="flex items-center text-sm text-muted-foreground">
                               <Calendar className="w-4 h-4 mr-1" />
-                              {format(parseISO(event.event_date), "dd/MM", { locale: ptBR })}
+                              {formatEventDate(event.event_date, "dd/MM")}
                             </div>
                           </div>
                           <CardTitle className="text-xl">{event.title}</CardTitle>
@@ -169,7 +175,7 @@ const Events = () => {
                           <div className="space-y-2 text-sm">
                             <div className="flex items-center text-muted-foreground">
                               <Clock className="w-4 h-4 mr-2 text-primary" />
-                              {format(parseISO(event.event_date), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                              {formatEventDate(event.event_date, "dd/MM/yyyy 'às' HH:mm")}
                             </div>
                             {event.location && (
                               <div className="flex items-center text-muted-foreground">
@@ -235,7 +241,7 @@ const Events = () => {
                             </Badge>
                             <div className="flex items-center text-sm text-muted-foreground">
                               <Calendar className="w-4 h-4 mr-1" />
-                              {format(parseISO(event.event_date), "dd/MM", { locale: ptBR })}
+                              {formatEventDate(event.event_date, "dd/MM")}
                             </div>
                           </div>
                           <CardTitle className="text-xl">{event.title}</CardTitle>
@@ -250,7 +256,7 @@ const Events = () => {
                           <div className="space-y-2 text-sm">
                             <div className="flex items-center text-muted-foreground">
                               <Clock className="w-4 h-4 mr-2 text-primary" />
-                              {format(parseISO(event.event_date), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                              {formatEventDate(event.event_date, "dd/MM/yyyy 'às' HH:mm")}
                             </div>
                             {event.location && (
                               <div className="flex items-center text-muted-foreground">
