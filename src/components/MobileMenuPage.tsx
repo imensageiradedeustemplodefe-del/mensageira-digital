@@ -97,7 +97,7 @@ const MobileMenuPage = () => {
         <div className="pt-4 border-t border-border">
           <div className="text-center text-muted-foreground">
             <p className="text-xs">
-              Desenvolvido por Palavra Viva
+              © 2025 Mensageira de Deus Templo de Fé | Desenvolvido por <span className="font-medium text-primary">Palavra Viva</span>
             </p>
           </div>
         </div>
