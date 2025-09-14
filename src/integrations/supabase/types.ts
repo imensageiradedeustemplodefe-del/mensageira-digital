@@ -348,6 +348,7 @@ export type Database = {
       }
       prayer_requests: {
         Row: {
+          allow_public_share: boolean | null
           approved_at: string | null
           approved_by: string | null
           category: string | null
@@ -364,6 +365,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allow_public_share?: boolean | null
           approved_at?: string | null
           approved_by?: string | null
           category?: string | null
@@ -380,6 +382,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allow_public_share?: boolean | null
           approved_at?: string | null
           approved_by?: string | null
           category?: string | null

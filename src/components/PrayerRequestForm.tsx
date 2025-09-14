@@ -18,7 +18,8 @@ export default function PrayerRequestForm() {
     phone: '',
     request_text: '',
     category: 'geral',
-    is_urgent: false
+    is_urgent: false,
+    allow_public_share: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -48,7 +49,8 @@ export default function PrayerRequestForm() {
         phone: '',
         request_text: '',
         category: 'geral',
-        is_urgent: false
+        is_urgent: false,
+        allow_public_share: false
       });
 
     } catch (error: any) {
@@ -164,24 +166,40 @@ export default function PrayerRequestForm() {
             />
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="is_urgent"
-              checked={formData.is_urgent}
-              onCheckedChange={(checked) => 
-                setFormData({...formData, is_urgent: checked as boolean})
-              }
-            />
-            <Label htmlFor="is_urgent" className="text-sm">
-              Marcar como pedido urgente
-            </Label>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="is_urgent"
+                checked={formData.is_urgent}
+                onCheckedChange={(checked) => 
+                  setFormData({...formData, is_urgent: checked as boolean})
+                }
+              />
+              <Label htmlFor="is_urgent" className="text-sm">
+                Marcar como pedido urgente
+              </Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="allow_public_share"
+                checked={formData.allow_public_share}
+                onCheckedChange={(checked) => 
+                  setFormData({...formData, allow_public_share: checked as boolean})
+                }
+              />
+              <Label htmlFor="allow_public_share" className="text-sm">
+                Permitir que minha oração seja compartilhada com outros membros da comunidade
+              </Label>
+            </div>
           </div>
 
           <Alert>
             <Heart className="h-4 w-4" />
             <AlertDescription>
               Seus dados são tratados com confidencialidade. Apenas a equipe pastoral 
-              terá acesso ao seu pedido de oração.
+              terá acesso completo ao seu pedido. Se você permitir o compartilhamento público,
+              outros membros verão apenas seu nome e o pedido de oração.
             </AlertDescription>
           </Alert>
 
