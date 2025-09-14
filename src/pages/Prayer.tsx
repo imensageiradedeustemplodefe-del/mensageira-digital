@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, Users, Clock, MessageCircle } from "lucide-react";
+import { Heart, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import PrayerRequestForm from "@/components/PrayerRequestForm";
@@ -138,75 +138,6 @@ const Prayer = () => {
         </div>
       </section>
 
-      {/* Prayer Groups and Times */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Momentos de Oração
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Participe dos nossos encontros de oração e intercessão.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            <Card className="text-center hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle>Guerreiros de Fé</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Grupo de intercessão dedicado à oração pela igreja e comunidade.
-                </p>
-                <div className="text-sm text-muted-foreground">
-                  <p><strong>Quando:</strong> Terça-feira às 19h</p>
-                  <p><strong>Local:</strong> Templo Principal</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle>Oração Matinal</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Começe o dia buscando a presença de Deus em oração.
-                </p>
-                <div className="text-sm text-muted-foreground">
-                  <p><strong>Quando:</strong> Segunda à Sexta às 6h</p>
-                  <p><strong>Local:</strong> Templo Principal</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MessageCircle className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle>Vigília Mensal</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Uma noite inteira dedicada à oração e comunhão com Deus.
-                </p>
-                <div className="text-sm text-muted-foreground">
-                  <p><strong>Quando:</strong> Primeira sexta do mês</p>
-                  <p><strong>Local:</strong> Templo Principal</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };
