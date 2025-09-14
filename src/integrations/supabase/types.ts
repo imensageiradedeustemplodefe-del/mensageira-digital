@@ -501,7 +501,7 @@ export type Database = {
         Insert: {
           category?: string | null
           created_at?: string | null
-          display_name?: never
+          display_name?: string | null
           id?: string | null
           is_urgent?: boolean | null
           request_text?: string | null
@@ -509,7 +509,7 @@ export type Database = {
         Update: {
           category?: string | null
           created_at?: string | null
-          display_name?: never
+          display_name?: string | null
           id?: string | null
           is_urgent?: boolean | null
           request_text?: string | null
