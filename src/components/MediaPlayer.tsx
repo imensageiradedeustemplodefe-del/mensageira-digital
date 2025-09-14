@@ -209,12 +209,8 @@ export function MediaPlayer() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-center">
-          {isYoutube ? (
-            <Youtube className="w-5 h-5 mr-2" />
-          ) : (
-            <Radio className="w-5 h-5 mr-2" />
-          )}
-          {isSpotify ? 'Playlist Gospel' : isYoutube ? 'Rádio YouTube' : 'Rádio Gospel'}
+          <Radio className="w-5 h-5 mr-2" />
+          {isSpotify ? 'Playlist Gospel' : 'Rádio Gospel'}
         </CardTitle>
       </CardHeader>
 
@@ -224,8 +220,6 @@ export function MediaPlayer() {
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
               {isSpotify ? (
                 <div className="text-primary font-bold text-2xl">♪</div>
-              ) : isYoutube ? (
-                <Youtube className="w-10 h-10 text-primary" />
               ) : (
                 <Radio className="w-10 h-10 text-primary" />
               )}
@@ -236,19 +230,11 @@ export function MediaPlayer() {
               {gospelRadio.artist && (
                 <p className="text-sm text-muted-foreground mt-1">{gospelRadio.artist}</p>
               )}
-              {!isSpotify && !isYoutube && (
+              {!isSpotify && (
                 <div className="flex items-center justify-center gap-2 mt-2">
                   <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-red-500 animate-pulse' : 'bg-muted-foreground'}`} />
                   <span className="text-sm text-muted-foreground">
-                    {isPlaying ? 'AO VIVO' : 'FORA DO AR'}
-                  </span>
-                </div>
-              )}
-              {isYoutube && (
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-red-500 animate-pulse' : 'bg-muted-foreground'}`} />
-                  <span className="text-sm text-muted-foreground">
-                    {isPlaying ? 'REPRODUZINDO' : 'PAUSADO'}
+                    {isPlaying ? 'NO AR' : 'FORA DO AR'}
                   </span>
                 </div>
               )}
