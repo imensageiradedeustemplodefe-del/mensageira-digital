@@ -46,66 +46,21 @@ interface Event {
   created_at: string;
 }
 
-// Modelos padrões de eventos
-const eventTemplates = {
-  culto: {
-    title: 'Culto de Adoração',
-    category: 'culto',
-    description: 'Junte-se a nós para um momento especial de adoração, louvor e palavra de Deus. Venha experimentar a presença do Senhor em nossa comunidade.',
-    location: 'Templo Principal'
-  },
-  batismo: {
-    title: 'Cerimônia de Batismo',
-    category: 'batismo',
-    description: 'Celebrando o novo nascimento em Cristo através do batismo nas águas. Uma cerimônia especial de compromisso com Jesus.',
-    location: 'Batistério do Templo'
-  },
-  jovens: {
-    title: 'Encontro de Jovens',
-    category: 'jovens',
-    description: 'Um momento especial para os jovens se conectarem com Deus através de louvor, palavra e comunhão. Venha fazer parte desta família!',
-    location: 'Salão dos Jovens'
-  },
-  ceia: {
-    title: 'Santa Ceia',
-    category: 'ceia',
-    description: 'Participem conosco da Santa Ceia, recordando o sacrifício de Jesus Cristo por nós. Um momento de reflexão e comunhão.',
-    location: 'Templo Principal'
-  },
-  campanha: {
-    title: 'Campanha de Oração',
-    category: 'campanha',
-    description: 'Dias especiais de oração e busca pela presença de Deus. Venha participar desta campanha de avivamento espiritual.',
-    location: 'Templo Principal'
-  },
-  retiro: {
-    title: 'Retiro Espiritual',
-    category: 'retiro',
-    description: 'Um tempo especial de comunhão, oração e palavra de Deus. Momentos únicos de crescimento espiritual e renovação.',
-    location: 'Centro de Retiros'
-  },
-  conferencia: {
-    title: 'Conferência Ministerial',
-    category: 'conferencia',
-    description: 'Dias especiais de ensino, workshops e ministração. Uma oportunidade de crescimento e capacitação ministerial.',
-    location: 'Auditório Principal'
-  },
-  evangelismo: {
-    title: 'Ação Evangelística',
-    category: 'evangelismo',
-    description: 'Saída missionária para compartilhar o amor de Cristo. Juntos levando a palavra de Deus àqueles que precisam.',
-    location: 'Praça Central'
-  },
-  lavacar: {
-    title: 'Lava Car Beneficente',
-    category: 'lavacar',
-    description: 'Ação social da igreja para arrecadar recursos para obras missionárias. Venha lavar seu carro e contribuir com a obra.',
-    location: 'Estacionamento da Igreja'
-  }
-};
+interface EventTemplate {
+  id: string;
+  name: string;
+  title: string;
+  category: string;
+  description: string;
+  location: string;
+  is_default: boolean;
+}
+
+// Modelos padrões de eventos - removidos pois agora são carregados do banco de dados
 
 export default function EventsManager() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [templates, setTemplates] = useState<EventTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -126,6 +81,7 @@ export default function EventsManager() {
 
   useEffect(() => {
     fetchEvents();
+    fetchTemplates();
   }, []);
 
   const fetchEvents = async () => {
@@ -149,6 +105,21 @@ export default function EventsManager() {
     }
   };
 
+  const fetchTemplates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('event_templates')
+        .select('*')
+        .order('is_default', { ascending: false })
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setTemplates(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar modelos:', error);
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       title: '',
@@ -165,17 +136,17 @@ export default function EventsManager() {
     setSelectedTemplate('');
   };
 
-  const applyTemplate = (templateKey: string) => {
-    const template = eventTemplates[templateKey as keyof typeof eventTemplates];
+  const applyTemplate = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
     if (template) {
       setFormData(prev => ({
         ...prev,
         title: template.title,
         category: template.category,
-        description: template.description,
-        location: template.location
+        description: template.description || '',
+        location: template.location || ''
       }));
-      setSelectedTemplate(templateKey);
+      setSelectedTemplate(templateId);
     }
   };
 
@@ -344,15 +315,11 @@ export default function EventsManager() {
                       <SelectValue placeholder="Selecione um modelo ou crie do zero" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="culto">Culto de Adoração</SelectItem>
-                      <SelectItem value="batismo">Cerimônia de Batismo</SelectItem>
-                      <SelectItem value="jovens">Encontro de Jovens</SelectItem>
-                      <SelectItem value="ceia">Santa Ceia</SelectItem>
-                      <SelectItem value="campanha">Campanha de Oração</SelectItem>
-                      <SelectItem value="retiro">Retiro Espiritual</SelectItem>
-                      <SelectItem value="conferencia">Conferência Ministerial</SelectItem>
-                      <SelectItem value="evangelismo">Ação Evangelística</SelectItem>
-                      <SelectItem value="lavacar">Lava Car Beneficente</SelectItem>
+                      {templates.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

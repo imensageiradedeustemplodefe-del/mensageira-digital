@@ -9,9 +9,10 @@ import { TestimoniesManager } from '@/components/admin/TestimoniesManager';
 import { MediaManager } from '@/components/admin/MediaManager';
 import PrayerRequestsManager from '@/components/admin/PrayerRequestsManager';
 import EventsManager from '@/components/admin/EventsManager';
+import EventTemplatesManager from '@/components/admin/EventTemplatesManager';
 import LiveStreamsManager from '@/components/admin/LiveStreamsManager';
 import DashboardStats from '@/components/admin/DashboardStats';
-import { LogOut, Image, Settings, MessageCircle, Music, Heart, Calendar, Radio, BarChart3, FolderOpen } from 'lucide-react';
+import { LogOut, Image, Settings, MessageCircle, Music, Heart, Calendar, Radio, BarChart3, FolderOpen, Copy } from 'lucide-react';
 
 const Admin = () => {
   const { signOut } = useAuth();
@@ -55,7 +56,7 @@ const Admin = () => {
             <div className="w-full">
               <TabsList className="w-full h-auto p-1 sm:p-2">
                 {/* Mobile: Horizontal scrollable tabs */}
-                <div className="flex lg:grid lg:grid-cols-8 w-full overflow-x-auto lg:overflow-x-visible gap-1 sm:gap-2 pb-1 lg:pb-0">
+                <div className="flex lg:grid lg:grid-cols-9 w-full overflow-x-auto lg:overflow-x-visible gap-1 sm:gap-2 pb-1 lg:pb-0">
                   <TabsTrigger 
                     value="dashboard" 
                     className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[80px] lg:min-w-0"
@@ -111,6 +112,15 @@ const Admin = () => {
                   </TabsTrigger>
                   
                   <TabsTrigger 
+                    value="templates" 
+                    className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[80px] lg:min-w-0"
+                  >
+                    <Copy className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Modelos</span>
+                    <span className="sm:hidden ml-1">Models</span>
+                  </TabsTrigger>
+                  
+                  <TabsTrigger 
                     value="prayers" 
                     className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[80px] lg:min-w-0"
                   >
@@ -153,6 +163,10 @@ const Admin = () => {
 
             <TabsContent value="events" className="mt-6">
               <EventsManager />
+            </TabsContent>
+
+            <TabsContent value="templates" className="mt-6">
+              <EventTemplatesManager />
             </TabsContent>
 
             <TabsContent value="prayers" className="mt-6">
