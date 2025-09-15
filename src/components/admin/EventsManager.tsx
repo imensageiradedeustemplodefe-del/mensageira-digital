@@ -46,11 +46,70 @@ interface Event {
   created_at: string;
 }
 
+// Modelos padrões de eventos
+const eventTemplates = {
+  culto: {
+    title: 'Culto de Adoração',
+    category: 'culto',
+    description: 'Junte-se a nós para um momento especial de adoração, louvor e palavra de Deus. Venha experimentar a presença do Senhor em nossa comunidade.',
+    location: 'Templo Principal'
+  },
+  batismo: {
+    title: 'Cerimônia de Batismo',
+    category: 'batismo',
+    description: 'Celebrando o novo nascimento em Cristo através do batismo nas águas. Uma cerimônia especial de compromisso com Jesus.',
+    location: 'Batistério do Templo'
+  },
+  jovens: {
+    title: 'Encontro de Jovens',
+    category: 'jovens',
+    description: 'Um momento especial para os jovens se conectarem com Deus através de louvor, palavra e comunhão. Venha fazer parte desta família!',
+    location: 'Salão dos Jovens'
+  },
+  ceia: {
+    title: 'Santa Ceia',
+    category: 'ceia',
+    description: 'Participem conosco da Santa Ceia, recordando o sacrifício de Jesus Cristo por nós. Um momento de reflexão e comunhão.',
+    location: 'Templo Principal'
+  },
+  campanha: {
+    title: 'Campanha de Oração',
+    category: 'campanha',
+    description: 'Dias especiais de oração e busca pela presença de Deus. Venha participar desta campanha de avivamento espiritual.',
+    location: 'Templo Principal'
+  },
+  retiro: {
+    title: 'Retiro Espiritual',
+    category: 'retiro',
+    description: 'Um tempo especial de comunhão, oração e palavra de Deus. Momentos únicos de crescimento espiritual e renovação.',
+    location: 'Centro de Retiros'
+  },
+  conferencia: {
+    title: 'Conferência Ministerial',
+    category: 'conferencia',
+    description: 'Dias especiais de ensino, workshops e ministração. Uma oportunidade de crescimento e capacitação ministerial.',
+    location: 'Auditório Principal'
+  },
+  evangelismo: {
+    title: 'Ação Evangelística',
+    category: 'evangelismo',
+    description: 'Saída missionária para compartilhar o amor de Cristo. Juntos levando a palavra de Deus àqueles que precisam.',
+    location: 'Praça Central'
+  },
+  lavacar: {
+    title: 'Lava Car Beneficente',
+    category: 'lavacar',
+    description: 'Ação social da igreja para arrecadar recursos para obras missionárias. Venha lavar seu carro e contribuir com a obra.',
+    location: 'Estacionamento da Igreja'
+  }
+};
+
 export default function EventsManager() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -103,6 +162,21 @@ export default function EventsManager() {
       image_url: ''
     });
     setEditingEvent(null);
+    setSelectedTemplate('');
+  };
+
+  const applyTemplate = (templateKey: string) => {
+    const template = eventTemplates[templateKey as keyof typeof eventTemplates];
+    if (template) {
+      setFormData(prev => ({
+        ...prev,
+        title: template.title,
+        category: template.category,
+        description: template.description,
+        location: template.location
+      }));
+      setSelectedTemplate(templateKey);
+    }
   };
 
   const handleEdit = (event: Event) => {
@@ -215,11 +289,14 @@ export default function EventsManager() {
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       'culto': 'bg-blue-100 text-blue-800',
-      'conferencia': 'bg-purple-100 text-purple-800',
-      'workshop': 'bg-green-100 text-green-800',
-      'retiro': 'bg-orange-100 text-orange-800',
-      'evangelismo': 'bg-red-100 text-red-800',
+      'batismo': 'bg-cyan-100 text-cyan-800',
       'jovens': 'bg-pink-100 text-pink-800',
+      'ceia': 'bg-indigo-100 text-indigo-800',
+      'campanha': 'bg-yellow-100 text-yellow-800',
+      'retiro': 'bg-orange-100 text-orange-800',
+      'conferencia': 'bg-purple-100 text-purple-800',
+      'evangelismo': 'bg-red-100 text-red-800',
+      'lavacar': 'bg-green-100 text-green-800',
       'geral': 'bg-gray-100 text-gray-800'
     };
     return colors[category] || colors['geral'];
@@ -259,6 +336,28 @@ export default function EventsManager() {
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {!editingEvent && (
+                <div className="space-y-2">
+                  <Label htmlFor="template">Modelo Padrão</Label>
+                  <Select value={selectedTemplate} onValueChange={applyTemplate}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um modelo ou crie do zero" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="culto">Culto de Adoração</SelectItem>
+                      <SelectItem value="batismo">Cerimônia de Batismo</SelectItem>
+                      <SelectItem value="jovens">Encontro de Jovens</SelectItem>
+                      <SelectItem value="ceia">Santa Ceia</SelectItem>
+                      <SelectItem value="campanha">Campanha de Oração</SelectItem>
+                      <SelectItem value="retiro">Retiro Espiritual</SelectItem>
+                      <SelectItem value="conferencia">Conferência Ministerial</SelectItem>
+                      <SelectItem value="evangelismo">Ação Evangelística</SelectItem>
+                      <SelectItem value="lavacar">Lava Car Beneficente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Título *</Label>
@@ -282,11 +381,14 @@ export default function EventsManager() {
                     <SelectContent>
                       <SelectItem value="geral">Geral</SelectItem>
                       <SelectItem value="culto">Culto</SelectItem>
-                      <SelectItem value="conferencia">Conferência</SelectItem>
-                      <SelectItem value="workshop">Workshop</SelectItem>
-                      <SelectItem value="retiro">Retiro</SelectItem>
-                      <SelectItem value="evangelismo">Evangelismo</SelectItem>
+                      <SelectItem value="batismo">Batismo</SelectItem>
                       <SelectItem value="jovens">Jovens</SelectItem>
+                      <SelectItem value="ceia">Ceia</SelectItem>
+                      <SelectItem value="campanha">Campanha</SelectItem>
+                      <SelectItem value="retiro">Retiro</SelectItem>
+                      <SelectItem value="conferencia">Conferência</SelectItem>
+                      <SelectItem value="evangelismo">Evangelismo</SelectItem>
+                      <SelectItem value="lavacar">Lava Car</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
