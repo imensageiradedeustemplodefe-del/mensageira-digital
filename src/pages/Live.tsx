@@ -44,8 +44,8 @@ const Live = () => {
       const day = now.getDay();
       const hour = now.getHours();
       
-      const fridayTime = settings.friday_service_time || "19:30";
-      const sundayTime = settings.sunday_service_time || "10:00";
+      const fridayTime = settings.friday_service_time || "20:00";
+      const sundayTime = settings.sunday_service_time || "19:30";
       
       const [fridayHour] = fridayTime.split(':').map(Number);
       const [sundayHour] = sundayTime.split(':').map(Number);
@@ -61,7 +61,7 @@ const Live = () => {
       } else if (day === 6) {
         setNextService(`Domingo às ${sundayTime} - Culto da Família`);
       } else {
-        setNextService(`Sexta-feira às ${settings.friday_service_time || "19:30"} - Culto de Cura e Libertação`);
+        setNextService(`Sexta-feira às ${settings.friday_service_time || "20:00"} - Culto de Cura e Libertação`);
       }
     };
 
@@ -80,19 +80,19 @@ const Live = () => {
     {
       name: "Culto de Cura e Libertação",
       day: "Sexta-feira",
-      time: "20:00",
+      time: settings.friday_service_time || "20:00",
       description: "Noite de oração especial para cura física, emocional e espiritual. Venha buscar a libertação em Jesus Cristo."
     },
     {
       name: "Culto da Família",
       day: "Domingo", 
-      time: "19:30",
+      time: settings.sunday_service_time || "19:30",
       description: "Culto especial para toda a família, com mensagens edificantes e momentos de adoração em comunidade."
     },
     {
       name: "Santa Ceia",
       day: "2º Domingo do Mês",
-      time: "19:30",
+      time: settings.sunday_service_time || "19:30",
       description: "Celebração da Santa Ceia do Senhor, momento sagrado de comunhão e renovação espiritual."
     }
   ];

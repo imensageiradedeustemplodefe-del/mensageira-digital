@@ -30,19 +30,19 @@ export const UpcomingEvents = ({ loading = false }: UpcomingEventsProps) => {
     {
       title: "Culto de Cura e Libertação",
       date: "Sexta-feira", 
-      time: settings.friday_service_time || "19:30",
+      time: settings.friday_service_time || "20:00",
       description: "Noite de oração especial para cura física, emocional e espiritual. Venha buscar a libertação em Jesus Cristo."
     },
     {
       title: "Culto da Família",
       date: "Domingo",
-      time: settings.sunday_service_time || "10:00",
+      time: settings.sunday_service_time || "19:30",
       description: "Culto especial para toda a família, com mensagens edificantes e momentos de adoração em comunidade."
     },
     {
       title: "Santa Ceia",
       date: "2º Domingo do Mês",
-      time: settings.sunday_service_time || "10:00",
+      time: settings.sunday_service_time || "19:30",
       description: "Celebração da Santa Ceia do Senhor, momento sagrado de comunhão e renovação espiritual."
     }
   ];
