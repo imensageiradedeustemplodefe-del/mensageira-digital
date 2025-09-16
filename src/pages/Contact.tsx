@@ -76,8 +76,8 @@ const Contact = () => {
     {
       icon: Clock,
       title: "Horários",
-      content: `Sex: ${settings.friday_service_time} | Dom: ${settings.sunday_service_time}`,
-      description: "Horários dos cultos principais"
+      content: `Dom: ${settings.sunday_service_time || '10:00'} • Qua: ${settings.wednesday_service_time || '19:30'} • Sex: ${settings.friday_service_time || '19:30'}`,
+      description: "Horários dos cultos"
     }
   ];
 
