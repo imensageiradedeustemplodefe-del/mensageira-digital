@@ -99,7 +99,7 @@ const Contact = () => {
       {/* Contact Info Cards */}
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-16">
+          <div className="grid sm:grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16">
             {contactInfo.map((info, index) => {
               const Icon = info.icon;
               return (
@@ -228,12 +228,12 @@ const Contact = () => {
                   <div className="space-y-3 text-muted-foreground">
                     <div className="flex items-start">
                       <Mail className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm break-all">E-mail da secretaria: {settings.contact_email_secretary || settings.church_email}</span>
+                      <span className="text-sm break-all">E-mail: {settings.contact_email_secretary || settings.church_email}</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-4 h-4 mr-2 bg-blue-600 rounded flex-shrink-0"></div>
                       <a href={settings.facebook_url || "https://www.facebook.com/igrejamensageira"} target="_blank" rel="noopener noreferrer" className="text-sm hover:text-primary transition-colors">
-                        Facebook: Igreja Mensageira
+                        Facebook: Igreja Mensageira De Deus Templo De Fé
                       </a>
                     </div>
                     <div className="flex items-center">
