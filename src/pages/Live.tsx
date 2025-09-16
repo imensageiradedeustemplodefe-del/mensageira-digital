@@ -44,8 +44,8 @@ const Live = () => {
       const day = now.getDay();
       const hour = now.getHours();
       
-      const fridayTime = "20:00";
-      const sundayTime = "19:30";
+      const fridayTime = settings.friday_service_time || "19:30";
+      const sundayTime = settings.sunday_service_time || "10:00";
       
       const [fridayHour] = fridayTime.split(':').map(Number);
       const [sundayHour] = sundayTime.split(':').map(Number);
@@ -61,7 +61,7 @@ const Live = () => {
       } else if (day === 6) {
         setNextService(`Domingo às ${sundayTime} - Culto da Família`);
       } else {
-        setNextService("Sexta-feira às 20:00 - Culto de Cura e Libertação");
+        setNextService(`Sexta-feira às ${settings.friday_service_time || "19:30"} - Culto de Cura e Libertação`);
       }
     };
 

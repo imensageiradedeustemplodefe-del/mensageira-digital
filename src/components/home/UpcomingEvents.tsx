@@ -4,27 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShareButton } from "@/components/ShareButton";
 import { Link } from "react-router-dom";
-
-const upcomingEvents = [
-  {
-    title: "Culto de Cura e Libertação",
-    date: "Sexta-feira", 
-    time: "20:00",
-    description: "Noite de oração especial para cura física, emocional e espiritual. Venha buscar a libertação em Jesus Cristo."
-  },
-  {
-    title: "Culto da Família",
-    date: "Domingo",
-    time: "19:30",
-    description: "Culto especial para toda a família, com mensagens edificantes e momentos de adoração em comunidade."
-  },
-  {
-    title: "Santa Ceia",
-    date: "2º Domingo do Mês",
-    time: "19:30",
-    description: "Celebração da Santa Ceia do Senhor, momento sagrado de comunhão e renovação espiritual."
-  }
-];
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 interface UpcomingEventsProps {
   loading?: boolean;
@@ -44,6 +24,28 @@ const EventSkeleton = () => (
 );
 
 export const UpcomingEvents = ({ loading = false }: UpcomingEventsProps) => {
+  const { settings } = useSiteSettings();
+  
+  const upcomingEvents = [
+    {
+      title: "Culto de Cura e Libertação",
+      date: "Sexta-feira", 
+      time: settings.friday_service_time || "19:30",
+      description: "Noite de oração especial para cura física, emocional e espiritual. Venha buscar a libertação em Jesus Cristo."
+    },
+    {
+      title: "Culto da Família",
+      date: "Domingo",
+      time: settings.sunday_service_time || "10:00",
+      description: "Culto especial para toda a família, com mensagens edificantes e momentos de adoração em comunidade."
+    },
+    {
+      title: "Santa Ceia",
+      date: "2º Domingo do Mês",
+      time: settings.sunday_service_time || "10:00",
+      description: "Celebração da Santa Ceia do Senhor, momento sagrado de comunhão e renovação espiritual."
+    }
+  ];
   return (
     <section className="py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
