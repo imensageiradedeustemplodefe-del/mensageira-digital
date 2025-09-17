@@ -57,19 +57,97 @@ const Navigation = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => window.history.back()}
-                className="p-2"
+                className="p-2 min-h-[44px] min-w-[44px]"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
-              <h1 className="text-lg font-semibold text-foreground">
-                {getPageTitle()}
-              </h1>
+              <Link to="/" className="flex items-center space-x-2">
+                <img 
+                  src="/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png" 
+                  alt="Logo" 
+                  className="w-6 h-6 object-contain"
+                />
+                <h1 className="text-lg font-semibold text-foreground">
+                  {getPageTitle()}
+                </h1>
+              </Link>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="min-h-[44px] min-w-[44px]"
+                title="Notificações"
+              >
+                <Link to="/notificacoes">
+                  <Bell className="h-5 w-5" />
+                </Link>
+              </Button>
               <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label="Menu"
+                className="min-h-[44px] min-w-[44px]"
+              >
+                {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </Button>
             </div>
           </div>
         </div>
+        
+        {/* Mobile Navigation Dropdown */}
+        {isOpen && (
+          <div className="md:hidden pb-4 bg-background/95 backdrop-blur border-t border-border">
+            <div className="space-y-1 pt-2 px-4">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`flex items-center px-4 py-4 rounded-lg text-base font-medium transition-all min-h-[52px] ${
+                      isActive(item.href)
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Icon className="w-5 h-5 mr-3" />
+                    {item.name}
+                  </Link>
+                );
+              })}
+              
+              {/* Mobile Ministry Links */}
+              <div className="pt-2 mt-2 border-t border-border">
+                <div className="px-4 py-3 text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                  Ministérios
+                </div>
+                {ministryPages.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={`flex items-center px-4 py-4 rounded-lg text-base font-medium transition-all min-h-[52px] ${
+                        isActive(item.href)
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Icon className="w-5 h-5 mr-3" />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
     );
   }
@@ -193,22 +271,22 @@ const Navigation = () => {
                 variant="ghost"
                 size="icon"
                 asChild
-                className="relative"
+                className="min-h-[44px] min-w-[44px]"
                 title="Notificações"
               >
                 <Link to="/notificacoes">
-                  <Bell className="h-[1.2rem] w-[1.2rem]" />
+                  <Bell className="h-5 w-5" />
                 </Link>
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 asChild
-                className="relative"
+                className="min-h-[44px] min-w-[44px]"
                 title="Perfil"
               >
                 <Link to="/admin/login">
-                  <User className="h-[1.2rem] w-[1.2rem]" />
+                  <User className="h-5 w-5" />
                 </Link>
               </Button>
               <ThemeToggle />
@@ -216,7 +294,8 @@ const Navigation = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(!isOpen)}
-                aria-label="Toggle menu"
+                aria-label="Menu"
+                className="min-h-[44px] min-w-[44px]"
               >
                 {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </Button>
@@ -236,19 +315,19 @@ const Navigation = () => {
               {navigation.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={`flex items-center px-3 py-4 rounded-lg text-base font-medium transition-all min-h-[48px] ${
-                      isActive(item.href)
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Icon className="w-5 h-5 mr-3" />
-                    {item.name}
-                  </Link>
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={`flex items-center px-4 py-4 rounded-lg text-base font-medium transition-all min-h-[52px] ${
+                        isActive(item.href)
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Icon className="w-5 h-5 mr-3" />
+                      {item.name}
+                    </Link>
                 );
               })}
               
@@ -260,19 +339,19 @@ const Navigation = () => {
                 {ministryPages.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={`flex items-center px-3 py-4 rounded-lg text-base font-medium transition-all min-h-[48px] ${
-                        isActive(item.href)
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      }`}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Icon className="w-5 h-5 mr-3" />
-                      {item.name}
-                    </Link>
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`flex items-center px-4 py-4 rounded-lg text-base font-medium transition-all min-h-[52px] ${
+                          isActive(item.href)
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                        }`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <Icon className="w-5 h-5 mr-3" />
+                        {item.name}
+                      </Link>
                   );
                 })}
               </div>
