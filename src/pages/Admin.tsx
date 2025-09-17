@@ -25,117 +25,116 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <section className="bg-gradient-to-br from-primary/10 to-peaceful-blue/20 py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center">
-              <Settings className="w-6 sm:w-8 h-6 sm:h-8 text-primary mr-3" />
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+      <section className="bg-gradient-to-br from-primary/10 to-peaceful-blue/20 py-6 sm:py-12">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center w-full sm:w-auto">
+              <Settings className="w-5 sm:w-6 lg:w-8 h-5 sm:h-6 lg:h-8 text-primary mr-2 sm:mr-3 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground truncate">
                   Painel Administrativo
                 </h1>
-                <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
+                <p className="text-muted-foreground mt-1 sm:mt-2 text-xs sm:text-sm lg:text-base">
                   Gerencie o conteúdo do site da igreja
                 </p>
               </div>
             </div>
-            <Button onClick={handleLogout} variant="outline" size="sm" className="self-end sm:self-auto">
+            <Button onClick={handleLogout} variant="outline" size="sm" className="self-end sm:self-auto flex-shrink-0">
               <LogOut className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Sair</span>
-              <span className="sm:hidden">Sair</span>
+              Sair
             </Button>
           </div>
         </div>
       </section>
 
       {/* Admin Panel */}
-      <section className="py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Tabs defaultValue="dashboard" className="space-y-6">
+      <section className="py-4 sm:py-8">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8">
+          <Tabs defaultValue="dashboard" className="space-y-4 sm:space-y-6">
             {/* Mobile: Horizontal scroll, Desktop: Grid */}
             <div className="w-full">
-              <TabsList className="w-full h-auto p-1 sm:p-2">
+              <TabsList className="w-full h-auto p-1 sm:p-2 bg-muted/50">
                 {/* Mobile: Horizontal scrollable tabs */}
-                <div className="flex lg:grid lg:grid-cols-9 w-full overflow-x-auto lg:overflow-x-visible gap-1 sm:gap-2 pb-1 lg:pb-0">
+                <div className="flex lg:grid lg:grid-cols-9 w-full overflow-x-auto lg:overflow-x-visible gap-1 sm:gap-2 pb-2 lg:pb-0">
                   <TabsTrigger 
                     value="dashboard" 
-                    className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[80px] lg:min-w-0"
+                    className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-3 lg:px-4 py-3 sm:py-2 lg:py-3 text-xs sm:text-sm min-w-[70px] sm:min-w-[80px] lg:min-w-0 h-auto"
                   >
-                    <BarChart3 className="w-4 h-4 sm:mr-2" />
+                    <BarChart3 className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                     <span className="hidden sm:inline">Dashboard</span>
-                    <span className="sm:hidden ml-1">Stats</span>
+                    <span className="sm:hidden text-[10px] leading-tight">Stats</span>
                   </TabsTrigger>
                   
                   <TabsTrigger 
                     value="albums" 
-                    className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[80px] lg:min-w-0"
+                    className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-3 lg:px-4 py-3 sm:py-2 lg:py-3 text-xs sm:text-sm min-w-[70px] sm:min-w-[80px] lg:min-w-0 h-auto"
                   >
-                    <FolderOpen className="w-4 h-4 sm:mr-2" />
+                    <FolderOpen className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                     <span className="hidden sm:inline">Álbuns</span>
-                    <span className="sm:hidden ml-1">Álbuns</span>
+                    <span className="sm:hidden text-[10px] leading-tight">Álbuns</span>
                   </TabsTrigger>
                   
                   <TabsTrigger 
                     value="testimonies" 
-                    className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[90px] lg:min-w-0"
+                    className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-3 lg:px-4 py-3 sm:py-2 lg:py-3 text-xs sm:text-sm min-w-[70px] sm:min-w-[90px] lg:min-w-0 h-auto"
                   >
-                    <MessageCircle className="w-4 h-4 sm:mr-2" />
+                    <MessageCircle className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                     <span className="hidden sm:inline">Testemunhos</span>
-                    <span className="sm:hidden ml-1">Testes</span>
+                    <span className="sm:hidden text-[10px] leading-tight">Testes</span>
                   </TabsTrigger>
                   
                   <TabsTrigger 
                     value="gallery" 
-                    className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[70px] lg:min-w-0"
+                    className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-3 lg:px-4 py-3 sm:py-2 lg:py-3 text-xs sm:text-sm min-w-[60px] sm:min-w-[70px] lg:min-w-0 h-auto"
                   >
-                    <Image className="w-4 h-4 sm:mr-2" />
+                    <Image className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                     <span className="hidden sm:inline">Fotos</span>
-                    <span className="sm:hidden ml-1">Fotos</span>
+                    <span className="sm:hidden text-[10px] leading-tight">Fotos</span>
                   </TabsTrigger>
                   
                   <TabsTrigger 
                     value="media" 
-                    className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[70px] lg:min-w-0"
+                    className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-3 lg:px-4 py-3 sm:py-2 lg:py-3 text-xs sm:text-sm min-w-[60px] sm:min-w-[70px] lg:min-w-0 h-auto"
                   >
-                    <Music className="w-4 h-4 sm:mr-2" />
+                    <Music className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                     <span className="hidden sm:inline">Mídias</span>
-                    <span className="sm:hidden ml-1">Mídia</span>
+                    <span className="sm:hidden text-[10px] leading-tight">Mídia</span>
                   </TabsTrigger>
                   
                   <TabsTrigger 
                     value="events" 
-                    className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[80px] lg:min-w-0"
+                    className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-3 lg:px-4 py-3 sm:py-2 lg:py-3 text-xs sm:text-sm min-w-[70px] sm:min-w-[80px] lg:min-w-0 h-auto"
                   >
-                    <Calendar className="w-4 h-4 sm:mr-2" />
+                    <Calendar className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                     <span className="hidden sm:inline">Eventos</span>
-                    <span className="sm:hidden ml-1">Events</span>
+                    <span className="sm:hidden text-[10px] leading-tight">Events</span>
                   </TabsTrigger>
                   
                   <TabsTrigger 
                     value="templates" 
-                    className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[80px] lg:min-w-0"
+                    className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-3 lg:px-4 py-3 sm:py-2 lg:py-3 text-xs sm:text-sm min-w-[70px] sm:min-w-[80px] lg:min-w-0 h-auto"
                   >
-                    <Copy className="w-4 h-4 sm:mr-2" />
+                    <Copy className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                     <span className="hidden sm:inline">Modelos</span>
-                    <span className="sm:hidden ml-1">Models</span>
+                    <span className="sm:hidden text-[10px] leading-tight">Models</span>
                   </TabsTrigger>
                   
                   <TabsTrigger 
                     value="prayers" 
-                    className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[80px] lg:min-w-0"
+                    className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-3 lg:px-4 py-3 sm:py-2 lg:py-3 text-xs sm:text-sm min-w-[70px] sm:min-w-[80px] lg:min-w-0 h-auto"
                   >
-                    <Heart className="w-4 h-4 sm:mr-2" />
+                    <Heart className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                     <span className="hidden sm:inline">Orações</span>
-                    <span className="sm:hidden ml-1">Orações</span>
+                    <span className="sm:hidden text-[10px] leading-tight">Orações</span>
                   </TabsTrigger>
                   
                   <TabsTrigger 
                     value="live" 
-                    className="flex items-center justify-center whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm min-w-[70px] lg:min-w-0"
+                    className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-3 lg:px-4 py-3 sm:py-2 lg:py-3 text-xs sm:text-sm min-w-[60px] sm:min-w-[70px] lg:min-w-0 h-auto"
                   >
-                    <Radio className="w-4 h-4 sm:mr-2" />
+                    <Radio className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                     <span className="hidden sm:inline">Transmissões</span>
-                    <span className="sm:hidden ml-1">Live</span>
+                    <span className="sm:hidden text-[10px] leading-tight">Live</span>
                   </TabsTrigger>
                 </div>
               </TabsList>
