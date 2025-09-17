@@ -215,12 +215,12 @@ All colors MUST be HSL. Based on church brand colors.
   }
 
   /* Hide scrollbars but keep functionality */
-  .hide-scrollbar {
+  .hide-scrollbar, .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
   
-  .hide-scrollbar::-webkit-scrollbar {
+  .hide-scrollbar::-webkit-scrollbar, .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
 
