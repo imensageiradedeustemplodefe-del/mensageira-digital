@@ -1,15 +1,19 @@
 import { Link } from "react-router-dom";
-import { Users, Phone, Camera, MessageCircle, Settings, Bell, ChevronRight } from "lucide-react";
+import { Users, Phone, Camera, MessageCircle, Settings, Bell, ChevronRight, Home, Calendar, Heart, Radio } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const MobileMenuPage = () => {
   const { settings } = useSiteSettings();
 
   const menuItems = [
+    { name: "Início", href: "/", icon: Home, description: "Página principal" },
     { name: "Sobre", href: "/sobre", icon: Users, description: "Conheça nossa história" },
-    { name: "Contato", href: "/contato", icon: Phone, description: "Entre em contato conosco" },
+    { name: "Eventos", href: "/eventos", icon: Calendar, description: "Próximos eventos" },
+    { name: "Orações", href: "/oracoes", icon: Heart, description: "Pedidos de oração" },
+    { name: "Ao Vivo", href: "/ao-vivo", icon: Radio, description: "Transmissões ao vivo" },
     { name: "Galeria", href: "/galeria", icon: Camera, description: "Fotos da nossa comunidade" },
     { name: "Testemunhos", href: "/testemunhos", icon: MessageCircle, description: "Histórias de fé" },
+    { name: "Contato", href: "/contato", icon: Phone, description: "Entre em contato conosco" },
   ];
 
   const settingsItems = [
