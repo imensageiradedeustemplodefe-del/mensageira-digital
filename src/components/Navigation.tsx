@@ -184,17 +184,6 @@ const Navigation = () => {
                 size="icon"
                 asChild
                 className="relative"
-                title="Notificações"
-              >
-                <Link to="/notificacoes">
-                  <Bell className="h-[1.2rem] w-[1.2rem]" />
-                </Link>
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                asChild
-                className="relative"
                 title="Perfil"
               >
                 <Link to="/admin/login">
@@ -202,21 +191,21 @@ const Navigation = () => {
                 </Link>
               </Button>
               <ThemeToggle />
-            </div>
-
-            {/* Mobile menu - removed hamburger, kept only icons */}
-            <div className="md:hidden flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
                 asChild
-                className="min-h-[44px] min-w-[44px]"
+                className="relative"
                 title="Notificações"
               >
                 <Link to="/notificacoes">
-                  <Bell className="h-5 w-5" />
+                  <Bell className="h-[1.2rem] w-[1.2rem]" />
                 </Link>
               </Button>
+            </div>
+
+            {/* Mobile menu - removed hamburger, kept only icons */}
+            <div className="md:hidden flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
@@ -229,6 +218,17 @@ const Navigation = () => {
                 </Link>
               </Button>
               <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="min-h-[44px] min-w-[44px]"
+                title="Notificações"
+              >
+                <Link to="/notificacoes">
+                  <Bell className="h-5 w-5" />
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
