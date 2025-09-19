@@ -2,12 +2,56 @@ import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export const usePushNotifications = () => {
   const [isSupported, setIsSupported] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const saveSubscriptionToBackend = async (subscription: PushSubscription | { endpoint: string; keys: { p256dh: string; auth: string } }) => {
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) {
+        console.log('User not authenticated, cannot save subscription');
+        return;
+      }
+
+      const subscriptionData = {
+        user_id: user.id,
+        endpoint: subscription.endpoint,
+        p256dh: 'keys' in subscription ? subscription.keys.p256dh : '',
+        auth: 'keys' in subscription ? subscription.keys.auth : '',
+        is_active: true
+      };
+
+      // Check if subscription already exists
+      const { data: existingSubscription } = await supabase
+        .from('push_subscriptions')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('endpoint', subscription.endpoint)
+        .maybeSingle();
+
+      if (existingSubscription) {
+        // Update existing subscription
+        await supabase
+          .from('push_subscriptions')
+          .update({ is_active: true, updated_at: new Date().toISOString() })
+          .eq('id', existingSubscription.id);
+      } else {
+        // Create new subscription
+        await supabase
+          .from('push_subscriptions')
+          .insert(subscriptionData);
+      }
+
+      console.log('Subscription saved to backend');
+    } catch (error) {
+      console.error('Error saving subscription to backend:', error);
+    }
+  };
 
   useEffect(() => {
     const initPushNotifications = async () => {
@@ -44,9 +88,16 @@ export const usePushNotifications = () => {
         setIsRegistered(true);
 
         // Listener para quando o registro é bem-sucedido
-        await PushNotifications.addListener('registration', (token) => {
+        await PushNotifications.addListener('registration', async (token) => {
           console.log('Push registration success, token: ' + token.value);
           setToken(token.value);
+          
+          // Save subscription to backend
+          await saveSubscriptionToBackend({
+            endpoint: token.value,
+            keys: { p256dh: '', auth: '' } // Native doesn't use these
+          });
+          
           toast({
             title: "Notificações ativadas!",
             description: "Você receberá avisos sobre novos eventos e cultos."
@@ -75,19 +126,32 @@ export const usePushNotifications = () => {
         // Listener para quando usuário toca na notificação
         await PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
           console.log('Push action performed: ' + JSON.stringify(notification));
-          // Aqui você pode navegar para uma página específica baseada no conteúdo da notificação
+          // Navigate to URL if provided
+          if (notification.notification.data?.url) {
+            window.location.href = notification.notification.data.url;
+          }
         });
 
       } else {
-        // Para web, apenas simular suporte sem configurar VAPID keys
-        setIsSupported(true);
-        
-        // Verificar se já tem permissão de notificação
-        if ('Notification' in window) {
-          const permission = Notification.permission;
-          if (permission === 'granted') {
+        // Para web, usar service worker e VAPID
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+          setIsSupported(true);
+          
+          // Check if already subscribed
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.getSubscription();
+          
+          if (subscription) {
             setIsRegistered(true);
+            setToken(subscription.endpoint);
           }
+          
+          // Check notification permission
+          if (Notification.permission === 'granted') {
+            setIsRegistered(!!subscription);
+          }
+        } else {
+          console.log('Push messaging is not supported');
         }
       }
     };
@@ -103,36 +167,42 @@ export const usePushNotifications = () => {
         // Já tratado no useEffect
         return true;
       } else {
-        // Para web, usar Notification API simples
-        if ('Notification' in window) {
-          const permission = await Notification.requestPermission();
-          
-          if (permission === 'granted') {
-            setIsRegistered(true);
-            setToken('web-notification-granted');
-            
-            toast({
-              title: "Notificações ativadas!",
-              description: "Você receberá avisos sobre novos eventos e cultos."
-            });
-            
-            return true;
-          } else {
-            toast({
-              title: "Permissão negada",
-              description: "Ative as notificações nas configurações do navegador.",
-              variant: "destructive"
-            });
-            return false;
-          }
-        } else {
+        // Para web, usar service worker com VAPID key
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
           toast({
-            title: "Não suportado",
-            description: "Seu navegador não suporta notificações.",
-            variant: "destructive"
+            title: "Não Suportado",
+            description: "Notificações push não são suportadas neste navegador.",
+            variant: "destructive",
           });
           return false;
         }
+
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          toast({
+            title: "Permissão Negada",
+            description: "Permissão para notificações foi negada.",
+            variant: "destructive",
+          });
+          return false;
+        }
+
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: 'BEl62iUYgUivxIkv69yViEuiBIa40HI8YHTe_JcYD9kPhmKb3deSyDSNrRK5ZQfC1E-u3YgOJpJ3F4eF7L8T0J8'
+        });
+
+        await saveSubscriptionToBackend(subscription);
+        setIsRegistered(true);
+        setToken(subscription.endpoint);
+
+        toast({
+          title: "Sucesso!",
+          description: "Notificações ativadas com sucesso.",
+        });
+        
+        return true;
       }
     } catch (error) {
       console.error('Error subscribing to push:', error);
@@ -148,11 +218,36 @@ export const usePushNotifications = () => {
   const unsubscribeFromPush = async () => {
     try {
       if (Capacitor.isNativePlatform()) {
-        // Para apps nativos, você pode limpar o token localmente
+        // For native platforms, mark as inactive in backend
+        const user = (await supabase.auth.getUser()).data.user;
+        if (user) {
+          await supabase
+            .from('push_subscriptions')
+            .update({ is_active: false })
+            .eq('user_id', user.id);
+        }
+        
         setToken(null);
         setIsRegistered(false);
       } else {
-        // Para web, apenas limpar estado local
+        // Para web, unsubscribe from service worker
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        
+        if (subscription) {
+          await subscription.unsubscribe();
+          
+          // Mark as inactive in backend
+          const user = (await supabase.auth.getUser()).data.user;
+          if (user) {
+            await supabase
+              .from('push_subscriptions')
+              .update({ is_active: false })
+              .eq('user_id', user.id)
+              .eq('endpoint', subscription.endpoint);
+          }
+        }
+        
         setToken(null);
         setIsRegistered(false);
       }

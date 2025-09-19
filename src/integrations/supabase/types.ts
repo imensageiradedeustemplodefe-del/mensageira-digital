@@ -587,6 +587,10 @@ export type Database = {
       }
     }
     Functions: {
+      notify_todays_events: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       send_push_notification: {
         Args: {
           p_badge?: string
