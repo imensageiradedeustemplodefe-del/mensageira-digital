@@ -169,11 +169,6 @@ const Navigation = () => {
                 </div>
               )}
             </div>
-            
-            {/* Search Bar */}
-            <div className="hidden lg:block ml-4">
-              <SearchBar className="w-48" />
-            </div>
           </div>
 
           {/* Right Icons */}
