@@ -139,7 +139,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       message: 'Push notifications processed',
       successful: successCount,
-      failed: failureCount
+      failed: failureCount,
+      total: subscriptions.length
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })

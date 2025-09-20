@@ -125,7 +125,7 @@ const PushNotificationsManager = () => {
       
       toast({
         title: "Sucesso!",
-        description: `Notificação enviada para ${result.successful} usuários.`,
+        description: `Notificação enviada para ${result.total || 0} usuários.`,
       });
 
       // Reset form

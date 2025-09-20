@@ -12,25 +12,21 @@ export const usePushNotifications = () => {
 
   const saveSubscriptionToBackend = async (subscription: PushSubscription | { endpoint: string; keys: { p256dh: string; auth: string } }) => {
     try {
+      // Para aplicações sem login, permitir subscriptions anônimas
       const user = (await supabase.auth.getUser()).data.user;
-      if (!user) {
-        console.log('User not authenticated, cannot save subscription');
-        return;
-      }
 
       const subscriptionData = {
-        user_id: user.id,
+        user_id: user?.id || null, // Permitir subscriptions anônimas
         endpoint: subscription.endpoint,
         p256dh: 'keys' in subscription ? subscription.keys.p256dh : '',
         auth: 'keys' in subscription ? subscription.keys.auth : '',
         is_active: true
       };
 
-      // Check if subscription already exists
+      // Check if subscription already exists (por endpoint, não por usuário)
       const { data: existingSubscription } = await supabase
         .from('push_subscriptions')
         .select('id')
-        .eq('user_id', user.id)
         .eq('endpoint', subscription.endpoint)
         .maybeSingle();
 
@@ -219,12 +215,11 @@ export const usePushNotifications = () => {
     try {
       if (Capacitor.isNativePlatform()) {
         // For native platforms, mark as inactive in backend
-        const user = (await supabase.auth.getUser()).data.user;
-        if (user) {
+        if (token) {
           await supabase
             .from('push_subscriptions')
             .update({ is_active: false })
-            .eq('user_id', user.id);
+            .eq('endpoint', token);
         }
         
         setToken(null);
@@ -237,15 +232,11 @@ export const usePushNotifications = () => {
         if (subscription) {
           await subscription.unsubscribe();
           
-          // Mark as inactive in backend
-          const user = (await supabase.auth.getUser()).data.user;
-          if (user) {
-            await supabase
-              .from('push_subscriptions')
-              .update({ is_active: false })
-              .eq('user_id', user.id)
-              .eq('endpoint', subscription.endpoint);
-          }
+          // Mark as inactive in backend por endpoint
+          await supabase
+            .from('push_subscriptions')
+            .update({ is_active: false })
+            .eq('endpoint', subscription.endpoint);
         }
         
         setToken(null);

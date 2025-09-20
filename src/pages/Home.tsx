@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Skeleton } from "@/components/ui/skeleton";
+import { NotificationSettings } from "@/components/NotificationSettings";
 
 // Lazy loading dos componentes
 const DailyVerse = lazy(() => import("@/components/DailyVerse"));
@@ -91,6 +92,13 @@ const Home = () => {
       <Suspense fallback={<SectionSkeleton className="py-16 bg-background" />}>
         <UpcomingEvents loading={settingsLoading} />
       </Suspense>
+
+      {/* Notification Settings */}
+      <section className="py-12 bg-accent/20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <NotificationSettings />
+        </div>
+      </section>
 
       {/* Contact Info com Suspense */}
       <Suspense fallback={<SectionSkeleton className="py-16 bg-background" />}>
