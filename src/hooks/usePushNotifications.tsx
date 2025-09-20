@@ -12,6 +12,8 @@ export const usePushNotifications = () => {
 
   const saveSubscriptionToBackend = async (subscription: PushSubscription | { endpoint: string; keys: { p256dh: string; auth: string } }) => {
     try {
+      console.log('Tentando salvar subscription:', subscription.endpoint);
+      
       // Para aplicações sem login, permitir subscriptions anônimas
       const user = (await supabase.auth.getUser()).data.user;
 
@@ -23,29 +25,44 @@ export const usePushNotifications = () => {
         is_active: true
       };
 
+      console.log('Dados da subscription:', subscriptionData);
+
       // Check if subscription already exists (por endpoint, não por usuário)
-      const { data: existingSubscription } = await supabase
+      const { data: existingSubscription, error: selectError } = await supabase
         .from('push_subscriptions')
         .select('id')
         .eq('endpoint', subscription.endpoint)
         .maybeSingle();
 
+      console.log('Subscription existente:', existingSubscription, 'Error:', selectError);
+
       if (existingSubscription) {
         // Update existing subscription
-        await supabase
+        const { error } = await supabase
           .from('push_subscriptions')
           .update({ is_active: true, updated_at: new Date().toISOString() })
           .eq('id', existingSubscription.id);
+
+        if (error) {
+          console.error('Error updating subscription:', error);
+        } else {
+          console.log('Subscription updated successfully');
+        }
       } else {
         // Create new subscription
-        await supabase
+        const { data, error } = await supabase
           .from('push_subscriptions')
-          .insert(subscriptionData);
-      }
+          .insert([subscriptionData])
+          .select();
 
-      console.log('Subscription saved to backend');
+        if (error) {
+          console.error('Error saving subscription:', error);
+        } else {
+          console.log('Subscription saved successfully:', data);
+        }
+      }
     } catch (error) {
-      console.error('Error saving subscription to backend:', error);
+      console.error('Error in saveSubscriptionToBackend:', error);
     }
   };
 
