@@ -44,7 +44,8 @@ export const usePushNotifications = () => {
           .eq('id', existingSubscription.id);
 
         if (error) {
-          console.error('Error updating subscription:', error);
+         console.log('Error updating subscription:', error);
+         console.log('Error details:', JSON.stringify(error, null, 2));
         } else {
           console.log('Subscription updated successfully');
         }
@@ -56,7 +57,8 @@ export const usePushNotifications = () => {
           .select();
 
         if (error) {
-          console.error('Error saving subscription:', error);
+         console.log('Error saving subscription:', error);
+         console.log('Error details:', JSON.stringify(error, null, 2));
         } else {
           console.log('Subscription saved successfully:', data);
         }

@@ -145,7 +145,23 @@ const Admin = () => {
             </TabsContent>
 
             <TabsContent value="notifications" className="mt-4 sm:mt-6">
-              <PushNotificationsManager />
+              <div className="space-y-6">
+                <div className="bg-card p-4 rounded-lg border">
+                  <h3 className="text-lg font-semibold mb-2">Configurar Notificações</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Para testar notificações, primeiro configure-as no seu dispositivo:
+                  </p>
+                  <a 
+                    href="/notificacoes" 
+                    target="_blank"
+                    className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                  >
+                    <Bell className="w-4 h-4 mr-2" />
+                    Configurar Notificações
+                  </a>
+                </div>
+                <PushNotificationsManager />
+              </div>
             </TabsContent>
 
             <TabsContent value="albums" className="mt-4 sm:mt-6">
