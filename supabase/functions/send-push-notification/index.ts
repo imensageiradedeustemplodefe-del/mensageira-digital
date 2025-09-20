@@ -83,27 +83,46 @@ serve(async (req) => {
         // Create proper Web Push payload
         const payload = JSON.stringify(notificationPayload)
         
-        // Create JWT token for VAPID authentication
-        const header = {
-          typ: 'JWT',
-          alg: 'ES256'
+        // Create VAPID headers for authentication
+        const vapidHeaders: Record<string, string> = {
+          'Content-Type': 'application/octet-stream',
+          'TTL': '86400',
+        }
+
+        // Add VAPID authentication header
+        if (subscription.endpoint.includes('fcm.googleapis.com')) {
+          // For FCM, use the VAPID key directly
+          vapidHeaders['Authorization'] = `key=${vapidPrivateKey}`
+          vapidHeaders['Content-Type'] = 'application/json'
+        } else {
+          // For other push services, use Web Push protocol
+          const urlBase64ToUint8Array = (base64String: string) => {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4)
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+            const rawData = atob(base64)
+            const outputArray = new Uint8Array(rawData.length)
+            for (let i = 0; i < rawData.length; ++i) {
+              outputArray[i] = rawData.charCodeAt(i)
+            }
+            return outputArray
+          }
+
+          // Create crypto key from VAPID private key
+          const vapidKey = urlBase64ToUint8Array(vapidPrivateKey.replace(/-----.*-----/g, '').replace(/\n/g, ''))
+          
+          vapidHeaders['Crypto-Key'] = `p256ecdsa=${vapidPublicKey}`
+          vapidHeaders['Authorization'] = `WebPush ${vapidPrivateKey}`
         }
         
-        const jwtPayload = {
-          aud: new URL(subscription.endpoint).origin,
-          exp: Math.floor(Date.now() / 1000) + 12 * 60 * 60, // 12 hours
-          sub: 'mailto:admin@example.com'
-        }
-        
-        // For simplicity, we'll use a basic approach without JWT signing
-        // In production, you'd want to use a proper JWT library
         const webPushResponse = await fetch(subscription.endpoint, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/octet-stream',
-            'TTL': '86400',
-          },
-          body: payload
+          headers: vapidHeaders,
+          body: subscription.endpoint.includes('fcm.googleapis.com') 
+            ? JSON.stringify({
+                to: subscription.endpoint.split('/').pop(),
+                notification: notificationPayload
+              })
+            : payload
         })
 
         if (!webPushResponse.ok) {

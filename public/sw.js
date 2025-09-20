@@ -152,36 +152,59 @@ self.addEventListener('message', (event) => {
 
 // Push notifications (quando disponível)
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push received');
+  console.log('[SW] Push received', event.data);
   
-  const options = {
+  let notificationData = {
+    title: 'Mensageira de Deus',
     body: 'Você tem uma nova mensagem da igreja!',
     icon: '/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png',
     badge: '/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png',
+    url: '/'
+  };
+
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      console.log('[SW] Push data:', data);
+      
+      notificationData = {
+        title: data.title || notificationData.title,
+        body: data.body || notificationData.body,
+        icon: data.icon || notificationData.icon,
+        badge: data.badge || notificationData.badge,
+        url: data.data?.url || data.url || notificationData.url
+      };
+    } catch (error) {
+      console.error('[SW] Error parsing push data:', error);
+      notificationData.body = event.data.text() || notificationData.body;
+    }
+  }
+
+  const options = {
+    body: notificationData.body,
+    icon: notificationData.icon,
+    badge: notificationData.badge,
     vibrate: [200, 100, 200],
     data: {
-      url: '/'
+      url: notificationData.url
     },
     actions: [
       {
         action: 'open',
-        title: 'Abrir App'
+        title: 'Abrir'
       },
       {
         action: 'close',
-        title: 'Fechar'
+        title: 'Dispensar'
       }
-    ]
+    ],
+    requireInteraction: true, // Mantém a notificação até ser clicada
+    silent: false, // Permite som
+    tag: 'mensageira-notification' // Agrupa notificações
   };
 
-  if (event.data) {
-    const data = event.data.json();
-    options.body = data.body || options.body;
-    options.data.url = data.url || options.data.url;
-  }
-
   event.waitUntil(
-    self.registration.showNotification('Mensageira de Deus', options)
+    self.registration.showNotification(notificationData.title, options)
   );
 });
 
