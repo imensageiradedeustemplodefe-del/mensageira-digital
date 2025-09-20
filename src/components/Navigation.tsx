@@ -6,9 +6,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { SearchBar } from "@/components/SearchBar";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { NotificationBadge } from "@/components/ui/notification-badge";
+import { useNotificationCount } from "@/hooks/useNotificationCount";
 
 const Navigation = () => {
   const { settings } = useSiteSettings();
+  const { count: notificationCount } = useNotificationCount();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -76,11 +79,12 @@ const Navigation = () => {
                 variant="ghost"
                 size="icon"
                 asChild
-                className="min-h-[44px] min-w-[44px]"
+                className="min-h-[44px] min-w-[44px] relative"
                 title="Notificações"
               >
                 <Link to="/notificacoes">
                   <Bell className="h-5 w-5" />
+                  <NotificationBadge count={notificationCount} />
                 </Link>
               </Button>
               <ThemeToggle />
@@ -195,6 +199,7 @@ const Navigation = () => {
               >
                 <Link to="/notificacoes">
                   <Bell className="h-[1.2rem] w-[1.2rem]" />
+                  <NotificationBadge count={notificationCount} />
                 </Link>
               </Button>
             </div>
@@ -217,11 +222,12 @@ const Navigation = () => {
                 variant="ghost"
                 size="icon"
                 asChild
-                className="min-h-[44px] min-w-[44px]"
+                className="min-h-[44px] min-w-[44px] relative"
                 title="Notificações"
               >
                 <Link to="/notificacoes">
                   <Bell className="h-5 w-5" />
+                  <NotificationBadge count={notificationCount} />
                 </Link>
               </Button>
             </div>
