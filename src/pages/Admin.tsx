@@ -12,7 +12,8 @@ import EventsManager from '@/components/admin/EventsManager';
 import EventTemplatesManager from '@/components/admin/EventTemplatesManager';
 import LiveStreamsManager from '@/components/admin/LiveStreamsManager';
 import DashboardStats from '@/components/admin/DashboardStats';
-import { LogOut, Image, Settings, MessageCircle, Music, Heart, Calendar, Radio, BarChart3, FolderOpen, Copy } from 'lucide-react';
+import PushNotificationsManager from '@/components/admin/PushNotificationsManager';
+import { LogOut, Image, Settings, MessageCircle, Music, Heart, Calendar, Radio, BarChart3, FolderOpen, Copy, Bell } from 'lucide-react';
 
 const Admin = () => {
   const { signOut } = useAuth();
@@ -55,13 +56,21 @@ const Admin = () => {
             <div className="w-full overflow-hidden">
               <TabsList className="w-full h-auto p-2 bg-muted/30 rounded-lg">
                 {/* Mobile: Horizontal scroll with better spacing */}
-                <div className="flex lg:grid lg:grid-cols-9 w-full overflow-x-auto lg:overflow-x-visible gap-1 lg:gap-2 scrollbar-hide">
+                <div className="flex lg:grid lg:grid-cols-10 w-full overflow-x-auto lg:overflow-x-visible gap-1 lg:gap-2 scrollbar-hide">
                   <TabsTrigger 
                     value="dashboard" 
                     className="flex flex-col lg:flex-row items-center justify-center whitespace-nowrap px-3 py-4 lg:py-3 text-xs lg:text-sm min-w-[80px] lg:min-w-0 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
                   >
                     <BarChart3 className="w-5 h-5 mb-1 lg:mb-0 lg:mr-2 flex-shrink-0" />
                     <span className="text-[10px] lg:text-sm font-medium">Dashboard</span>
+                  </TabsTrigger>
+
+                  <TabsTrigger 
+                    value="notifications" 
+                    className="flex flex-col lg:flex-row items-center justify-center whitespace-nowrap px-3 py-4 lg:py-3 text-xs lg:text-sm min-w-[80px] lg:min-w-0 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                  >
+                    <Bell className="w-5 h-5 mb-1 lg:mb-0 lg:mr-2 flex-shrink-0" />
+                    <span className="text-[10px] lg:text-sm font-medium">Notific.</span>
                   </TabsTrigger>
                   
                   <TabsTrigger 
@@ -133,6 +142,10 @@ const Admin = () => {
 
             <TabsContent value="dashboard" className="mt-4 sm:mt-6">
               <DashboardStats />
+            </TabsContent>
+
+            <TabsContent value="notifications" className="mt-4 sm:mt-6">
+              <PushNotificationsManager />
             </TabsContent>
 
             <TabsContent value="albums" className="mt-4 sm:mt-6">
