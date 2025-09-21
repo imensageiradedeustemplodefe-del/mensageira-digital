@@ -63,6 +63,18 @@ self.addEventListener('fetch', (event) => {
   // Ignorar requisições externas não relacionadas ao app
   if (!url.origin === location.origin && !url.pathname.startsWith('/api')) return;
 
+  // Permitir streaming de áudio para continuar em background
+  if (request.destination === 'audio' || request.url.includes('.mp3') || request.url.includes('.m3u8') || request.url.includes('stream')) {
+    // Para áudio, usar estratégia de rede primeiro para garantir stream em tempo real
+    event.respondWith(
+      fetch(request).catch(() => {
+        // Se falhar, tentar cache como fallback
+        return caches.match(request);
+      })
+    );
+    return;
+  }
+
   // Estratégia Cache First para recursos estáticos
   if (request.destination === 'document' || 
       request.destination === 'script' || 
@@ -120,7 +132,7 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// Escutar mensagens do cliente
+// Controles de mídia em segundo plano
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
@@ -147,6 +159,24 @@ self.addEventListener('message', (event) => {
     }).then(() => {
       event.ports[0].postMessage({ success: true });
     });
+  }
+
+  // Suporte para controles de mídia
+  if (event.data && event.data.type === 'MEDIA_SESSION_UPDATE') {
+    const { title, artist, artwork } = event.data;
+    console.log('[SW] Media session update:', { title, artist });
+    
+    // Configurar metadata para controles do sistema
+    if ('mediaSession' in self) {
+      self.mediaSession.metadata = new MediaMetadata({
+        title: title || 'Rádio Gospel',
+        artist: artist || 'Mensageira de Deus',
+        album: 'Transmissão ao vivo',
+        artwork: artwork || [
+          { src: '/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png', sizes: '192x192', type: 'image/png' }
+        ]
+      });
+    }
   }
 });
 

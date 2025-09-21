@@ -24,6 +24,7 @@ export function MediaPlayer() {
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const wakeLockRef = useRef<any>(null);
 
   // Helper function to detect media type
   const getMediaType = (url: string): 'spotify' | 'youtube' | 'radio' | 'audio' => {
@@ -71,6 +72,72 @@ export function MediaPlayer() {
     }
   };
 
+  // Request wake lock to keep screen active during audio playback
+  const requestWakeLock = async () => {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+        console.log('[MediaPlayer] Wake lock activated');
+      }
+    } catch (error) {
+      console.log('[MediaPlayer] Wake lock not available or failed:', error);
+    }
+  };
+
+  // Release wake lock
+  const releaseWakeLock = () => {
+    if (wakeLockRef.current) {
+      wakeLockRef.current.release();
+      wakeLockRef.current = null;
+      console.log('[MediaPlayer] Wake lock released');
+    }
+  };
+
+  // Setup Media Session API for background playback
+  const setupMediaSession = (audio: HTMLAudioElement) => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: gospelRadio?.title || 'Rádio Gospel',
+        artist: gospelRadio?.artist || 'Mensageira de Deus',
+        album: 'Transmissão ao vivo',
+        artwork: [
+          { src: '/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png', sizes: '96x96', type: 'image/png' },
+          { src: '/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png', sizes: '128x128', type: 'image/png' },
+          { src: '/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png', sizes: '192x192', type: 'image/png' },
+          { src: '/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png', sizes: '256x256', type: 'image/png' },
+          { src: '/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png', sizes: '384x384', type: 'image/png' },
+          { src: '/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png', sizes: '512x512', type: 'image/png' },
+        ],
+      });
+
+      // Set up action handlers
+      navigator.mediaSession.setActionHandler('play', () => {
+        if (audioRef.current) {
+          audioRef.current.play();
+          setIsPlaying(true);
+        }
+      });
+
+      navigator.mediaSession.setActionHandler('pause', () => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        }
+      });
+
+      navigator.mediaSession.setActionHandler('stop', () => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          setIsPlaying(false);
+        }
+      });
+
+      // Update playback state
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }
+  };
+
   const togglePlay = async () => {
     if (!gospelRadio) return;
 
@@ -102,6 +169,10 @@ export function MediaPlayer() {
         if (iframeRef.current) {
           iframeRef.current.style.display = 'none';
         }
+        // Clear media session for YouTube
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'paused';
+        }
         return;
       }
 
@@ -125,6 +196,10 @@ export function MediaPlayer() {
       if (isPlaying) {
         setIsPlaying(false);
         audioRef.current?.pause();
+        // Update media session
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'paused';
+        }
         return;
       }
 
@@ -137,20 +212,45 @@ export function MediaPlayer() {
         console.error('Erro ao reproduzir mídia:', e);
         setError('Não foi possível reproduzir esta mídia. Verifique se a URL está correta e acessível.');
         setIsPlaying(false);
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'none';
+        }
       };
       
       audio.onloadstart = () => setError(null);
       audio.onplay = () => {
         setIsPlaying(true);
         setError(null);
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'playing';
+        }
+        // Request wake lock to keep screen active
+        requestWakeLock();
       };
-      audio.onpause = () => setIsPlaying(false);
-      audio.onended = () => setIsPlaying(false);
+      audio.onpause = () => {
+        setIsPlaying(false);
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'paused';
+        }
+        // Release wake lock when pausing
+        releaseWakeLock();
+      };
+      audio.onended = () => {
+        setIsPlaying(false);
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'none';
+        }
+        // Release wake lock when audio ends
+        releaseWakeLock();
+      };
       
       // Set volume and source
       audio.volume = isMuted ? 0 : volume[0] / 100;
       audio.crossOrigin = "anonymous"; // Try to handle CORS
       audio.src = gospelRadio.media_url;
+      
+      // Setup Media Session for background playback
+      setupMediaSession(audio);
       
       // Load and play
       audio.load();
@@ -166,8 +266,22 @@ export function MediaPlayer() {
       console.error('Erro ao reproduzir mídia:', error);
       setError('Não foi possível reproduzir esta mídia. Tente novamente ou verifique sua conexão.');
       setIsPlaying(false);
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'none';
+      }
     }
   };
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+      releaseWakeLock();
+    };
+  }, []);
 
   if (loading) {
     return (
