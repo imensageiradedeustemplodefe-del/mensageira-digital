@@ -55,26 +55,37 @@ export const useCacheManager = () => {
     setIsClearing(true);
     
     try {
-      // Comunica com o service worker para limpeza seletiva
+      // Força recarregamento dos arquivos CSS para garantir estilos atualizados
+      const timestamp = Date.now();
+      const links = document.querySelectorAll('link[rel="stylesheet"]');
+      links.forEach((link: any) => {
+        if (link.href) {
+          const url = new URL(link.href);
+          url.searchParams.set('v', timestamp.toString());
+          link.href = url.toString();
+        }
+      });
+
+      // Comunica com o service worker para limpeza seletiva de outros recursos
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         const messageChannel = new MessageChannel();
         
         messageChannel.port1.onmessage = (event) => {
           if (event.data.success) {
-            console.log('Service worker cache cleared selectively - styles preserved');
+            console.log('Service worker cache cleared selectively - CSS refreshed');
           } else {
             console.error('Cache clearing failed:', event.data.error);
           }
         };
 
-        // Usa limpeza seletiva que preserva CSS e recursos críticos
+        // Usa limpeza seletiva que preserva apenas imagens e recursos estáticos
         navigator.serviceWorker.controller.postMessage(
           { type: 'CLEAR_CACHE' },
           [messageChannel.port2]
         );
       }
 
-      console.log('Selective cache clearing completed - styles preserved');
+      console.log('Selective cache clearing completed - CSS updated, other resources preserved');
       
     } catch (error) {
       console.error('Error clearing cache:', error);

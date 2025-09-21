@@ -150,12 +150,14 @@ self.addEventListener('message', (event) => {
   
   if (event.data && event.data.type === 'CLEAR_CACHE') {
     const preservePatterns = [
-      '/assets/', // Arquivos de build (CSS, JS)
-      '.css',     // Arquivos CSS
-      '.js',      // Arquivos JS críticos
       '/lovable-uploads/', // Imagens do projeto
       '/favicon', // Favicons
       '/manifest.json', // Manifest PWA
+      '.png',     // Imagens
+      '.jpg',     // Imagens
+      '.jpeg',    // Imagens
+      '.svg',     // Ícones
+      '.webp',    // Imagens
     ];
 
     caches.keys().then((cacheNames) => {
@@ -164,23 +166,23 @@ self.addEventListener('message', (event) => {
           const cache = await caches.open(cacheName);
           const keys = await cache.keys();
           
-          // Filtrar e deletar apenas recursos não críticos
+          // Filtrar e deletar CSS/JS para forçar atualização, preservar apenas imagens
           const keysToDelete = keys.filter(request => {
             const url = request.url;
-            // Preservar arquivos críticos para o estilo
+            // Preservar apenas imagens e recursos estáticos não críticos
             return !preservePatterns.some(pattern => url.includes(pattern));
           });
 
-          console.log('[SW] Clearing cache entries:', keysToDelete.length, 'of', keys.length);
+          console.log('[SW] Clearing cache entries (including CSS/JS):', keysToDelete.length, 'of', keys.length);
           
-          // Deletar apenas os recursos não críticos
+          // Deletar CSS, JS e outros recursos para forçar atualização
           return Promise.all(
             keysToDelete.map(request => cache.delete(request))
           );
         })
       );
     }).then(() => {
-      console.log('[SW] Cache cleared selectively - styles preserved');
+      console.log('[SW] Cache cleared selectively - images preserved, CSS/JS updated');
       event.ports[0].postMessage({ success: true });
     }).catch((error) => {
       console.error('[SW] Error clearing cache:', error);
