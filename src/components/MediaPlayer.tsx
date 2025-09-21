@@ -26,6 +26,48 @@ export function MediaPlayer() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const wakeLockRef = useRef<any>(null);
 
+  // Initialize audio element once
+  useEffect(() => {
+    if (!audioRef.current) {
+      const audio = new Audio();
+      
+      // Configure audio for background playback
+      audio.preload = 'auto';
+      audio.crossOrigin = 'anonymous';
+      
+      // Add event listeners for background playback
+      audio.addEventListener('play', () => {
+        setIsPlaying(true);
+        setError(null);
+        requestWakeLock();
+        updateMediaSession();
+      });
+      
+      audio.addEventListener('pause', () => {
+        setIsPlaying(false);
+        releaseWakeLock();
+        updateMediaSession();
+      });
+      
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
+        releaseWakeLock();
+        updateMediaSession();
+      });
+      
+      audio.addEventListener('error', (e) => {
+        console.error('Erro ao reproduzir mídia:', e);
+        setError('Não foi possível reproduzir esta mídia. Verifique se a URL está correta e acessível.');
+        setIsPlaying(false);
+        updateMediaSession();
+      });
+      
+      audio.addEventListener('loadstart', () => setError(null));
+      
+      audioRef.current = audio;
+    }
+  }, []);
+
   // Helper function to detect media type
   const getMediaType = (url: string): 'spotify' | 'youtube' | 'radio' | 'audio' => {
     if (url.includes('spotify.com')) return 'spotify';
@@ -50,6 +92,11 @@ export function MediaPlayer() {
       audioRef.current.volume = isMuted ? 0 : volume[0] / 100;
     }
   }, [volume, isMuted]);
+
+  // Update Media Session when playing state changes
+  useEffect(() => {
+    updateMediaSession();
+  }, [isPlaying, gospelRadio]);
 
   const fetchGospelRadio = async () => {
     try {
@@ -94,11 +141,11 @@ export function MediaPlayer() {
   };
 
   // Setup Media Session API for background playback
-  const setupMediaSession = (audio: HTMLAudioElement) => {
-    if ('mediaSession' in navigator) {
+  const setupMediaSession = () => {
+    if ('mediaSession' in navigator && gospelRadio) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: gospelRadio?.title || 'Rádio Gospel',
-        artist: gospelRadio?.artist || 'Mensageira de Deus',
+        title: gospelRadio.title || 'Rádio Gospel',
+        artist: gospelRadio.artist || 'Mensageira de Deus',
         album: 'Transmissão ao vivo',
         artwork: [
           { src: '/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png', sizes: '96x96', type: 'image/png' },
@@ -114,14 +161,12 @@ export function MediaPlayer() {
       navigator.mediaSession.setActionHandler('play', () => {
         if (audioRef.current) {
           audioRef.current.play();
-          setIsPlaying(true);
         }
       });
 
       navigator.mediaSession.setActionHandler('pause', () => {
         if (audioRef.current) {
           audioRef.current.pause();
-          setIsPlaying(false);
         }
       });
 
@@ -129,17 +174,39 @@ export function MediaPlayer() {
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
-          setIsPlaying(false);
         }
       });
-
-      // Update playback state
-      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
     }
   };
 
+  // Update Media Session playback state
+  const updateMediaSession = () => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+      
+      // Notify service worker about media session changes
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller && gospelRadio) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'MEDIA_SESSION_UPDATE',
+          title: gospelRadio.title || 'Rádio Gospel',
+          artist: gospelRadio.artist || 'Mensageira de Deus',
+          artwork: [
+            { src: '/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png', sizes: '192x192', type: 'image/png' }
+          ]
+        });
+      }
+    }
+  };
+
+  // Setup Media Session when gospelRadio loads
+  useEffect(() => {
+    if (gospelRadio) {
+      setupMediaSession();
+    }
+  }, [gospelRadio]);
+
   const togglePlay = async () => {
-    if (!gospelRadio) return;
+    if (!gospelRadio || !audioRef.current) return;
 
     const mediaType = getMediaType(gospelRadio.media_url);
     
@@ -169,10 +236,6 @@ export function MediaPlayer() {
         if (iframeRef.current) {
           iframeRef.current.style.display = 'none';
         }
-        // Clear media session for YouTube
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'paused';
-        }
         return;
       }
 
@@ -189,71 +252,25 @@ export function MediaPlayer() {
     }
 
     try {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-
+      const audio = audioRef.current;
+      
       if (isPlaying) {
-        setIsPlaying(false);
-        audioRef.current?.pause();
-        // Update media session
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'paused';
-        }
+        audio.pause();
         return;
       }
 
       setError(null);
-      const audio = new Audio();
-      audioRef.current = audio;
       
-      // Set up error handling
-      audio.onerror = (e) => {
-        console.error('Erro ao reproduzir mídia:', e);
-        setError('Não foi possível reproduzir esta mídia. Verifique se a URL está correta e acessível.');
-        setIsPlaying(false);
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'none';
-        }
-      };
+      // Only change source if it's different
+      if (audio.src !== gospelRadio.media_url) {
+        audio.src = gospelRadio.media_url;
+        audio.load();
+      }
       
-      audio.onloadstart = () => setError(null);
-      audio.onplay = () => {
-        setIsPlaying(true);
-        setError(null);
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'playing';
-        }
-        // Request wake lock to keep screen active
-        requestWakeLock();
-      };
-      audio.onpause = () => {
-        setIsPlaying(false);
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'paused';
-        }
-        // Release wake lock when pausing
-        releaseWakeLock();
-      };
-      audio.onended = () => {
-        setIsPlaying(false);
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'none';
-        }
-        // Release wake lock when audio ends
-        releaseWakeLock();
-      };
-      
-      // Set volume and source
+      // Set volume
       audio.volume = isMuted ? 0 : volume[0] / 100;
-      audio.crossOrigin = "anonymous"; // Try to handle CORS
-      audio.src = gospelRadio.media_url;
       
-      // Setup Media Session for background playback
-      setupMediaSession(audio);
-      
-      // Load and play
-      audio.load();
+      // Play audio
       await audio.play();
 
       // Update play count
@@ -266,9 +283,6 @@ export function MediaPlayer() {
       console.error('Erro ao reproduzir mídia:', error);
       setError('Não foi possível reproduzir esta mídia. Tente novamente ou verifique sua conexão.');
       setIsPlaying(false);
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'none';
-      }
     }
   };
 
