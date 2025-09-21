@@ -55,45 +55,26 @@ export const useCacheManager = () => {
     setIsClearing(true);
     
     try {
-      // Limpa cache do navegador
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(
-          cacheNames.map(cacheName => {
-            console.log('Clearing browser cache:', cacheName);
-            return caches.delete(cacheName);
-          })
-        );
-      }
-
-      // Comunica com o service worker para limpeza adicional
+      // Comunica com o service worker para limpeza seletiva
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         const messageChannel = new MessageChannel();
         
         messageChannel.port1.onmessage = (event) => {
           if (event.data.success) {
-            console.log('Service worker cache cleared successfully');
+            console.log('Service worker cache cleared selectively - styles preserved');
+          } else {
+            console.error('Cache clearing failed:', event.data.error);
           }
         };
 
+        // Usa limpeza seletiva que preserva CSS e recursos críticos
         navigator.serviceWorker.controller.postMessage(
           { type: 'CLEAR_CACHE' },
           [messageChannel.port2]
         );
       }
 
-      // Força recarregamento dos recursos sem cache
-      const timestamp = Date.now();
-      const links = document.querySelectorAll('link[rel="stylesheet"]');
-      links.forEach((link: any) => {
-        if (link.href) {
-          const url = new URL(link.href);
-          url.searchParams.set('v', timestamp.toString());
-          link.href = url.toString();
-        }
-      });
-
-      console.log('Cache clearing completed');
+      console.log('Selective cache clearing completed - styles preserved');
       
     } catch (error) {
       console.error('Error clearing cache:', error);
@@ -106,15 +87,51 @@ export const useCacheManager = () => {
     await clearCacheAutomatically();
     
     toast({
-      title: "Cache Limpo",
-      description: "Cache limpo manualmente. Atualizando página...",
+      title: "Cache Atualizado",
+      description: "Cache limpo preservando estilos",
       duration: 2000,
     });
+  };
+
+  // Função para limpeza completa quando realmente necessário
+  const clearAllCache = async () => {
+    if (isClearing) return;
     
-    // Recarrega a página após limpar o cache
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
+    setIsClearing(true);
+    
+    try {
+      // Limpa tudo incluindo CSS (pode causar perda temporária de estilo)
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        const messageChannel = new MessageChannel();
+        
+        messageChannel.port1.onmessage = (event) => {
+          if (event.data.success) {
+            console.log('Complete cache cleared - styles may be affected');
+          }
+        };
+
+        navigator.serviceWorker.controller.postMessage(
+          { type: 'CLEAR_ALL_CACHE' },
+          [messageChannel.port2]
+        );
+      }
+      
+      toast({
+        title: "Cache Completamente Limpo",
+        description: "Recarregando página para restaurar estilos...",
+        duration: 2000,
+      });
+      
+      // Recarrega a página para restaurar estilos
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Error clearing all cache:', error);
+    } finally {
+      setIsClearing(false);
+    }
   };
 
   // Limpa cache automaticamente a cada 5 minutos
@@ -130,6 +147,7 @@ export const useCacheManager = () => {
   return { 
     isClearing, 
     forceClearCache,
-    clearCacheAutomatically 
+    clearCacheAutomatically,
+    clearAllCache
   };
 };

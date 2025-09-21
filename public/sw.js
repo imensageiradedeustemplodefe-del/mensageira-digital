@@ -149,14 +149,56 @@ self.addEventListener('message', (event) => {
   }
   
   if (event.data && event.data.type === 'CLEAR_CACHE') {
+    const preservePatterns = [
+      '/assets/', // Arquivos de build (CSS, JS)
+      '.css',     // Arquivos CSS
+      '.js',      // Arquivos JS críticos
+      '/lovable-uploads/', // Imagens do projeto
+      '/favicon', // Favicons
+      '/manifest.json', // Manifest PWA
+    ];
+
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map(async (cacheName) => {
+          const cache = await caches.open(cacheName);
+          const keys = await cache.keys();
+          
+          // Filtrar e deletar apenas recursos não críticos
+          const keysToDelete = keys.filter(request => {
+            const url = request.url;
+            // Preservar arquivos críticos para o estilo
+            return !preservePatterns.some(pattern => url.includes(pattern));
+          });
+
+          console.log('[SW] Clearing cache entries:', keysToDelete.length, 'of', keys.length);
+          
+          // Deletar apenas os recursos não críticos
+          return Promise.all(
+            keysToDelete.map(request => cache.delete(request))
+          );
+        })
+      );
+    }).then(() => {
+      console.log('[SW] Cache cleared selectively - styles preserved');
+      event.ports[0].postMessage({ success: true });
+    }).catch((error) => {
+      console.error('[SW] Error clearing cache:', error);
+      event.ports[0].postMessage({ success: false, error: error.message });
+    });
+  }
+
+  // Nova opção para limpeza completa (se necessário)
+  if (event.data && event.data.type === 'CLEAR_ALL_CACHE') {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          console.log('[SW] Clearing cache:', cacheName);
+          console.log('[SW] Clearing all cache:', cacheName);
           return caches.delete(cacheName);
         })
       );
     }).then(() => {
+      console.log('[SW] All cache cleared completely');
       event.ports[0].postMessage({ success: true });
     });
   }
