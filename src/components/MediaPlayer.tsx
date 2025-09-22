@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Radio, Volume2, VolumeX, Youtube } from 'lucide-react';
+import { Play, Pause, Radio, Volume2, VolumeX, Youtube, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
+import { toast } from '@/hooks/use-toast';
 
 interface MediaItem {
   id: string;
@@ -13,6 +14,7 @@ interface MediaItem {
   is_published: boolean;
   artist?: string;
   description?: string;
+  fallback_urls?: string[];
 }
 
 export function MediaPlayer() {
@@ -22,61 +24,146 @@ export function MediaPlayer() {
   const [isMuted, setIsMuted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [currentUrlIndex, setCurrentUrlIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const wakeLockRef = useRef<any>(null);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Get all available URLs (main + fallbacks)
+  const getAvailableUrls = useCallback((): string[] => {
+    if (!gospelRadio) return [];
+    const urls = [gospelRadio.media_url];
+    if (gospelRadio.fallback_urls?.length) {
+      urls.push(...gospelRadio.fallback_urls);
+    }
+    return urls.filter(Boolean);
+  }, [gospelRadio]);
+
+  // Retry logic with exponential backoff
+  const scheduleRetry = useCallback((attemptNumber: number) => {
+    if (attemptNumber >= 3) {
+      setError('Não foi possível conectar ao servidor de mídia após várias tentativas.');
+      setIsRetrying(false);
+      return;
+    }
+
+    const delay = Math.min(1000 * Math.pow(2, attemptNumber), 10000); // Max 10s
+    setIsRetrying(true);
+    
+    retryTimeoutRef.current = setTimeout(() => {
+      setRetryCount(attemptNumber + 1);
+      tryNextUrl();
+    }, delay);
+  }, []);
+
+  // Try next available URL
+  const tryNextUrl = useCallback(() => {
+    const urls = getAvailableUrls();
+    if (currentUrlIndex < urls.length - 1) {
+      setCurrentUrlIndex(prev => prev + 1);
+      setError(null);
+      return true;
+    }
+    return false;
+  }, [getAvailableUrls, currentUrlIndex]);
 
   // Initialize audio element once
   useEffect(() => {
     if (!audioRef.current) {
       const audio = new Audio();
       
-      // Configure audio for background playback
-      audio.preload = 'auto';
+      // Configure audio for background playbook
+      audio.preload = 'metadata';
       audio.crossOrigin = 'anonymous';
       
-      // Critical: Set audio to continue playing in background
+      // Critical: Configure for background playback
       audio.setAttribute('data-no-pause', 'true');
+      audio.setAttribute('webkit-playsinline', 'true');
+      audio.setAttribute('playsinline', 'true');
       
-      // Add event listeners for background playback
+      // Success handlers
       audio.addEventListener('play', () => {
         setIsPlaying(true);
         setError(null);
+        setRetryCount(0);
+        setIsRetrying(false);
         updateMediaSession();
+        console.log('[MediaPlayer] Audio started playing');
       });
       
       audio.addEventListener('pause', () => {
         setIsPlaying(false);
         updateMediaSession();
+        console.log('[MediaPlayer] Audio paused');
       });
       
       audio.addEventListener('ended', () => {
         setIsPlaying(false);
         updateMediaSession();
+        console.log('[MediaPlayer] Audio ended');
       });
-      
-      audio.addEventListener('error', (e) => {
-        console.error('Erro ao reproduzir mídia:', e);
-        setError('Não foi possível reproduzir esta mídia. Verifique se a URL está correta e acessível.');
-        setIsPlaying(false);
-        updateMediaSession();
-      });
-      
-      audio.addEventListener('loadstart', () => setError(null));
-      
-      // Handle visibility change to prevent auto-pause
+
+      // Loading progress handlers
       audio.addEventListener('loadstart', () => {
-        // Prevent browser from pausing on visibility change
-        document.addEventListener('visibilitychange', () => {
-          if (document.hidden && audio.paused && isPlaying) {
-            audio.play().catch(console.error);
+        setError(null);
+        console.log('[MediaPlayer] Loading started');
+      });
+
+      audio.addEventListener('canplay', () => {
+        console.log('[MediaPlayer] Can start playing');
+      });
+
+      audio.addEventListener('canplaythrough', () => {
+        console.log('[MediaPlayer] Can play through without buffering');
+      });
+      
+      // Error handler with retry logic
+      audio.addEventListener('error', (e) => {
+        const errorEvent = e as ErrorEvent;
+        console.error('[MediaPlayer] Audio error:', errorEvent, audio.error);
+        
+        setIsPlaying(false);
+        
+        // Try next URL if available
+        if (!tryNextUrl()) {
+          // If no more URLs, try retry with current URL
+          if (retryCount < 3) {
+            scheduleRetry(retryCount);
+          } else {
+            setError('Falha ao reproduzir mídia. Verifique sua conexão com a internet.');
+            setIsRetrying(false);
           }
-        });
+        }
+      });
+
+      // Network state handlers
+      audio.addEventListener('waiting', () => {
+        console.log('[MediaPlayer] Buffering...');
+      });
+
+      audio.addEventListener('stalled', () => {
+        console.log('[MediaPlayer] Download stalled');
+        if (isPlaying) {
+          toast({
+            title: "Conexão Instável",
+            description: "A conexão com o servidor de mídia está instável.",
+            variant: "destructive"
+          });
+        }
       });
       
       audioRef.current = audio;
     }
-  }, []);
+
+    // Cleanup function
+    return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+      }
+    };
+  }, [tryNextUrl, retryCount, scheduleRetry, isPlaying]);
 
   // Helper function to detect media type
   const getMediaType = (url: string): 'spotify' | 'youtube' | 'radio' | 'audio' => {
@@ -129,21 +216,48 @@ export function MediaPlayer() {
     }
   };
 
-  // Prevent browser from auto-pausing on visibility change
+  // Handle page visibility changes for background playback
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden && audioRef.current && !audioRef.current.paused) {
-        // Audio should continue playing in background
-        console.log('[MediaPlayer] App went to background, audio continues');
-      } else if (!document.hidden && audioRef.current && isPlaying && audioRef.current.paused) {
-        // Resume if needed when coming back to foreground
-        audioRef.current.play().catch(console.error);
-        console.log('[MediaPlayer] App returned to foreground, resuming audio');
+      if (!audioRef.current) return;
+
+      if (document.hidden) {
+        // App went to background - ensure audio continues
+        console.log('[MediaPlayer] App backgrounded, maintaining audio playback');
+        
+        // Force continue playback if it was playing
+        if (isPlaying && audioRef.current.paused) {
+          audioRef.current.play().catch((error) => {
+            console.warn('[MediaPlayer] Could not resume playback in background:', error);
+          });
+        }
+      } else {
+        // App returned to foreground
+        console.log('[MediaPlayer] App foregrounded');
+        
+        // Sync state if needed
+        if (isPlaying && audioRef.current.paused) {
+          audioRef.current.play().catch((error) => {
+            console.warn('[MediaPlayer] Could not resume playback on foreground:', error);
+          });
+        }
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      // Keep playing even if user navigates away
+      if (audioRef.current && isPlaying) {
+        console.log('[MediaPlayer] Page unloading, keeping audio alive');
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, [isPlaying]);
 
   // Setup Media Session API for background playback
@@ -220,7 +334,23 @@ export function MediaPlayer() {
     }
   }, [gospelRadio]);
 
-  const togglePlay = async () => {
+  // Manual retry function
+  const manualRetry = useCallback(() => {
+    if (!gospelRadio) return;
+    
+    setError(null);
+    setIsRetrying(false);
+    setRetryCount(0);
+    setCurrentUrlIndex(0);
+    
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+    }
+    
+    togglePlay();
+  }, [gospelRadio]);
+
+  const togglePlay = useCallback(async () => {
     if (!gospelRadio || !audioRef.current) return;
 
     const mediaType = getMediaType(gospelRadio.media_url);
@@ -230,10 +360,14 @@ export function MediaPlayer() {
       window.open(gospelRadio.media_url, '_blank');
       
       // Update play count for Spotify
-      await supabase
-        .from('media_items')
-        .update({ play_count: ((gospelRadio as any).play_count || 0) + 1 })
-        .eq('id', gospelRadio.id);
+      try {
+        await supabase
+          .from('media_items')
+          .update({ play_count: ((gospelRadio as any).play_count || 0) + 1 })
+          .eq('id', gospelRadio.id);
+      } catch (error) {
+        console.warn('Failed to update play count:', error);
+      }
       
       return;
     }
@@ -258,10 +392,14 @@ export function MediaPlayer() {
       setError(null);
       
       // Update play count for YouTube
-      await supabase
-        .from('media_items')
-        .update({ play_count: ((gospelRadio as any).play_count || 0) + 1 })
-        .eq('id', gospelRadio.id);
+      try {
+        await supabase
+          .from('media_items')
+          .update({ play_count: ((gospelRadio as any).play_count || 0) + 1 })
+          .eq('id', gospelRadio.id);
+      } catch (error) {
+        console.warn('Failed to update play count:', error);
+      }
       
       return;
     }
@@ -275,31 +413,50 @@ export function MediaPlayer() {
       }
 
       setError(null);
+      setIsRetrying(false);
+      
+      // Get current URL to try
+      const urls = getAvailableUrls();
+      const currentUrl = urls[currentUrlIndex] || gospelRadio.media_url;
       
       // Only change source if it's different
-      if (audio.src !== gospelRadio.media_url) {
-        audio.src = gospelRadio.media_url;
+      if (audio.src !== currentUrl) {
+        console.log(`[MediaPlayer] Loading URL: ${currentUrl}`);
+        audio.src = currentUrl;
         audio.load();
       }
       
       // Set volume
       audio.volume = isMuted ? 0 : volume[0] / 100;
       
-      // Play audio
-      await audio.play();
-
-      // Update play count
-      await supabase
-        .from('media_items')
-        .update({ play_count: ((gospelRadio as any).play_count || 0) + 1 })
-        .eq('id', gospelRadio.id);
+      // Play audio with better error handling
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        await playPromise;
+        
+        // Update play count only on successful play
+        await supabase
+          .from('media_items')
+          .update({ play_count: ((gospelRadio as any).play_count || 0) + 1 })
+          .eq('id', gospelRadio.id);
+          
+        toast({
+          title: "Reprodução Iniciada",
+          description: `Tocando: ${gospelRadio.title}`,
+          duration: 2000
+        });
+      }
 
     } catch (error) {
-      console.error('Erro ao reproduzir mídia:', error);
-      setError('Não foi possível reproduzir esta mídia. Tente novamente ou verifique sua conexão.');
-      setIsPlaying(false);
+      console.error('[MediaPlayer] Play error:', error);
+      
+      // Don't set error immediately, let the audio error handler deal with it
+      if (retryCount === 0) {
+        scheduleRetry(0);
+      }
     }
-  };
+  }, [gospelRadio, isPlaying, currentUrlIndex, getAvailableUrls, isMuted, volume, retryCount, scheduleRetry]);
 
   // Clean up on unmount
   useEffect(() => {
@@ -383,8 +540,33 @@ export function MediaPlayer() {
             </div>
 
             {error && (
-              <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-                {error}
+              <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md space-y-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="text-xs font-medium">ERRO DE REPRODUÇÃO</span>
+                </div>
+                <p>{error}</p>
+                {!isSpotify && !isYoutube && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={manualRetry}
+                    className="w-full mt-2"
+                    disabled={isRetrying}
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+                    {isRetrying ? 'Tentando...' : 'Tentar Novamente'}
+                  </Button>
+                )}
+              </div>
+            )}
+            
+            {isRetrying && !error && (
+              <div className="bg-muted text-muted-foreground text-sm p-3 rounded-md">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Reconectando... (Tentativa {retryCount + 1}/3)</span>
+                </div>
               </div>
             )}
 
