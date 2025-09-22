@@ -76,7 +76,7 @@ export const TestNotification = () => {
           disabled={!isSupported}
           className="w-full"
         >
-          {isRegistered ? "Testar Notificação" : "Ativar e Testar"}
+          {isRegistered ? "Testar Notificação" : "🔔 ATIVAR NOTIFICAÇÕES"}
         </Button>
         
         {!isSupported && (

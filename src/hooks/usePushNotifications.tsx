@@ -189,15 +189,24 @@ export const usePushNotifications = () => {
   }, [toast]);
 
   const subscribeToPush = async () => {
-    if (!isSupported) return false;
+    console.log('🔔 Iniciando processo de inscrição para push notifications');
+    console.log('isSupported:', isSupported);
+    
+    if (!isSupported) {
+      console.error('❌ Push notifications não suportadas');
+      return false;
+    }
 
     try {
       if (Capacitor.isNativePlatform()) {
+        console.log('📱 Plataforma nativa detectada');
         // Já tratado no useEffect
         return true;
       } else {
+        console.log('🌐 Plataforma web detectada');
         // Para web, usar service worker com VAPID key
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+          console.error('❌ Service Worker ou PushManager não disponível');
           toast({
             title: "Não Suportado",
             description: "Notificações push não são suportadas neste navegador.",
@@ -206,8 +215,12 @@ export const usePushNotifications = () => {
           return false;
         }
 
+        console.log('🔐 Solicitando permissão de notificação...');
         const permission = await Notification.requestPermission();
+        console.log('Permissão:', permission);
+        
         if (permission !== 'granted') {
+          console.error('❌ Permissão negada');
           toast({
             title: "Permissão Negada",
             description: "Permissão para notificações foi negada.",
@@ -216,10 +229,13 @@ export const usePushNotifications = () => {
           return false;
         }
 
+        console.log('🔑 Obtendo chave VAPID do backend...');
         // Get VAPID key from backend
         const vapidResponse = await supabase.functions.invoke('get-vapid-key');
+        console.log('Resposta VAPID:', vapidResponse);
+        
         if (vapidResponse.error) {
-          console.error('Error getting VAPID key:', vapidResponse.error);
+          console.error('❌ Erro ao obter chave VAPID:', vapidResponse.error);
           toast({
             title: "Erro de Configuração",
             description: "Não foi possível obter as chaves de notificação.",
@@ -229,23 +245,30 @@ export const usePushNotifications = () => {
         }
 
         const { vapidPublicKey } = vapidResponse.data;
-        console.log('Using VAPID key:', vapidPublicKey);
+        console.log('Chave VAPID obtida:', vapidPublicKey?.substring(0, 10) + '...');
 
+        console.log('⚙️ Obtendo Service Worker...');
         const registration = await navigator.serviceWorker.ready;
+        console.log('Service Worker pronto');
+        
+        console.log('📝 Criando subscription...');
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: vapidPublicKey
         });
 
-        console.log('Web subscription created:', {
-          endpoint: subscription.endpoint,
+        console.log('✅ Subscription criada:', {
+          endpoint: subscription.endpoint.substring(0, 50) + '...',
           keys: subscription.toJSON().keys
         });
 
+        console.log('💾 Salvando subscription no backend...');
         await saveSubscriptionToBackend(subscription);
+        
         setIsRegistered(true);
         setToken(subscription.endpoint);
 
+        console.log('🎉 Processo concluído com sucesso!');
         toast({
           title: "Sucesso!",
           description: "Notificações ativadas com sucesso.",
@@ -254,10 +277,10 @@ export const usePushNotifications = () => {
         return true;
       }
     } catch (error) {
-      console.error('Error subscribing to push:', error);
+      console.error('💥 Erro no processo de inscrição:', error);
       toast({
         title: "Erro nas notificações",
-        description: "Não foi possível ativar as notificações.",
+        description: "Não foi possível ativar as notificações: " + error.message,
         variant: "destructive"
       });
       return false;
