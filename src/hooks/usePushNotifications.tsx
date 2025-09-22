@@ -202,10 +202,25 @@ export const usePushNotifications = () => {
           return false;
         }
 
+        // Get VAPID key from backend
+        const vapidResponse = await supabase.functions.invoke('get-vapid-key');
+        if (vapidResponse.error) {
+          console.error('Error getting VAPID key:', vapidResponse.error);
+          toast({
+            title: "Erro de Configuração",
+            description: "Não foi possível obter as chaves de notificação.",
+            variant: "destructive",
+          });
+          return false;
+        }
+
+        const { vapidPublicKey } = vapidResponse.data;
+        console.log('Using VAPID key:', vapidPublicKey);
+
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: 'BEl62iUYgUivxIkv69yViEuiBIa40HI8YHTe_JcYD9kPhmKb3deSyDSNrRK5ZQfC1E-u3YgOJpJ3F4eF7L8T0J8'
+          applicationServerKey: vapidPublicKey
         });
 
         await saveSubscriptionToBackend(subscription);

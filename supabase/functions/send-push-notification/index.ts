@@ -1,48 +1,9 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import webPush from 'npm:web-push@3.6.7'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// Helper function to create Web Push headers with VAPID authentication
-async function createWebPushHeaders(
-  endpoint: string,
-  vapidPublicKey: string,
-  vapidPrivateKey: string,
-  payload: string
-): Promise<Record<string, string>> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/octet-stream',
-    'TTL': '86400',
-  }
-
-  try {
-    // For Web Push protocol, we need to create a JWT token
-    // This is a simplified version - in production you might want to use a proper JWT library
-    const vapidSubject = 'mailto:admin@igreja.com' // Change to your email
-    
-    // Create VAPID headers
-    const jwtHeader = btoa(JSON.stringify({ typ: 'JWT', alg: 'ES256' }))
-    const jwtPayload = btoa(JSON.stringify({
-      aud: new URL(endpoint).origin,
-      exp: Math.floor(Date.now() / 1000) + 12 * 60 * 60, // 12 hours
-      sub: vapidSubject
-    }))
-
-    // For simplicity, we'll use a basic authorization header
-    // In a production environment, you should properly sign the JWT
-    headers['Authorization'] = `vapid t=${jwtHeader}.${jwtPayload}.signature, k=${vapidPublicKey}`
-    
-    return headers
-  } catch (error) {
-    console.error('Error creating VAPID headers:', error)
-    // Fallback to basic headers
-    return {
-      'Content-Type': 'application/json',
-      'TTL': '86400',
-    }
-  }
 }
 
 interface PushNotificationPayload {
@@ -109,6 +70,13 @@ serve(async (req) => {
       }
     }
 
+    // Configure web-push with VAPID keys
+    webPush.setVapidDetails(
+      'mailto:admin@igreja.com',
+      vapidPublicKey,
+      vapidPrivateKey
+    )
+
     // Send notifications to all subscriptions
     const notificationPromises = subscriptions.map(async (subscription: any) => {
       try {
@@ -120,37 +88,29 @@ serve(async (req) => {
           }
         }
 
-        // Create proper Web Push payload
-        const payload = JSON.stringify(notificationPayload)
-        
-        // Create VAPID headers for authentication
-        const vapidHeaders: Record<string, string> = {
-          'Content-Type': 'application/octet-stream',
-          'TTL': '86400',
-        }
+        console.log(`Sending notification to endpoint: ${subscription.endpoint.substring(0, 50)}...`)
 
-        // Use Web Push protocol for all endpoints (including FCM)
-        // Convert VAPID keys to proper format
-        const webPushHeaders = await createWebPushHeaders(
-          subscription.endpoint,
-          vapidPublicKey,
-          vapidPrivateKey,
-          payload
+        // Send push notification using web-push library
+        await webPush.sendNotification(
+          pushSubscription,
+          JSON.stringify(notificationPayload),
+          {
+            TTL: 86400, // 24 hours
+            urgency: 'normal',
+            topic: 'igreja-notification'
+          }
         )
-        
-        Object.assign(vapidHeaders, webPushHeaders)
-        
-        const webPushResponse = await fetch(subscription.endpoint, {
-          method: 'POST',
-          headers: vapidHeaders,
-          body: payload
-        })
 
-        if (!webPushResponse.ok) {
-          console.error(`Failed to send notification to ${subscription.endpoint}:`, webPushResponse.statusText)
-          
-          // If subscription is invalid, mark as inactive
-          if (webPushResponse.status === 410) {
+        console.log(`Successfully sent notification to subscription ${subscription.id}`)
+        return { success: true, subscriptionId: subscription.id }
+
+      } catch (error) {
+        console.error(`Error sending notification to subscription ${subscription.id}:`, error)
+        
+        // If subscription is invalid (410 error), mark as inactive
+        if (error.statusCode === 410) {
+          console.log(`Marking subscription ${subscription.id} as inactive due to 410 error`)
+          try {
             await fetch(`${supabaseUrl}/rest/v1/push_subscriptions?id=eq.${subscription.id}`, {
               method: 'PATCH',
               headers: {
@@ -160,12 +120,11 @@ serve(async (req) => {
               },
               body: JSON.stringify({ is_active: false })
             })
+          } catch (dbError) {
+            console.error(`Failed to mark subscription as inactive:`, dbError)
           }
         }
 
-        return { success: true, subscriptionId: subscription.id }
-      } catch (error) {
-        console.error(`Error sending notification to subscription ${subscription.id}:`, error)
         return { success: false, subscriptionId: subscription.id, error: error.message }
       }
     })
