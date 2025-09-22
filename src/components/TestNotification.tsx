@@ -2,10 +2,12 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 export const TestNotification = () => {
   const { toast } = useToast();
-  const { isRegistered, subscribeToPush } = usePushNotifications();
+  const { isRegistered, subscribeToPush, isSupported, token } = usePushNotifications();
 
   const sendTestNotification = async () => {
     try {
@@ -53,17 +55,36 @@ export const TestNotification = () => {
   };
 
   return (
-    <div className="p-4 bg-card rounded-lg border">
-      <h3 className="font-semibold mb-2">Teste de Notificações Push</h3>
-      <p className="text-sm text-muted-foreground mb-4">
-        {isRegistered 
-          ? "Você está inscrito para receber notificações. Clique para testar."
-          : "Ative as notificações e teste o funcionamento."
-        }
-      </p>
-      <Button onClick={handleSubscribeAndTest}>
-        {isRegistered ? "Testar Notificação" : "Ativar e Testar"}
-      </Button>
-    </div>
+    <Card className="bg-card border">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          🔔 Teste de Notificações Push
+          <Badge variant={isRegistered ? "default" : "secondary"}>
+            {isRegistered ? "Ativo" : "Inativo"}
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="text-sm text-muted-foreground space-y-1">
+          <p><strong>Suporte:</strong> {isSupported ? "✅ Suportado" : "❌ Não Suportado"}</p>
+          <p><strong>Status:</strong> {isRegistered ? "✅ Inscrito" : "❌ Não inscrito"}</p>
+          {token && <p><strong>Endpoint:</strong> {token.substring(0, 50)}...</p>}
+        </div>
+        
+        <Button 
+          onClick={handleSubscribeAndTest}
+          disabled={!isSupported}
+          className="w-full"
+        >
+          {isRegistered ? "Testar Notificação" : "Ativar e Testar"}
+        </Button>
+        
+        {!isSupported && (
+          <p className="text-sm text-destructive">
+            Notificações push não são suportadas neste navegador/dispositivo.
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 };

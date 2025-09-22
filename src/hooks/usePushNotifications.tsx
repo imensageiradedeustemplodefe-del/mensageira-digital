@@ -17,11 +17,25 @@ export const usePushNotifications = () => {
       // Para aplicações sem login, permitir subscriptions anônimas
       const user = (await supabase.auth.getUser()).data.user;
 
+      let p256dhKey = '';
+      let authKey = '';
+      
+      if ('toJSON' in subscription) {
+        // É uma PushSubscription real do browser
+        const subscriptionJson = subscription.toJSON();
+        p256dhKey = subscriptionJson.keys?.p256dh || '';
+        authKey = subscriptionJson.keys?.auth || '';
+      } else {
+        // É um objeto simples (para native)
+        p256dhKey = subscription.keys.p256dh;
+        authKey = subscription.keys.auth;
+      }
+
       const subscriptionData = {
         user_id: user?.id || null, // Permitir subscriptions anônimas
         endpoint: subscription.endpoint,
-        p256dh: 'keys' in subscription ? subscription.keys.p256dh : '',
-        auth: 'keys' in subscription ? subscription.keys.auth : '',
+        p256dh: p256dhKey,
+        auth: authKey,
         is_active: true
       };
 
@@ -221,6 +235,11 @@ export const usePushNotifications = () => {
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: vapidPublicKey
+        });
+
+        console.log('Web subscription created:', {
+          endpoint: subscription.endpoint,
+          keys: subscription.toJSON().keys
         });
 
         await saveSubscriptionToBackend(subscription);

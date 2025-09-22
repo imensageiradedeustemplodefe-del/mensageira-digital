@@ -70,16 +70,34 @@ serve(async (req) => {
       }
     }
 
-    // Configure web-push with VAPID keys
+    // Validate and configure web-push with VAPID keys
+    console.log('VAPID Public Key length:', vapidPublicKey?.length)
+    console.log('VAPID Private Key length:', vapidPrivateKey?.length)
+    
+    // Ensure keys are properly formatted
+    const cleanPublicKey = vapidPublicKey?.trim()
+    const cleanPrivateKey = vapidPrivateKey?.trim()
+    
+    if (!cleanPublicKey || !cleanPrivateKey) {
+      console.error('Missing VAPID keys')
+      return new Response('Missing VAPID configuration', { status: 500, headers: corsHeaders })
+    }
+    
     webPush.setVapidDetails(
       'mailto:admin@igreja.com',
-      vapidPublicKey,
-      vapidPrivateKey
+      cleanPublicKey,
+      cleanPrivateKey
     )
 
     // Send notifications to all subscriptions
     const notificationPromises = subscriptions.map(async (subscription: any) => {
       try {
+        // Skip subscriptions without proper keys (native/FCM endpoints)
+        if (!subscription.p256dh || !subscription.auth) {
+          console.log(`Skipping subscription without keys: ${subscription.endpoint.substring(0, 50)}...`)
+          return { success: false, subscriptionId: subscription.id, error: 'Missing subscription keys' }
+        }
+        
         const pushSubscription = {
           endpoint: subscription.endpoint,
           keys: {
