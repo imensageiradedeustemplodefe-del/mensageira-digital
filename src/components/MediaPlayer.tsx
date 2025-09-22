@@ -35,23 +35,23 @@ export function MediaPlayer() {
       audio.preload = 'auto';
       audio.crossOrigin = 'anonymous';
       
+      // Critical: Set audio to continue playing in background
+      audio.setAttribute('data-no-pause', 'true');
+      
       // Add event listeners for background playback
       audio.addEventListener('play', () => {
         setIsPlaying(true);
         setError(null);
-        requestWakeLock();
         updateMediaSession();
       });
       
       audio.addEventListener('pause', () => {
         setIsPlaying(false);
-        releaseWakeLock();
         updateMediaSession();
       });
       
       audio.addEventListener('ended', () => {
         setIsPlaying(false);
-        releaseWakeLock();
         updateMediaSession();
       });
       
@@ -63,6 +63,16 @@ export function MediaPlayer() {
       });
       
       audio.addEventListener('loadstart', () => setError(null));
+      
+      // Handle visibility change to prevent auto-pause
+      audio.addEventListener('loadstart', () => {
+        // Prevent browser from pausing on visibility change
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && audio.paused && isPlaying) {
+            audio.play().catch(console.error);
+          }
+        });
+      });
       
       audioRef.current = audio;
     }
@@ -119,26 +129,22 @@ export function MediaPlayer() {
     }
   };
 
-  // Request wake lock to keep screen active during audio playback
-  const requestWakeLock = async () => {
-    try {
-      if ('wakeLock' in navigator) {
-        wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
-        console.log('[MediaPlayer] Wake lock activated');
+  // Prevent browser from auto-pausing on visibility change
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && audioRef.current && !audioRef.current.paused) {
+        // Audio should continue playing in background
+        console.log('[MediaPlayer] App went to background, audio continues');
+      } else if (!document.hidden && audioRef.current && isPlaying && audioRef.current.paused) {
+        // Resume if needed when coming back to foreground
+        audioRef.current.play().catch(console.error);
+        console.log('[MediaPlayer] App returned to foreground, resuming audio');
       }
-    } catch (error) {
-      console.log('[MediaPlayer] Wake lock not available or failed:', error);
-    }
-  };
+    };
 
-  // Release wake lock
-  const releaseWakeLock = () => {
-    if (wakeLockRef.current) {
-      wakeLockRef.current.release();
-      wakeLockRef.current = null;
-      console.log('[MediaPlayer] Wake lock released');
-    }
-  };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isPlaying]);
 
   // Setup Media Session API for background playback
   const setupMediaSession = () => {
@@ -157,16 +163,21 @@ export function MediaPlayer() {
         ],
       });
 
-      // Set up action handlers
+      // Set up action handlers for system media controls
       navigator.mediaSession.setActionHandler('play', () => {
-        if (audioRef.current) {
-          audioRef.current.play();
+        if (audioRef.current && audioRef.current.paused) {
+          audioRef.current.play().then(() => {
+            setIsPlaying(true);
+            console.log('[MediaPlayer] Media Session: Play triggered');
+          }).catch(console.error);
         }
       });
 
       navigator.mediaSession.setActionHandler('pause', () => {
-        if (audioRef.current) {
+        if (audioRef.current && !audioRef.current.paused) {
           audioRef.current.pause();
+          setIsPlaying(false);
+          console.log('[MediaPlayer] Media Session: Pause triggered');
         }
       });
 
@@ -174,8 +185,12 @@ export function MediaPlayer() {
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
+          setIsPlaying(false);
+          console.log('[MediaPlayer] Media Session: Stop triggered');
         }
       });
+
+      console.log('[MediaPlayer] Media Session configured');
     }
   };
 
@@ -293,7 +308,6 @@ export function MediaPlayer() {
         audioRef.current.pause();
         audioRef.current.src = '';
       }
-      releaseWakeLock();
     };
   }, []);
 
