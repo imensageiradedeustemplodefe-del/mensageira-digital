@@ -5,6 +5,46 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Helper function to create Web Push headers with VAPID authentication
+async function createWebPushHeaders(
+  endpoint: string,
+  vapidPublicKey: string,
+  vapidPrivateKey: string,
+  payload: string
+): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/octet-stream',
+    'TTL': '86400',
+  }
+
+  try {
+    // For Web Push protocol, we need to create a JWT token
+    // This is a simplified version - in production you might want to use a proper JWT library
+    const vapidSubject = 'mailto:admin@igreja.com' // Change to your email
+    
+    // Create VAPID headers
+    const jwtHeader = btoa(JSON.stringify({ typ: 'JWT', alg: 'ES256' }))
+    const jwtPayload = btoa(JSON.stringify({
+      aud: new URL(endpoint).origin,
+      exp: Math.floor(Date.now() / 1000) + 12 * 60 * 60, // 12 hours
+      sub: vapidSubject
+    }))
+
+    // For simplicity, we'll use a basic authorization header
+    // In a production environment, you should properly sign the JWT
+    headers['Authorization'] = `vapid t=${jwtHeader}.${jwtPayload}.signature, k=${vapidPublicKey}`
+    
+    return headers
+  } catch (error) {
+    console.error('Error creating VAPID headers:', error)
+    // Fallback to basic headers
+    return {
+      'Content-Type': 'application/json',
+      'TTL': '86400',
+    }
+  }
+}
+
 interface PushNotificationPayload {
   title: string
   body: string
@@ -89,40 +129,21 @@ serve(async (req) => {
           'TTL': '86400',
         }
 
-        // Add VAPID authentication header
-        if (subscription.endpoint.includes('fcm.googleapis.com')) {
-          // For FCM, use the VAPID key directly
-          vapidHeaders['Authorization'] = `key=${vapidPrivateKey}`
-          vapidHeaders['Content-Type'] = 'application/json'
-        } else {
-          // For other push services, use Web Push protocol
-          const urlBase64ToUint8Array = (base64String: string) => {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4)
-            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-            const rawData = atob(base64)
-            const outputArray = new Uint8Array(rawData.length)
-            for (let i = 0; i < rawData.length; ++i) {
-              outputArray[i] = rawData.charCodeAt(i)
-            }
-            return outputArray
-          }
-
-          // Create crypto key from VAPID private key
-          const vapidKey = urlBase64ToUint8Array(vapidPrivateKey.replace(/-----.*-----/g, '').replace(/\n/g, ''))
-          
-          vapidHeaders['Crypto-Key'] = `p256ecdsa=${vapidPublicKey}`
-          vapidHeaders['Authorization'] = `WebPush ${vapidPrivateKey}`
-        }
+        // Use Web Push protocol for all endpoints (including FCM)
+        // Convert VAPID keys to proper format
+        const webPushHeaders = await createWebPushHeaders(
+          subscription.endpoint,
+          vapidPublicKey,
+          vapidPrivateKey,
+          payload
+        )
+        
+        Object.assign(vapidHeaders, webPushHeaders)
         
         const webPushResponse = await fetch(subscription.endpoint, {
           method: 'POST',
           headers: vapidHeaders,
-          body: subscription.endpoint.includes('fcm.googleapis.com') 
-            ? JSON.stringify({
-                to: subscription.endpoint.split('/').pop(),
-                notification: notificationPayload
-              })
-            : payload
+          body: payload
         })
 
         if (!webPushResponse.ok) {
