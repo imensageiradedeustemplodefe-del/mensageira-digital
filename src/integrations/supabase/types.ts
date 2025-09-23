@@ -460,6 +460,33 @@ export type Database = {
         }
         Relationships: []
       }
+      public_prayer_requests: {
+        Row: {
+          category: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          is_urgent: boolean | null
+          request_text: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_urgent?: boolean | null
+          request_text: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_urgent?: boolean | null
+          request_text?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
@@ -558,35 +585,20 @@ export type Database = {
       }
     }
     Views: {
-      public_prayer_requests: {
-        Row: {
-          category: string | null
-          created_at: string | null
-          display_name: string | null
-          id: string | null
-          is_urgent: boolean | null
-          request_text: string | null
-        }
-        Insert: {
-          category?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-          is_urgent?: boolean | null
-          request_text?: string | null
-        }
-        Update: {
-          category?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-          is_urgent?: boolean | null
-          request_text?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
+      get_public_prayer_requests: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string
+          created_at: string
+          display_name: string
+          id: string
+          is_urgent: boolean
+          request_text: string
+        }[]
+      }
       notify_todays_events: {
         Args: Record<PropertyKey, never>
         Returns: undefined
