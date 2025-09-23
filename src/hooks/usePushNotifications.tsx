@@ -12,21 +12,24 @@ export const usePushNotifications = () => {
 
   const saveSubscriptionToBackend = async (subscription: PushSubscription | { endpoint: string; keys: { p256dh: string; auth: string } }) => {
     try {
-      console.log('Tentando salvar subscription:', subscription.endpoint);
+      console.log('💾 [SAVE] Iniciando salvamento da subscription:', subscription.endpoint.substring(0, 50) + '...');
       
       // Para aplicações sem login, permitir subscriptions anônimas
       const user = (await supabase.auth.getUser()).data.user;
+      console.log('👤 [SAVE] Usuário autenticado:', user ? user.id : 'ANÔNIMO');
 
       let p256dhKey = '';
       let authKey = '';
       
       if ('toJSON' in subscription) {
         // É uma PushSubscription real do browser
+        console.log('🔧 [SAVE] Processando subscription real do browser');
         const subscriptionJson = subscription.toJSON();
         p256dhKey = subscriptionJson.keys?.p256dh || '';
         authKey = subscriptionJson.keys?.auth || '';
       } else {
         // É um objeto simples (para native)
+        console.log('📱 [SAVE] Processando subscription nativa');
         p256dhKey = subscription.keys.p256dh;
         authKey = subscription.keys.auth;
       }
@@ -39,46 +42,64 @@ export const usePushNotifications = () => {
         is_active: true
       };
 
-      console.log('Dados da subscription:', subscriptionData);
+      console.log('📊 [SAVE] Dados da subscription preparados:', {
+        user_id: subscriptionData.user_id,
+        endpoint: subscriptionData.endpoint.substring(0, 50) + '...',
+        p256dh: subscriptionData.p256dh ? 'PRESENTE' : 'AUSENTE',
+        auth: subscriptionData.auth ? 'PRESENTE' : 'AUSENTE'
+      });
 
       // Check if subscription already exists (por endpoint, não por usuário)
+      console.log('🔍 [SAVE] Verificando se subscription já existe...');
       const { data: existingSubscription, error: selectError } = await supabase
         .from('push_subscriptions')
         .select('id')
         .eq('endpoint', subscription.endpoint)
         .maybeSingle();
 
-      console.log('Subscription existente:', existingSubscription, 'Error:', selectError);
+      if (selectError) {
+        console.error('❌ [SAVE] Erro ao verificar subscription existente:', selectError);
+        return { success: false, error: selectError };
+      }
+
+      console.log('🔍 [SAVE] Subscription existente:', existingSubscription ? 'SIM (id: ' + existingSubscription.id + ')' : 'NÃO');
 
       if (existingSubscription) {
         // Update existing subscription
+        console.log('🔄 [SAVE] Atualizando subscription existente...');
         const { error } = await supabase
           .from('push_subscriptions')
           .update({ is_active: true, updated_at: new Date().toISOString() })
           .eq('id', existingSubscription.id);
 
         if (error) {
-         console.log('Error updating subscription:', error);
-         console.log('Error details:', JSON.stringify(error, null, 2));
+         console.error('❌ [SAVE] Erro ao atualizar subscription:', error);
+         console.error('❌ [SAVE] Detalhes do erro:', JSON.stringify(error, null, 2));
+         return { success: false, error };
         } else {
-          console.log('Subscription updated successfully');
+          console.log('✅ [SAVE] Subscription atualizada com sucesso');
+          return { success: true };
         }
       } else {
         // Create new subscription
+        console.log('➕ [SAVE] Criando nova subscription...');
         const { data, error } = await supabase
           .from('push_subscriptions')
           .insert([subscriptionData])
           .select();
 
         if (error) {
-         console.log('Error saving subscription:', error);
-         console.log('Error details:', JSON.stringify(error, null, 2));
+         console.error('❌ [SAVE] Erro ao criar subscription:', error);
+         console.error('❌ [SAVE] Detalhes do erro:', JSON.stringify(error, null, 2));
+         return { success: false, error };
         } else {
-          console.log('Subscription saved successfully:', data);
+          console.log('✅ [SAVE] Subscription criada com sucesso:', data);
+          return { success: true, data };
         }
       }
     } catch (error) {
-      console.error('Error in saveSubscriptionToBackend:', error);
+      console.error('💥 [SAVE] Erro geral no saveSubscriptionToBackend:', error);
+      return { success: false, error };
     }
   };
 
@@ -232,20 +253,29 @@ export const usePushNotifications = () => {
         console.log('🔑 Obtendo chave VAPID do backend...');
         // Get VAPID key from backend
         const vapidResponse = await supabase.functions.invoke('get-vapid-key');
-        console.log('Resposta VAPID:', vapidResponse);
+        console.log('Resposta VAPID completa:', vapidResponse);
         
         if (vapidResponse.error) {
           console.error('❌ Erro ao obter chave VAPID:', vapidResponse.error);
           toast({
             title: "Erro de Configuração",
-            description: "Não foi possível obter as chaves de notificação.",
+            description: "Não foi possível obter as chaves de notificação: " + vapidResponse.error.message,
             variant: "destructive",
           });
           return false;
         }
 
         const { vapidPublicKey } = vapidResponse.data;
-        console.log('Chave VAPID obtida:', vapidPublicKey?.substring(0, 10) + '...');
+        if (!vapidPublicKey) {
+          console.error('❌ Chave VAPID não encontrada na resposta');
+          toast({
+            title: "Erro de Configuração", 
+            description: "Chave VAPID não foi encontrada.",
+            variant: "destructive",
+          });
+          return false;
+        }
+        console.log('Chave VAPID obtida:', vapidPublicKey?.substring(0, 20) + '...');
 
         console.log('⚙️ Obtendo Service Worker...');
         const registration = await navigator.serviceWorker.ready;
@@ -281,7 +311,8 @@ export const usePushNotifications = () => {
         });
 
         console.log('💾 Salvando subscription no backend...');
-        await saveSubscriptionToBackend(subscription);
+        const saveResult = await saveSubscriptionToBackend(subscription);
+        console.log('Resultado do salvamento:', saveResult);
         
         setIsRegistered(true);
         setToken(subscription.endpoint);
@@ -296,9 +327,10 @@ export const usePushNotifications = () => {
       }
     } catch (error) {
       console.error('💥 Erro no processo de inscrição:', error);
+      console.error('Stack trace completo:', error.stack);
       toast({
         title: "Erro nas notificações",
-        description: "Não foi possível ativar as notificações: " + error.message,
+        description: "Erro detalhado: " + (error.message || error.toString()),
         variant: "destructive"
       });
       return false;
