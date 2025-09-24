@@ -9,7 +9,7 @@ const About = () => {
     {
       name: "Profeta João",
       role: "Profeta (em memória)",
-      description: "Foi ele quem fundou esta igreja e fez tudo acontecer. Sua visão e dedicação criaram o alicerce de fé que sustenta nossa comunidade até hoje.",
+      description: "Era a base e o alicerce de nossa igreja. Mesmo não estando mais entre nós, sua influência e ensinamentos continuam guiando nossa comunidade de fé.",
       image: "/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png"
     },
     {
