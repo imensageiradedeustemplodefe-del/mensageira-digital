@@ -4,11 +4,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AudioProvider } from "@/contexts/AudioContext";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import MobileMenuPage from "@/components/MobileMenuPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { GlobalAudioPlayer } from "@/components/GlobalAudioPlayer";
 import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 import { useCacheManager } from "@/hooks/useCacheManager";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -67,6 +69,7 @@ const AppContent = () => {
       </main>
       {!isMobile && <Footer />}
       {isMobile && <MobileBottomNav />}
+      <GlobalAudioPlayer />
     </div>
   );
 };
@@ -75,11 +78,13 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
+        <AudioProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </AudioProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
