@@ -603,6 +603,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      sanitize_prayer_request_for_public: {
+        Args: { p_email?: string; p_name: string; p_phone?: string }
+        Returns: string
+      }
       send_push_notification: {
         Args: {
           p_badge?: string
