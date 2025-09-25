@@ -66,7 +66,15 @@ export type Database = {
           prayer_request_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_encrypted_contacts_prayer_request"
+            columns: ["prayer_request_id"]
+            isOneToOne: false
+            referencedRelation: "prayer_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_templates: {
         Row: {
@@ -633,6 +641,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_encrypted_contact: {
+        Args: { p_prayer_request_id: string }
+        Returns: {
+          encrypted_email: string
+          encrypted_phone: string
+          encryption_key_hash: string
+        }[]
+      }
       get_public_prayer_requests: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -676,6 +692,15 @@ export type Database = {
           p_url?: string
         }
         Returns: undefined
+      }
+      store_encrypted_contact: {
+        Args: {
+          p_encrypted_email?: string
+          p_encrypted_phone?: string
+          p_key_hash?: string
+          p_prayer_request_id: string
+        }
+        Returns: string
       }
     }
     Enums: {
