@@ -1,5 +1,4 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import webPush from 'npm:web-push@3.6.7'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +13,44 @@ interface PushNotificationPayload {
   url?: string
 }
 
+// Simple push notification sender using FCM format
+async function sendPushNotification(
+  endpoint: string,
+  payload: string,
+  auth: string,
+  p256dh: string
+): Promise<boolean> {
+  try {
+    // For FCM endpoints, we can send directly
+    if (endpoint.includes('fcm.googleapis.com')) {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'TTL': '86400',
+        },
+        body: payload
+      })
+      return response.ok
+    }
+    
+    // For other endpoints, try a simple POST
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'TTL': '86400',
+      },
+      body: payload
+    })
+    
+    return response.ok
+  } catch (error) {
+    console.error('Push notification failed:', error)
+    return false
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -25,12 +62,10 @@ serve(async (req) => {
     
     const { title, body, icon = '/favicon.ico', badge = '/favicon.ico', url = '/' } = await req.json() as PushNotificationPayload
 
-    const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY')
-    const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-    if (!vapidPublicKey || !vapidPrivateKey || !supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       console.error('Missing required environment variables')
       return new Response('Missing configuration', { status: 500, headers: corsHeaders })
     }
@@ -60,7 +95,7 @@ serve(async (req) => {
     }
 
     // Prepare notification payload
-    const notificationPayload = {
+    const notificationPayload = JSON.stringify({
       title,
       body,
       icon,
@@ -68,65 +103,35 @@ serve(async (req) => {
       data: {
         url
       }
-    }
-
-    // Validate and configure web-push with VAPID keys
-    console.log('VAPID Public Key length:', vapidPublicKey?.length)
-    console.log('VAPID Private Key length:', vapidPrivateKey?.length)
-    
-    // Ensure keys are properly formatted
-    const cleanPublicKey = vapidPublicKey?.trim()
-    const cleanPrivateKey = vapidPrivateKey?.trim()
-    
-    if (!cleanPublicKey || !cleanPrivateKey) {
-      console.error('Missing VAPID keys')
-      return new Response('Missing VAPID configuration', { status: 500, headers: corsHeaders })
-    }
-    
-    webPush.setVapidDetails(
-      'mailto:admin@igreja.com',
-      cleanPublicKey,
-      cleanPrivateKey
-    )
+    })
 
     // Send notifications to all subscriptions
     const notificationPromises = subscriptions.map(async (subscription: any) => {
       try {
-        // Skip subscriptions without proper keys (native/FCM endpoints)
-        if (!subscription.p256dh || !subscription.auth) {
-          console.log(`Skipping subscription without keys: ${subscription.endpoint.substring(0, 50)}...`)
-          return { success: false, subscriptionId: subscription.id, error: 'Missing subscription keys' }
-        }
-        
-        const pushSubscription = {
-          endpoint: subscription.endpoint,
-          keys: {
-            p256dh: subscription.p256dh,
-            auth: subscription.auth
-          }
-        }
-
         console.log(`Sending notification to endpoint: ${subscription.endpoint.substring(0, 50)}...`)
 
-        // Send push notification using web-push library
-        await webPush.sendNotification(
-          pushSubscription,
-          JSON.stringify(notificationPayload),
-          {
-            TTL: 86400, // 24 hours
-            urgency: 'normal',
-            topic: 'igreja-notification'
-          }
+        const success = await sendPushNotification(
+          subscription.endpoint,
+          notificationPayload,
+          subscription.auth || '',
+          subscription.p256dh || ''
         )
 
-        console.log(`Successfully sent notification to subscription ${subscription.id}`)
-        return { success: true, subscriptionId: subscription.id }
+        if (success) {
+          console.log(`Successfully sent notification to subscription ${subscription.id}`)
+          return { success: true, subscriptionId: subscription.id }
+        } else {
+          console.log(`Failed to send notification to subscription ${subscription.id}`)
+          return { success: false, subscriptionId: subscription.id, error: 'Push service error' }
+        }
 
       } catch (error) {
         console.error(`Error sending notification to subscription ${subscription.id}:`, error)
         
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        
         // If subscription is invalid (410 error), mark as inactive
-        if (error.statusCode === 410) {
+        if (errorMessage.includes('410')) {
           console.log(`Marking subscription ${subscription.id} as inactive due to 410 error`)
           try {
             await fetch(`${supabaseUrl}/rest/v1/push_subscriptions?id=eq.${subscription.id}`, {
@@ -143,7 +148,7 @@ serve(async (req) => {
           }
         }
 
-        return { success: false, subscriptionId: subscription.id, error: error.message }
+        return { success: false, subscriptionId: subscription.id, error: errorMessage }
       }
     })
 
@@ -157,14 +162,16 @@ serve(async (req) => {
       message: 'Push notifications processed',
       successful: successCount,
       failed: failureCount,
-      total: subscriptions.length
+      total: subscriptions.length,
+      results: results
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
 
   } catch (error) {
     console.error('Error in send-push-notification function:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
