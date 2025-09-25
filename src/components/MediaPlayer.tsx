@@ -115,11 +115,11 @@ export function MediaPlayer() {
 
     const mediaType = getMediaType(gospelRadio.media_url);
     
-    // Handle Spotify URLs differently - open externally
-    if (mediaType === 'spotify') {
+    // Handle external URLs differently - open externally  
+    if (mediaType === 'spotify' || mediaType === 'youtube') {
       window.open(gospelRadio.media_url, '_blank');
       
-      // Update play count for Spotify
+      // Update play count for external links
       try {
         await supabase
           .from('media_items')
@@ -185,14 +185,14 @@ export function MediaPlayer() {
   }
 
   const mediaType = getMediaType(gospelRadio.media_url);
-  const isSpotify = mediaType === 'spotify';
+  const isExternalLink = mediaType === 'spotify' || mediaType === 'youtube';
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-center">
           <Radio className="w-5 h-5 mr-2" />
-          {isSpotify ? 'Playlist Gospel' : 'Rádio Gospel'}
+          {isExternalLink ? (mediaType === 'spotify' ? 'Playlist Gospel' : 'Canal Gospel') : 'Rádio Gospel'}
         </CardTitle>
       </CardHeader>
 
@@ -200,8 +200,8 @@ export function MediaPlayer() {
         <div className="bg-muted rounded-lg p-6">
           <div className="text-center space-y-4">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-              {isSpotify ? (
-                <div className="text-primary font-bold text-2xl">♪</div>
+              {isExternalLink ? (
+                <div className="text-primary font-bold text-2xl">{mediaType === 'spotify' ? '♪' : '▶'}</div>
               ) : (
                 <Radio className="w-10 h-10 text-primary" />
               )}
@@ -212,7 +212,7 @@ export function MediaPlayer() {
             {gospelRadio.artist && (
                 <p className="text-sm text-muted-foreground mt-1">{gospelRadio.artist}</p>
               )}
-            {!isSpotify && (
+            {!isExternalLink && (
               <div className="flex items-center justify-center gap-2 mt-2">
                 <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-red-500 animate-pulse' : 'bg-muted-foreground'}`} />
                 <span className="text-sm text-muted-foreground">
@@ -229,7 +229,7 @@ export function MediaPlayer() {
                   <span className="text-xs font-medium">ERRO DE REPRODUÇÃO</span>
                 </div>
                 <p>{error}</p>
-                {!isSpotify && (
+                {!isExternalLink && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -258,10 +258,10 @@ export function MediaPlayer() {
               onClick={togglePlay}
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
-              {isSpotify ? (
+              {isExternalLink ? (
                 <>
                   <Play className="w-5 h-5 mr-2" />
-                  Abrir no Spotify
+                  {mediaType === 'spotify' ? 'Abrir no Spotify' : 'Assistir no YouTube'}
                 </>
               ) : isPlaying ? (
                 <>
@@ -276,13 +276,16 @@ export function MediaPlayer() {
               )}
             </Button>
 
-            {isSpotify && (
+            {isExternalLink && (
               <p className="text-xs text-muted-foreground">
-                Este conteúdo será aberto no Spotify Web Player
+                {mediaType === 'spotify' 
+                  ? 'Este conteúdo será aberto no Spotify Web Player'
+                  : 'Este conteúdo será aberto no YouTube'
+                }
               </p>
             )}
             
-            {!isSpotify && (
+            {!isExternalLink && (
               <p className="text-xs text-muted-foreground">
                 Use o player flutuante para controles em segundo plano
               </p>

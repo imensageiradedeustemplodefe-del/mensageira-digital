@@ -261,13 +261,26 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
 
+    // Para YouTube URLs, vamos tentar convertê-las para embed
+    if (mediaType === 'youtube') {
+      const videoId = currentMedia.media_url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+      if (videoId && videoId[1]) {
+        // Tentar usar URL de áudio direto do YouTube (não sempre funciona)
+        const audioUrl = `https://www.youtube.com/embed/${videoId[1]}?autoplay=1&enablejsapi=1`;
+        setError('Para URLs do YouTube, use um link de stream de áudio direto para melhor compatibilidade');
+        setLoading(false);
+        return;
+      }
+    }
+
     // Validar se a URL parece ser um stream válido
     const isValidStreamUrl = currentMedia.media_url.match(/\.(mp3|aac|m3u8|pls|m3u)$/i) || 
                             currentMedia.media_url.includes('stream') ||
                             currentMedia.media_url.includes('radio') ||
-                            currentMedia.media_url.includes('.fm');
+                            currentMedia.media_url.includes('.fm') ||
+                            currentMedia.is_radio; // Allow URLs marked as radio
 
-    if (!isValidStreamUrl && mediaType !== 'radio') {
+    if (!isValidStreamUrl && mediaType !== 'radio' && mediaType !== 'youtube') {
       setError('URL de mídia inválida para reprodução');
       setLoading(false);
       return;
