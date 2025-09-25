@@ -192,6 +192,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [retryCount, currentMedia]);
 
+  // Helper function to detect media type
+  const getMediaType = useCallback((url: string): 'spotify' | 'youtube' | 'radio' | 'audio' => {
+    if (url.includes('spotify.com')) return 'spotify';
+    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+    if (url.includes('stream.') || url.includes('radio') || url.includes('.fm')) return 'radio';
+    return 'audio';
+  }, []);
+
   // Controle de volume
   useEffect(() => {
     if (audioRef.current) {
@@ -244,6 +252,27 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const play = useCallback(async () => {
     if (!audioRef.current || !currentMedia) return;
 
+    const mediaType = getMediaType(currentMedia.media_url);
+    
+    // Verificar se é um URL válido para reprodução
+    if (mediaType === 'youtube' || mediaType === 'spotify') {
+      setError('Este tipo de mídia deve ser aberto em aplicativo externo');
+      setLoading(false);
+      return;
+    }
+
+    // Validar se a URL parece ser um stream válido
+    const isValidStreamUrl = currentMedia.media_url.match(/\.(mp3|aac|m3u8|pls|m3u)$/i) || 
+                            currentMedia.media_url.includes('stream') ||
+                            currentMedia.media_url.includes('radio') ||
+                            currentMedia.media_url.includes('.fm');
+
+    if (!isValidStreamUrl && mediaType !== 'radio') {
+      setError('URL de mídia inválida para reprodução');
+      setLoading(false);
+      return;
+    }
+
     try {
       setError(null);
       setLoading(true);
@@ -271,7 +300,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setLoading(false);
       handleAudioError();
     }
-  }, [currentMedia, isMuted, volume, handleAudioError]);
+  }, [currentMedia, isMuted, volume, handleAudioError, getMediaType]);
 
   const pause = useCallback(() => {
     if (audioRef.current && !audioRef.current.paused) {
@@ -293,6 +322,18 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audioRef.current.pause();
     }
     
+    const mediaType = getMediaType(media.media_url);
+    
+    // Não carregar no contexto de áudio se for YouTube ou Spotify
+    if (mediaType === 'youtube' || mediaType === 'spotify') {
+      console.log(`[AudioContext] ${mediaType} URL detected, skipping audio context load`);
+      setCurrentMedia(null);
+      setError(null);
+      setRetryCount(0);
+      setLoading(false);
+      return;
+    }
+    
     setCurrentMedia(media);
     setError(null);
     setRetryCount(0);
@@ -301,7 +342,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (retryTimeoutRef.current) {
       clearTimeout(retryTimeoutRef.current);
     }
-  }, []);
+  }, [getMediaType]);
 
   const clearError = useCallback(() => {
     setError(null);
