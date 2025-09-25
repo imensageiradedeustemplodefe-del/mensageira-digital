@@ -38,6 +38,36 @@ export type Database = {
         }
         Relationships: []
       }
+      encrypted_contacts: {
+        Row: {
+          created_at: string
+          encrypted_email: string | null
+          encrypted_phone: string | null
+          encryption_key_hash: string
+          id: string
+          prayer_request_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          encrypted_email?: string | null
+          encrypted_phone?: string | null
+          encryption_key_hash?: string
+          id?: string
+          prayer_request_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          encrypted_email?: string | null
+          encrypted_phone?: string | null
+          encryption_key_hash?: string
+          id?: string
+          prayer_request_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       event_templates: {
         Row: {
           category: string
@@ -390,13 +420,12 @@ export type Database = {
           category: string | null
           completed_at: string | null
           created_at: string
-          email: string | null
+          has_contact_info: boolean | null
           id: string
           is_approved: boolean | null
           is_completed: boolean | null
           is_urgent: boolean | null
           name: string
-          phone: string | null
           request_text: string
           updated_at: string
         }
@@ -407,13 +436,12 @@ export type Database = {
           category?: string | null
           completed_at?: string | null
           created_at?: string
-          email?: string | null
+          has_contact_info?: boolean | null
           id?: string
           is_approved?: boolean | null
           is_completed?: boolean | null
           is_urgent?: boolean | null
           name: string
-          phone?: string | null
           request_text: string
           updated_at?: string
         }
@@ -424,15 +452,32 @@ export type Database = {
           category?: string | null
           completed_at?: string | null
           created_at?: string
-          email?: string | null
+          has_contact_info?: boolean | null
           id?: string
           is_approved?: boolean | null
           is_completed?: boolean | null
           is_urgent?: boolean | null
           name?: string
-          phone?: string | null
           request_text?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      prayer_requests_contact_backup: {
+        Row: {
+          email: string | null
+          id: string | null
+          phone: string | null
+        }
+        Insert: {
+          email?: string | null
+          id?: string | null
+          phone?: string | null
+        }
+        Update: {
+          email?: string | null
+          id?: string | null
+          phone?: string | null
         }
         Relationships: []
       }
