@@ -599,6 +599,21 @@ export type Database = {
           request_text: string
         }[]
       }
+      get_sanitized_prayer_requests: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string
+          created_at: string
+          display_name: string
+          id: string
+          is_urgent: boolean
+          request_text: string
+        }[]
+      }
+      is_admin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       notify_todays_events: {
         Args: Record<PropertyKey, never>
         Returns: undefined
