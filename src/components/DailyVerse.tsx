@@ -1,80 +1,22 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Share2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-
-interface Verse {
-  text: string;
-  reference: string;
-}
+import { useDailyVerses } from "@/hooks/useDailyVerses";
 
 const DailyVerse = () => {
-  const [verse, setVerse] = useState<Verse>({
-    text: "",
-    reference: ""
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const { verse, isLoading, error, refreshVerse, getDailyVerse } = useDailyVerses();
   const { toast } = useToast();
-
-  // Lista de versículos inspiradores
-  const verses = [
-    {
-      text: "Porque eu bem sei os pensamentos que tenho a vosso respeito, diz o SENHOR; pensamentos de paz, e não de mal, para vos dar o fim que esperais.",
-      reference: "Jeremias 29:11"
-    },
-    {
-      text: "Tudo posso naquele que me fortalece.",
-      reference: "Filipenses 4:13"
-    },
-    {
-      text: "O SENHOR é o meu pastor; nada me faltará.",
-      reference: "Salmos 23:1"
-    },
-    {
-      text: "Entrega o teu caminho ao SENHOR; confia nele, e ele tudo fará.",
-      reference: "Salmos 37:5"
-    },
-    {
-      text: "E sabemos que todas as coisas contribuem juntamente para o bem daqueles que amam a Deus.",
-      reference: "Romanos 8:28"
-    },
-    {
-      text: "Não tema, porque eu sou contigo; não te assombres, porque eu sou teu Deus.",
-      reference: "Isaías 41:10"
-    },
-    {
-      text: "Buscar-me-eis, e me achareis, quando me buscardes com todo o vosso coração.",
-      reference: "Jeremias 29:13"
-    }
-  ];
-
-  const getDailyVerse = (useRandom = false) => {
-    setIsLoading(true);
-    let verseIndex;
-    
-    if (useRandom) {
-      // Gera um índice aleatório para o botão de atualizar
-      verseIndex = Math.floor(Math.random() * verses.length);
-    } else {
-      // Gera um índice baseado na data atual para o versículo do dia
-      const today = new Date();
-      const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-      verseIndex = dayOfYear % verses.length;
-    }
-    
-    setTimeout(() => {
-      setVerse(verses[verseIndex]);
-      setIsLoading(false);
-    }, 500);
-  };
 
   useEffect(() => {
     getDailyVerse();
   }, []);
 
   const shareVerse = async () => {
-    const shareText = `"${verse.text}" - ${verse.reference}`;
+    if (!verse) return;
+    
+    const shareText = `"${verse.verse_text}" - ${verse.verse_reference}`;
     
     if (navigator.share) {
       try {
@@ -104,19 +46,49 @@ const DailyVerse = () => {
     }
   };
 
+  if (error) {
+    return (
+      <Card className="relative overflow-hidden bg-gradient-to-br from-primary-light/20 to-warm-gold/30 border-none shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-br from-spiritual-glow/5 to-transparent"></div>
+        <CardContent className="relative p-6 sm:p-8">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Palavra do Dia</h3>
+            <p className="text-destructive text-sm">{error}</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={getDailyVerse}
+              className="mt-4"
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="relative overflow-hidden bg-gradient-to-br from-primary-light/20 to-warm-gold/30 border-none shadow-lg">
       <div className="absolute inset-0 bg-gradient-to-br from-spiritual-glow/5 to-transparent"></div>
       <CardContent className="relative p-6 sm:p-8">
         <div className="flex items-start justify-between mb-4">
-          <h3 className="text-lg font-semibold text-foreground">Palavra do Dia</h3>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Palavra do Dia</h3>
+            {verse && verse.category && (
+              <span className="text-xs text-muted-foreground capitalize bg-muted/50 px-2 py-1 rounded-full mt-1 inline-block">
+                {verse.category.replace('_', ' ')}
+              </span>
+            )}
+          </div>
           <div className="flex gap-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => getDailyVerse(true)}
+              onClick={refreshVerse}
               disabled={isLoading}
               className="hover:bg-white/20"
+              title="Novo versículo"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
@@ -124,7 +96,9 @@ const DailyVerse = () => {
               variant="ghost"
               size="sm"
               onClick={shareVerse}
+              disabled={!verse}
               className="hover:bg-white/20"
+              title="Compartilhar versículo"
             >
               <Share2 className="w-4 h-4" />
             </Button>
@@ -137,14 +111,18 @@ const DailyVerse = () => {
             <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
             <div className="h-3 bg-muted rounded w-1/3"></div>
           </div>
-        ) : (
+        ) : verse ? (
           <div className="space-y-3">
             <blockquote className="text-foreground text-base sm:text-lg italic leading-relaxed">
-              "{verse.text}"
+              "{verse.verse_text}"
             </blockquote>
             <cite className="block text-sm font-medium text-muted-foreground">
-              — {verse.reference}
+              — {verse.verse_reference}
             </cite>
+          </div>
+        ) : (
+          <div className="text-center text-muted-foreground">
+            <p>Carregando versículo...</p>
           </div>
         )}
       </CardContent>

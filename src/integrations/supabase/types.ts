@@ -38,6 +38,45 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_verses: {
+        Row: {
+          book_name: string
+          category: string | null
+          chapter: number
+          created_at: string
+          id: string
+          is_active: boolean | null
+          updated_at: string
+          verse_number: string
+          verse_reference: string
+          verse_text: string
+        }
+        Insert: {
+          book_name: string
+          category?: string | null
+          chapter: number
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+          verse_number: string
+          verse_reference: string
+          verse_text: string
+        }
+        Update: {
+          book_name?: string
+          category?: string | null
+          chapter?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+          verse_number?: string
+          verse_reference?: string
+          verse_text?: string
+        }
+        Relationships: []
+      }
       encrypted_contacts: {
         Row: {
           created_at: string
