@@ -261,16 +261,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
 
-    // Para YouTube URLs, vamos tentar convertê-las para embed
+    // Para YouTube URLs, abrir externamente como Spotify
     if (mediaType === 'youtube') {
-      const videoId = currentMedia.media_url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-      if (videoId && videoId[1]) {
-        // Tentar usar URL de áudio direto do YouTube (não sempre funciona)
-        const audioUrl = `https://www.youtube.com/embed/${videoId[1]}?autoplay=1&enablejsapi=1`;
-        setError('Para URLs do YouTube, use um link de stream de áudio direto para melhor compatibilidade');
-        setLoading(false);
-        return;
-      }
+      setError('Este tipo de mídia deve ser aberto em aplicativo externo');
+      setLoading(false);
+      return;
     }
 
     // Validar se a URL parece ser um stream válido
@@ -280,7 +275,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                             currentMedia.media_url.includes('.fm') ||
                             currentMedia.is_radio; // Allow URLs marked as radio
 
-    if (!isValidStreamUrl && mediaType !== 'radio' && mediaType !== 'youtube') {
+    if (!isValidStreamUrl && mediaType !== 'radio') {
       setError('URL de mídia inválida para reprodução');
       setLoading(false);
       return;
@@ -337,9 +332,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     const mediaType = getMediaType(media.media_url);
     
-    // Não carregar no contexto de áudio apenas se for Spotify
-    if (mediaType === 'spotify') {
-      console.log(`[AudioContext] Spotify URL detected, skipping audio context load`);
+    // Não carregar no contexto de áudio se for Spotify ou YouTube
+    if (mediaType === 'spotify' || mediaType === 'youtube') {
+      console.log(`[AudioContext] ${mediaType} URL detected, skipping audio context load`);
       setCurrentMedia(null);
       setError(null);
       setRetryCount(0);
