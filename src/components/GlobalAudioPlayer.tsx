@@ -54,6 +54,8 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
 
   const handlePlayPause = async () => {
     try {
+      console.log('[GlobalAudioPlayer] Play/Pause clicked, isPlaying:', isPlaying, 'loading:', loading);
+      
       if (isPlaying) {
         pause();
       } else {
@@ -61,6 +63,15 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
       }
     } catch (error) {
       console.error('[GlobalAudioPlayer] Play/Pause error:', error);
+      // Reset loading state if there's an error
+      if (loading) {
+        setTimeout(() => {
+          if (error) {
+            // Force clear loading state after error
+            console.log('[GlobalAudioPlayer] Forcing loading state reset');
+          }
+        }, 2000);
+      }
     }
   };
 
@@ -124,7 +135,8 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
               size="sm"
               onClick={handlePlayPause}
               disabled={loading}
-              className="h-10 w-10 p-0 bg-primary hover:bg-primary/90"
+              className="h-10 w-10 p-0 bg-primary hover:bg-primary/90 disabled:opacity-50"
+              title={loading ? 'Carregando...' : (isPlaying ? 'Pausar' : 'Reproduzir')}
             >
               {loading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

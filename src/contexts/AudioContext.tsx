@@ -424,18 +424,21 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsPlaying(true);
     setError(null);
     setRetryCount(0);
+    setLoading(false); // Reset loading state when playing
     updateMediaSession();
     console.log('[AudioContext] YouTube started playing');
   }, [updateMediaSession]);
 
   const handleYouTubePause = useCallback(() => {
     setIsPlaying(false);
+    setLoading(false); // Reset loading state when paused
     updateMediaSession();
     console.log('[AudioContext] YouTube paused');
   }, [updateMediaSession]);
 
   const handleYouTubeEnd = useCallback(() => {
     setIsPlaying(false);
+    setLoading(false); // Reset loading state when ended
     updateMediaSession();
     console.log('[AudioContext] YouTube ended');
   }, [updateMediaSession]);
