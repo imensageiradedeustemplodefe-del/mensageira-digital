@@ -181,7 +181,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         console.log(`[AudioContext] Retrying... attempt ${retryCount + 1}/3`);
         setRetryCount(prev => prev + 1);
         if (audioRef.current && currentMedia) {
-          audioRef.current.src = currentMedia.media_url;
+          let retryUrl = currentMedia.media_url;
+          if (getMediaType(currentMedia.media_url) === 'youtube') {
+            setError('URLs do YouTube não são suportadas. Configure um stream de rádio online válido.');
+            setLoading(false);
+            return;
+          }
+          audioRef.current.src = retryUrl;
           audioRef.current.load();
           audioRef.current.play().catch(console.error);
         }
@@ -191,6 +197,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setLoading(false);
     }
   }, [retryCount, currentMedia]);
+
+  // Helper function to convert YouTube URL to audio stream
+  const convertYouTubeUrl = useCallback((url: string): string => {
+    const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+    if (videoId && videoId[1]) {
+      // Use a YouTube audio proxy service
+      return `https://cors-anywhere.herokuapp.com/https://www.youtube.com/watch?v=${videoId[1]}`;
+    }
+    return url;
+  }, []);
 
   // Helper function to detect media type
   const getMediaType = useCallback((url: string): 'spotify' | 'youtube' | 'radio' | 'audio' => {
@@ -254,9 +270,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const mediaType = getMediaType(currentMedia.media_url);
     
-    // Verificar se é um URL válido para reprodução
-    if (mediaType === 'spotify') {
-      setError('Este tipo de mídia deve ser aberto em aplicativo externo');
+    // Para YouTube, tentar usar um stream de áudio
+    let audioUrl = currentMedia.media_url;
+    if (mediaType === 'youtube') {
+      // Para URLs do YouTube, mostrar mensagem explicativa
+      setError('URLs do YouTube não são suportadas para reprodução direta. Use um link de stream de áudio ou rádio online.');
       setLoading(false);
       return;
     }
@@ -279,8 +297,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setLoading(true);
       
       // Configurar fonte se necessário
-      if (audioRef.current.src !== currentMedia.media_url) {
-        audioRef.current.src = currentMedia.media_url;
+      if (audioRef.current.src !== audioUrl) {
+        audioRef.current.src = audioUrl;
         audioRef.current.load();
       }
       

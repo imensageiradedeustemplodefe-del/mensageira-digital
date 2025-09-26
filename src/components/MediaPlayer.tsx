@@ -229,7 +229,14 @@ export function MediaPlayer() {
                   <span className="text-xs font-medium">ERRO DE REPRODUÇÃO</span>
                 </div>
                 <p>{error}</p>
-                {!isExternalLink && (
+                {mediaType === 'youtube' && (
+                  <div className="text-xs mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                    <p className="font-medium mb-1">💡 Sugestão:</p>
+                    <p>Para reproduzir áudio, use um link de rádio online (streaming) ao invés de vídeos do YouTube.</p>
+                    <p className="mt-1">Exemplo: https://servidor.com/radio.mp3</p>
+                  </div>
+                )}
+                {!isExternalLink && mediaType !== 'youtube' && (
                   <Button
                     size="sm"
                     variant="outline"
