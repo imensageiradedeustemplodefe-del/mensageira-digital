@@ -227,8 +227,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audioRef.current.volume = isMuted ? 0 : volume / 100;
     }
     // Also update YouTube player volume
-    if (youtubePlayerRef.current && youtubePlayerRef.current.setVolume) {
-      youtubePlayerRef.current.setVolume(isMuted ? 0 : volume);
+    if (globalYouTubePlayer && globalYouTubePlayer.setVolume) {
+      globalYouTubePlayer.setVolume(isMuted ? 0 : volume);
     }
   }, [volume, isMuted]);
 
@@ -275,15 +275,42 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Funções de controle
   const play = useCallback(async () => {
-    if (!audioRef.current || !currentMedia) return;
+    if (!currentMedia) return;
 
     const mediaType = getMediaType(currentMedia.media_url);
     
-    // Para YouTube, tentar usar um stream de áudio
-    let audioUrl = currentMedia.media_url;
+    // Para YouTube, usar o player dedicado
     if (mediaType === 'youtube') {
-      // Para URLs do YouTube, mostrar mensagem explicativa
-      setError('URLs do YouTube não são suportadas para reprodução direta. Use um link de stream de áudio ou rádio online.');
+      if (globalYouTubePlayer && globalYouTubePlayer.playVideo) {
+        try {
+          setError(null);
+          setLoading(true);
+          globalYouTubePlayer.playVideo();
+          
+          // Update play count
+          await supabase
+            .from('media_items')
+            .update({ play_count: ((currentMedia as any).play_count || 0) + 1 })
+            .eq('id', currentMedia.id);
+            
+        } catch (error) {
+          console.error('[AudioContext] YouTube play error:', error);
+          setLoading(false);
+          setError('Erro ao reproduzir vídeo do YouTube');
+        }
+      } else {
+        setError('Player do YouTube não está pronto');
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Para outros tipos de mídia
+    if (!audioRef.current) return;
+    
+    // Verificar se é um URL válido para reprodução
+    if (mediaType === 'spotify') {
+      setError('Este tipo de mídia deve ser aberto em aplicativo externo');
       setLoading(false);
       return;
     }
@@ -306,8 +333,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setLoading(true);
       
       // Configurar fonte se necessário
-      if (audioRef.current.src !== audioUrl) {
-        audioRef.current.src = audioUrl;
+      if (audioRef.current.src !== currentMedia.media_url) {
+        audioRef.current.src = currentMedia.media_url;
         audioRef.current.load();
       }
       
@@ -333,8 +360,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const pause = useCallback(() => {
     const mediaType = currentMedia ? getMediaType(currentMedia.media_url) : 'audio';
     
-    if (mediaType === 'youtube' && youtubePlayerRef.current && youtubePlayerRef.current.pause) {
-      youtubePlayerRef.current.pause();
+    if (mediaType === 'youtube' && globalYouTubePlayer && globalYouTubePlayer.pauseVideo) {
+      globalYouTubePlayer.pauseVideo();
     } else if (audioRef.current && !audioRef.current.paused) {
       audioRef.current.pause();
     }
@@ -355,8 +382,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     
     // Pausar YouTube player se estiver tocando
-    if (youtubePlayerRef.current && youtubePlayerRef.current.pause) {
-      youtubePlayerRef.current.pause();
+    if (globalYouTubePlayer && globalYouTubePlayer.pauseVideo) {
+      globalYouTubePlayer.pauseVideo();
     }
     
     const mediaType = getMediaType(media.media_url);

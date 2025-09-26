@@ -28,7 +28,8 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   volume = 75,
   autoplay = false
 }) => {
-  const playerRef = useRef<any>(null);
+  const youtubePlayerRef = useRef<any>(null); // For YouTube player instance
+  const imperativeRef = useRef<any>(null);    // For imperative handle
   const containerRef = useRef<HTMLDivElement>(null);
   const isAPIReadyRef = useRef(false);
 
@@ -64,11 +65,11 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     if (!window.YT || !containerRef.current || !actualVideoId) return;
 
     // Destroy existing player
-    if (playerRef.current) {
-      playerRef.current.destroy();
+    if (youtubePlayerRef.current) {
+      youtubePlayerRef.current.destroy();
     }
 
-    playerRef.current = new window.YT.Player(containerRef.current, {
+    youtubePlayerRef.current = new window.YT.Player(containerRef.current, {
       height: '0',
       width: '0',
       videoId: actualVideoId,
@@ -111,43 +112,43 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
 
   // Update volume when prop changes
   useEffect(() => {
-    if (playerRef.current && playerRef.current.setVolume) {
-      playerRef.current.setVolume(volume);
+    if (youtubePlayerRef.current && youtubePlayerRef.current.setVolume) {
+      youtubePlayerRef.current.setVolume(volume);
     }
   }, [volume]);
 
   // Public methods to control playback
   const play = useCallback(() => {
-    if (playerRef.current && playerRef.current.playVideo) {
-      playerRef.current.playVideo();
+    if (youtubePlayerRef.current && youtubePlayerRef.current.playVideo) {
+      youtubePlayerRef.current.playVideo();
     }
   }, []);
 
   const pause = useCallback(() => {
-    if (playerRef.current && playerRef.current.pauseVideo) {
-      playerRef.current.pauseVideo();
+    if (youtubePlayerRef.current && youtubePlayerRef.current.pauseVideo) {
+      youtubePlayerRef.current.pauseVideo();
     }
   }, []);
 
   const stop = useCallback(() => {
-    if (playerRef.current && playerRef.current.stopVideo) {
-      playerRef.current.stopVideo();
+    if (youtubePlayerRef.current && youtubePlayerRef.current.stopVideo) {
+      youtubePlayerRef.current.stopVideo();
     }
   }, []);
 
   const setVolumeLevel = useCallback((level: number) => {
-    if (playerRef.current && playerRef.current.setVolume) {
-      playerRef.current.setVolume(level);
+    if (youtubePlayerRef.current && youtubePlayerRef.current.setVolume) {
+      youtubePlayerRef.current.setVolume(level);
     }
   }, []);
 
-  // Expose player methods via ref
-  React.useImperativeHandle(playerRef, () => ({
+  // Expose player methods via imperative handle
+  React.useImperativeHandle(imperativeRef, () => ({
     play,
     pause,
     stop,
     setVolume: setVolumeLevel,
-    getPlayer: () => playerRef.current
+    getPlayer: () => youtubePlayerRef.current
   }));
 
   return (
