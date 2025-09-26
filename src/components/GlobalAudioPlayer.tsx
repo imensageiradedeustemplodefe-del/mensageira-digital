@@ -26,6 +26,7 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
     isMuted,
     error,
     loading,
+    hasStartedPlayback,
     play,
     pause,
     setVolume,
@@ -44,8 +45,8 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
     }
   }, [error]);
 
-  // Se não há mídia carregada, não mostrar o player
-  if (!currentMedia) {
+  // Se não há mídia carregada OU não iniciou reprodução ainda, não mostrar o player
+  if (!currentMedia || !hasStartedPlayback) {
     return null;
   }
 

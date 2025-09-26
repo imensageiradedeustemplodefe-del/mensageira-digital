@@ -24,6 +24,7 @@ interface AudioContextType {
   isMuted: boolean;
   error: string | null;
   loading: boolean;
+  hasStartedPlayback: boolean; // Novo estado para controlar se já iniciou reprodução
   
   // Controles do áudio
   play: () => Promise<void>;
@@ -54,6 +55,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [hasStartedPlayback, setHasStartedPlayback] = useState(false); // Novo estado
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const youtubePlayerRef = useRef<any>(null);
@@ -76,6 +78,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setIsPlaying(true);
         setError(null);
         setRetryCount(0);
+        setHasStartedPlayback(true); // Marcar que iniciou reprodução
         updateMediaSession();
         console.log('[AudioContext] Audio started playing');
       });
@@ -279,6 +282,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const mediaType = getMediaType(currentMedia.media_url);
     
+    // Marcar que a reprodução foi iniciada
+    setHasStartedPlayback(true);
+    
     // Para YouTube, usar o player dedicado
     if (mediaType === 'youtube') {
       if (globalYouTubePlayer && globalYouTubePlayer.playVideo) {
@@ -395,6 +401,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setError(null);
       setRetryCount(0);
       setLoading(false);
+      setHasStartedPlayback(false); // Reset playback state
       return;
     }
     
@@ -402,6 +409,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setError(null);
     setRetryCount(0);
     setLoading(false);
+    setHasStartedPlayback(false); // Reset para nova mídia
     
     if (retryTimeoutRef.current) {
       clearTimeout(retryTimeoutRef.current);
@@ -457,6 +465,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     isMuted,
     error,
     loading,
+    hasStartedPlayback,
     play,
     pause,
     setVolume,
