@@ -261,13 +261,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
 
-    // Para YouTube URLs, abrir externamente como Spotify
-    if (mediaType === 'youtube') {
-      setError('Este tipo de mídia deve ser aberto em aplicativo externo');
-      setLoading(false);
-      return;
-    }
-
     // Validar se a URL parece ser um stream válido
     const isValidStreamUrl = currentMedia.media_url.match(/\.(mp3|aac|m3u8|pls|m3u)$/i) || 
                             currentMedia.media_url.includes('stream') ||
@@ -332,9 +325,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     const mediaType = getMediaType(media.media_url);
     
-    // Não carregar no contexto de áudio se for Spotify ou YouTube
-    if (mediaType === 'spotify' || mediaType === 'youtube') {
-      console.log(`[AudioContext] ${mediaType} URL detected, skipping audio context load`);
+    // Não carregar no contexto de áudio apenas se for Spotify
+    if (mediaType === 'spotify') {
+      console.log(`[AudioContext] Spotify URL detected, skipping audio context load`);
       setCurrentMedia(null);
       setError(null);
       setRetryCount(0);

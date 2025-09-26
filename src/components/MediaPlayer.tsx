@@ -116,7 +116,7 @@ export function MediaPlayer() {
     const mediaType = getMediaType(gospelRadio.media_url);
     
     // Handle external URLs differently - open externally  
-    if (mediaType === 'spotify' || mediaType === 'youtube') {
+    if (mediaType === 'spotify') {
       window.open(gospelRadio.media_url, '_blank');
       
       // Update play count for external links
@@ -185,14 +185,14 @@ export function MediaPlayer() {
   }
 
   const mediaType = getMediaType(gospelRadio.media_url);
-  const isExternalLink = mediaType === 'spotify' || mediaType === 'youtube';
+  const isExternalLink = mediaType === 'spotify';
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-center">
           <Radio className="w-5 h-5 mr-2" />
-          {isExternalLink ? (mediaType === 'spotify' ? 'Playlist Gospel' : 'Canal Gospel') : 'Rádio Gospel'}
+          Rádio Gospel
         </CardTitle>
       </CardHeader>
 
@@ -201,7 +201,7 @@ export function MediaPlayer() {
           <div className="text-center space-y-4">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
               {isExternalLink ? (
-                <div className="text-primary font-bold text-2xl">{mediaType === 'spotify' ? '♪' : '▶'}</div>
+                <div className="text-primary font-bold text-2xl">♪</div>
               ) : (
                 <Radio className="w-10 h-10 text-primary" />
               )}
@@ -261,7 +261,7 @@ export function MediaPlayer() {
               {isExternalLink ? (
                 <>
                   <Play className="w-5 h-5 mr-2" />
-                  {mediaType === 'spotify' ? 'Abrir no Spotify' : 'Assistir no YouTube'}
+                  Abrir no Spotify
                 </>
               ) : isPlaying ? (
                 <>
@@ -278,10 +278,7 @@ export function MediaPlayer() {
 
             {isExternalLink && (
               <p className="text-xs text-muted-foreground">
-                {mediaType === 'spotify' 
-                  ? 'Este conteúdo será aberto no Spotify Web Player'
-                  : 'Este conteúdo será aberto no YouTube'
-                }
+                Este conteúdo será aberto no Spotify Web Player
               </p>
             )}
             
