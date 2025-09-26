@@ -31,7 +31,8 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
     pause,
     setVolume,
     toggleMute,
-    clearError
+    clearError,
+    closePlayer
   } = useAudio();
 
   // Mostrar toast quando há erro
@@ -80,24 +81,28 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
     setVolume(newVolume[0]);
   };
 
+  const handleClose = () => {
+    closePlayer();
+    onClose?.(); // Chamar callback opcional se fornecido
+  };
+
   return (
-    <Card className="fixed bottom-4 right-4 w-80 shadow-lg z-50 bg-background/95 backdrop-blur-sm border-2">
+    <Card className="fixed bottom-4 right-4 w-80 shadow-xl z-[9999] bg-background/95 backdrop-blur-sm border-2 border-border/50">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Radio className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium">Reproduzindo</span>
           </div>
-          {onClose && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={onClose}
-              className="h-6 w-6 p-0"
-            >
-              <X className="w-3 h-3" />
-            </Button>
-          )}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleClose}
+            className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+            title="Fechar player"
+          >
+            <X className="w-3 h-3" />
+          </Button>
         </div>
 
         <div className="space-y-3">

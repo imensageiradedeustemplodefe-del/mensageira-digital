@@ -24,7 +24,7 @@ interface AudioContextType {
   isMuted: boolean;
   error: string | null;
   loading: boolean;
-  hasStartedPlayback: boolean; // Novo estado para controlar se já iniciou reprodução
+  hasStartedPlayback: boolean;
   
   // Controles do áudio
   play: () => Promise<void>;
@@ -35,6 +35,7 @@ interface AudioContextType {
   // Gerenciamento de mídia
   loadMedia: (media: MediaItem) => void;
   clearError: () => void;
+  closePlayer: () => void; // Nova função para fechar o player
 }
 
 const AudioContext = createContext<AudioContextType | null>(null);
@@ -420,6 +421,23 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setError(null);
   }, []);
 
+  const closePlayer = useCallback(() => {
+    // Pausar reprodução atual
+    const mediaType = currentMedia ? getMediaType(currentMedia.media_url) : 'audio';
+    
+    if (mediaType === 'youtube' && globalYouTubePlayer && globalYouTubePlayer.pauseVideo) {
+      globalYouTubePlayer.pauseVideo();
+    } else if (audioRef.current && !audioRef.current.paused) {
+      audioRef.current.pause();
+    }
+    
+    // Resetar estados
+    setHasStartedPlayback(false);
+    setIsPlaying(false);
+    setError(null);
+    setLoading(false);
+  }, [currentMedia, getMediaType]);
+
   // YouTube Player Event Handlers
   const handleYouTubeReady = useCallback((player: any) => {
     setLoading(false);
@@ -472,6 +490,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     toggleMute,
     loadMedia,
     clearError,
+    closePlayer,
   };
 
   return (
