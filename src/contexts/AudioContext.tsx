@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useRef, useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import YouTubeAudioPlayer from '@/components/YouTubeAudioPlayer';
+
+// Global YouTube player reference
+let globalYouTubePlayer: any = null;
 
 interface MediaItem {
   id: string;
@@ -52,6 +56,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [retryCount, setRetryCount] = useState(0);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const youtubePlayerRef = useRef<any>(null);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Inicializar áudio global
@@ -221,6 +226,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume / 100;
     }
+    // Also update YouTube player volume
+    if (youtubePlayerRef.current && youtubePlayerRef.current.setVolume) {
+      youtubePlayerRef.current.setVolume(isMuted ? 0 : volume);
+    }
   }, [volume, isMuted]);
 
   // Configurar Media Session quando mídia carrega
@@ -322,10 +331,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [currentMedia, isMuted, volume, handleAudioError, getMediaType]);
 
   const pause = useCallback(() => {
-    if (audioRef.current && !audioRef.current.paused) {
+    const mediaType = currentMedia ? getMediaType(currentMedia.media_url) : 'audio';
+    
+    if (mediaType === 'youtube' && youtubePlayerRef.current && youtubePlayerRef.current.pause) {
+      youtubePlayerRef.current.pause();
+    } else if (audioRef.current && !audioRef.current.paused) {
       audioRef.current.pause();
     }
-  }, []);
+  }, [currentMedia, getMediaType]);
 
   const setVolume = useCallback((newVolume: number) => {
     setVolumeState(newVolume);
@@ -339,6 +352,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Pausar áudio atual se estiver tocando
     if (audioRef.current && !audioRef.current.paused) {
       audioRef.current.pause();
+    }
+    
+    // Pausar YouTube player se estiver tocando
+    if (youtubePlayerRef.current && youtubePlayerRef.current.pause) {
+      youtubePlayerRef.current.pause();
     }
     
     const mediaType = getMediaType(media.media_url);
@@ -367,6 +385,41 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setError(null);
   }, []);
 
+  // YouTube Player Event Handlers
+  const handleYouTubeReady = useCallback((player: any) => {
+    setLoading(false);
+    globalYouTubePlayer = player;
+    youtubePlayerRef.current = player;
+    console.log('[AudioContext] YouTube player ready');
+  }, []);
+
+  const handleYouTubePlay = useCallback(() => {
+    setIsPlaying(true);
+    setError(null);
+    setRetryCount(0);
+    updateMediaSession();
+    console.log('[AudioContext] YouTube started playing');
+  }, [updateMediaSession]);
+
+  const handleYouTubePause = useCallback(() => {
+    setIsPlaying(false);
+    updateMediaSession();
+    console.log('[AudioContext] YouTube paused');
+  }, [updateMediaSession]);
+
+  const handleYouTubeEnd = useCallback(() => {
+    setIsPlaying(false);
+    updateMediaSession();
+    console.log('[AudioContext] YouTube ended');
+  }, [updateMediaSession]);
+
+  const handleYouTubeError = useCallback((error: any) => {
+    console.error('[AudioContext] YouTube error:', error);
+    setIsPlaying(false);
+    setLoading(false);
+    setError('Erro ao reproduzir vídeo do YouTube');
+  }, []);
+
   const value: AudioContextType = {
     currentMedia,
     isPlaying,
@@ -385,6 +438,17 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <AudioContext.Provider value={value}>
       {children}
+      {currentMedia && getMediaType(currentMedia.media_url) === 'youtube' && (
+        <YouTubeAudioPlayer
+          videoId={currentMedia.media_url}
+          onReady={handleYouTubeReady}
+          onPlay={handleYouTubePlay}
+          onPause={handleYouTubePause}
+          onEnd={handleYouTubeEnd}
+          onError={handleYouTubeError}
+          volume={isMuted ? 0 : volume}
+        />
+      )}
     </AudioContext.Provider>
   );
 };
