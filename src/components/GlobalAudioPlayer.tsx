@@ -10,6 +10,14 @@ interface GlobalAudioPlayerProps {
   onClose?: () => void;
 }
 
+// Helper function to detect media type
+const getMediaType = (url: string): 'spotify' | 'youtube' | 'radio' | 'audio' => {
+  if (url.includes('spotify.com')) return 'spotify';
+  if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+  if (url.includes('stream.') || url.includes('radio') || url.includes('.fm')) return 'radio';
+  return 'audio';
+};
+
 export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose }) => {
   const {
     currentMedia,
@@ -41,11 +49,18 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
     return null;
   }
 
+  const mediaType = getMediaType(currentMedia.media_url);
+  const isYouTube = mediaType === 'youtube';
+
   const handlePlayPause = async () => {
-    if (isPlaying) {
-      pause();
-    } else {
-      await play();
+    try {
+      if (isPlaying) {
+        pause();
+      } else {
+        await play();
+      }
+    } catch (error) {
+      console.error('[GlobalAudioPlayer] Play/Pause error:', error);
     }
   };
 
@@ -85,6 +100,11 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
               <span className="text-xs text-muted-foreground">
                 {isPlaying ? 'NO AR' : 'FORA DO AR'}
               </span>
+              {isYouTube && (
+                <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                  YouTube
+                </span>
+              )}
             </div>
           </div>
 
@@ -95,6 +115,7 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
               variant="ghost"
               onClick={toggleMute}
               className="h-8 w-8 p-0"
+              disabled={loading}
             >
               {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </Button>
@@ -116,16 +137,23 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
 
             <div className="flex-1 max-w-20">
               <Slider
-                value={[volume]}
+                value={[isMuted ? 0 : volume]}
                 onValueChange={handleVolumeChange}
                 max={100}
                 step={1}
                 className="w-full"
+                disabled={loading}
               />
             </div>
           </div>
 
-          {/* Status de erro */}
+          {/* Status de carregamento ou erro */}
+          {loading && !error && (
+            <div className="text-xs text-center text-muted-foreground bg-muted/50 p-2 rounded">
+              {isYouTube ? 'Carregando player do YouTube...' : 'Conectando...'}
+            </div>
+          )}
+
           {error && (
             <div className="text-xs text-destructive text-center bg-destructive/10 p-2 rounded">
               {error}
@@ -133,10 +161,17 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
                 size="sm"
                 variant="ghost"
                 onClick={clearError}
-                className="ml-2 h-auto p-0 text-xs"
+                className="ml-2 h-auto p-0 text-xs underline"
               >
                 Dispensar
               </Button>
+            </div>
+          )}
+
+          {/* Dica para YouTube */}
+          {isYouTube && !error && !loading && (
+            <div className="text-xs text-center text-muted-foreground bg-blue-50 p-2 rounded">
+              🎵 Reproduzindo áudio do YouTube
             </div>
           )}
         </div>
