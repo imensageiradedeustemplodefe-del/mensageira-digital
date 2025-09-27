@@ -58,19 +58,33 @@ export function GoogleDriveManager() {
   const checkDriveConnection = async () => {
     try {
       setLoading(true);
+      console.log('Iniciando teste de conexão Google Drive...');
+      
       const { data, error } = await supabase.functions.invoke('google-drive-sync', {
         body: { action: 'list_folders' }
       });
 
-      if (error) throw error;
+      console.log('Resposta da função:', { data, error });
+
+      if (error) {
+        console.error('Erro na função:', error);
+        throw error;
+      }
       
       setDriveConnected(true);
-      setFolders(data.folders);
+      setFolders(data.folders || []);
       toast.success('Conectado ao Google Drive!');
     } catch (error) {
       console.error('Erro ao conectar com Google Drive:', error);
       setDriveConnected(false);
-      toast.error('Erro ao conectar com Google Drive. Verifique as credenciais.');
+      
+      // Mensagem de erro mais específica
+      const errorMessage = error?.message || 'Erro desconhecido';
+      if (errorMessage.includes('Failed to get Google Drive access token')) {
+        toast.error('Erro de autenticação. Verifique se o refresh token ainda é válido.');
+      } else {
+        toast.error(`Erro ao conectar: ${errorMessage}`);
+      }
     } finally {
       setLoading(false);
     }
