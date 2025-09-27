@@ -319,6 +319,80 @@ export type Database = {
           },
         ]
       }
+      google_drive_photos: {
+        Row: {
+          created_at: string
+          drive_file_id: string
+          drive_folder_id: string | null
+          drive_modified_time: string | null
+          gallery_photo_id: string | null
+          id: string
+          last_synced_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          drive_file_id: string
+          drive_folder_id?: string | null
+          drive_modified_time?: string | null
+          gallery_photo_id?: string | null
+          id?: string
+          last_synced_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          drive_file_id?: string
+          drive_folder_id?: string | null
+          drive_modified_time?: string | null
+          gallery_photo_id?: string | null
+          id?: string
+          last_synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_drive_photos_gallery_photo_id_fkey"
+            columns: ["gallery_photo_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      google_drive_settings: {
+        Row: {
+          created_at: string
+          folder_id: string | null
+          id: string
+          is_enabled: boolean | null
+          last_sync_at: string | null
+          sync_frequency: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          folder_id?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          last_sync_at?: string | null
+          sync_frequency?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          folder_id?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          last_sync_at?: string | null
+          sync_frequency?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       live_streams: {
         Row: {
           chat_enabled: boolean | null
