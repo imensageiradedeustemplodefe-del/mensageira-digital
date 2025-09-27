@@ -8,6 +8,23 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "pt-BR",
+  "categories": ["lifestyle", "social"],
+  "shortcuts": [
+    {
+      "name": "Culto ao Vivo",
+      "short_name": "Live",
+      "description": "Assista ao culto ao vivo",
+      "url": "/live",
+      "icons": [{ "src": "/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Palavra do Dia",
+      "short_name": "Palavra",
+      "description": "Veja a palavra do dia",
+      "url": "/",
+      "icons": [{ "src": "/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png",
