@@ -53,12 +53,20 @@ serve(async (req) => {
     const CLIENT_SECRET = Deno.env.get('GOOGLE_DRIVE_CLIENT_SECRET')
     const REFRESH_TOKEN = Deno.env.get('GOOGLE_DRIVE_REFRESH_TOKEN')
 
+    console.log('Checking Google Drive credentials...')
+    console.log('CLIENT_ID exists:', !!CLIENT_ID)
+    console.log('CLIENT_SECRET exists:', !!CLIENT_SECRET) 
+    console.log('REFRESH_TOKEN exists:', !!REFRESH_TOKEN)
+    console.log('CLIENT_ID prefix:', CLIENT_ID?.substring(0, 20) + '...')
+
     if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN) {
       throw new Error('Google Drive credentials not configured')
     }
 
     // Get access token
     console.log('Attempting to refresh Google Drive token...')
+    console.log('Using client_id:', CLIENT_ID.substring(0, 20) + '...')
+    
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -76,6 +84,13 @@ serve(async (req) => {
     
     if (!tokenData.access_token) {
       console.error('No access token in response:', tokenData)
+      
+      if (tokenData.error === 'unauthorized_client') {
+        throw new Error('OAUTH_ERROR: O refresh token foi gerado com credenciais diferentes. Você precisa gerar um novo refresh token usando SEU client_id no OAuth Playground.')
+      } else if (tokenData.error === 'invalid_grant') {
+        throw new Error('OAUTH_ERROR: O refresh token expirou ou é inválido. Gere um novo refresh token.')
+      }
+      
       throw new Error(`Failed to get Google Drive access token: ${tokenData.error || 'Unknown error'}`)
     }
 
