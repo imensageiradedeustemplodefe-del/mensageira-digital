@@ -58,6 +58,7 @@ serve(async (req) => {
     }
 
     // Get access token
+    console.log('Attempting to refresh Google Drive token...')
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -70,8 +71,12 @@ serve(async (req) => {
     })
 
     const tokenData = await tokenResponse.json()
+    console.log('Token response status:', tokenResponse.status)
+    console.log('Token response data:', tokenData)
+    
     if (!tokenData.access_token) {
-      throw new Error('Failed to get Google Drive access token')
+      console.error('No access token in response:', tokenData)
+      throw new Error(`Failed to get Google Drive access token: ${tokenData.error || 'Unknown error'}`)
     }
 
     const accessToken = tokenData.access_token
