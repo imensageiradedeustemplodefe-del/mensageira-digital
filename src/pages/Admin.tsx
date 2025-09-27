@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GalleryManager } from '@/components/admin/GalleryManager';
 import { AlbumsManager } from '@/components/admin/AlbumsManager';
+import { GoogleDriveManager } from '@/components/admin/GoogleDriveManager';
 import { TestimoniesManager } from '@/components/admin/TestimoniesManager';
 import { MediaManager } from '@/components/admin/MediaManager';
 import PrayerRequestsManager from '@/components/admin/PrayerRequestsManager';
@@ -13,7 +14,7 @@ import EventTemplatesManager from '@/components/admin/EventTemplatesManager';
 import LiveStreamsManager from '@/components/admin/LiveStreamsManager';
 import DashboardStats from '@/components/admin/DashboardStats';
 import PushNotificationsManager from '@/components/admin/PushNotificationsManager';
-import { LogOut, Image, Settings, MessageCircle, Music, Heart, Calendar, Radio, BarChart3, FolderOpen, Copy, Bell } from 'lucide-react';
+import { LogOut, Image, Settings, MessageCircle, Music, Heart, Calendar, Radio, BarChart3, FolderOpen, Copy, Bell, Cloud } from 'lucide-react';
 
 const Admin = () => {
   const { signOut } = useAuth();
@@ -96,6 +97,14 @@ const Admin = () => {
                     <Image className="w-5 h-5 mb-1 lg:mb-0 lg:mr-2 flex-shrink-0" />
                     <span className="text-[10px] lg:text-sm font-medium">Fotos</span>
                   </TabsTrigger>
+
+                  <TabsTrigger 
+                    value="drive" 
+                    className="flex flex-col lg:flex-row items-center justify-center whitespace-nowrap px-3 py-4 lg:py-3 text-xs lg:text-sm min-w-[80px] lg:min-w-0 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                  >
+                    <Cloud className="w-5 h-5 mb-1 lg:mb-0 lg:mr-2 flex-shrink-0" />
+                    <span className="text-[10px] lg:text-sm font-medium">Drive</span>
+                  </TabsTrigger>
                   
                   <TabsTrigger 
                     value="media" 
@@ -174,6 +183,10 @@ const Admin = () => {
 
             <TabsContent value="gallery" className="mt-4 sm:mt-6">
               <GalleryManager />
+            </TabsContent>
+
+            <TabsContent value="drive" className="mt-4 sm:mt-6">
+              <GoogleDriveManager />
             </TabsContent>
 
             <TabsContent value="media" className="mt-4 sm:mt-6">

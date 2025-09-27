@@ -2,3 +2,6 @@ project_id = "zienifzedhpcynuozfan"
 
 [functions.send-push-notification]
 verify_jwt = false
+
+[functions.google-drive-sync]
+verify_jwt = true
