@@ -584,24 +584,6 @@ export type Database = {
         }
         Relationships: []
       }
-      prayer_requests_contact_backup: {
-        Row: {
-          email: string | null
-          id: string | null
-          phone: string | null
-        }
-        Insert: {
-          email?: string | null
-          id?: string | null
-          phone?: string | null
-        }
-        Update: {
-          email?: string | null
-          id?: string | null
-          phone?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
