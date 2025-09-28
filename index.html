@@ -21,32 +21,6 @@
     <!-- Apple Splash Screens -->
     <link rel="apple-touch-icon" href="/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png">
     <link rel="apple-touch-startup-image" href="/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png">
-    
-    <!-- Splash screen styles for better initial load -->
-    <style>
-      #splash-loader {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #1E90FF 0%, #87CEEB 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-      }
-      .splash-logo {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        animation: pulse 2s infinite;
-      }
-      @keyframes pulse {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.8; transform: scale(1.05); }
-      }
-    </style>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -64,23 +38,8 @@
   </head>
 
   <body>
-    <!-- Immediate splash screen while JS loads -->
-    <div id="splash-loader">
-      <img src="/lovable-uploads/e0927536-21ca-4d51-b004-638d6974f554.png" alt="Loading..." class="splash-logo">
-    </div>
-    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    
-    <script>
-      // Hide initial splash once React loads
-      window.addEventListener('load', function() {
-        const splash = document.getElementById('splash-loader');
-        if (splash) {
-          setTimeout(() => splash.remove(), 1000);
-        }
-      });
-    </script>
     
     <!-- PWA Service Worker -->
     <script>
