@@ -762,6 +762,15 @@ export type Database = {
           encryption_key_hash: string
         }[]
       }
+      get_public_church_info: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string
+          display_name: string
+          setting_key: string
+          setting_value: string
+        }[]
+      }
       get_public_prayer_requests: {
         Args: Record<PropertyKey, never>
         Returns: {

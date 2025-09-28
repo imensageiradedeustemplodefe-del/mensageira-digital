@@ -187,9 +187,9 @@ export function useSiteSettings() {
 
   const fetchSettings = async () => {
     try {
+      // Use the secure function to get public church info with protected contact data
       const { data, error } = await supabase
-        .from('site_settings')
-        .select('setting_key, setting_value');
+        .rpc('get_public_church_info');
 
       if (error) {
         console.error('Erro ao buscar configurações:', error);
