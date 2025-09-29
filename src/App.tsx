@@ -11,11 +11,9 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import MobileMenuPage from "@/components/MobileMenuPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { GlobalAudioPlayer } from "@/components/GlobalAudioPlayer";
-import { SplashScreen } from "@/components/SplashScreen";
 import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 import { useCacheManager } from "@/hooks/useCacheManager";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState, useEffect } from "react";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Events from "./pages/Events";
@@ -37,24 +35,6 @@ const AppContent = () => {
   useServiceWorkerUpdate();
   useCacheManager();
   const isMobile = useIsMobile();
-  const [showSplash, setShowSplash] = useState(true);
-
-  useEffect(() => {
-    // Show splash screen for first-time users or when app is installed
-    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
-    if (hasSeenSplash) {
-      setShowSplash(false);
-    }
-  }, []);
-
-  const handleSplashComplete = () => {
-    sessionStorage.setItem('hasSeenSplash', 'true');
-    setShowSplash(false);
-  };
-
-  if (showSplash) {
-    return <SplashScreen onComplete={handleSplashComplete} />;
-  }
 
   return (
     <div className="min-h-screen flex flex-col">

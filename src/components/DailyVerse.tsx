@@ -10,8 +10,11 @@ const DailyVerse = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    getDailyVerse();
-  }, []);
+    // Só carrega se ainda não tem versículo (o hook já carrega automaticamente)
+    if (!verse && !isLoading) {
+      getDailyVerse();
+    }
+  }, [verse, isLoading]);
 
   const shareVerse = async () => {
     if (!verse) return;
