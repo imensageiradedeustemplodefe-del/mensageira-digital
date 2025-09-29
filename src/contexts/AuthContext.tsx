@@ -4,7 +4,6 @@ import type { User, Session } from '@supabase/supabase-js';
 
 interface AdminProfile {
   id: string;
-  email: string;
   role: string;
 }
 
@@ -48,7 +47,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setTimeout(async () => {
             const { data: profileData } = await supabase
               .from('profiles')
-              .select('id, email, role')
+              .select('id, role')
               .eq('id', session.user.id)
               .eq('role', 'admin')
               .maybeSingle();
@@ -71,7 +70,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (session?.user) {
         supabase
           .from('profiles')
-          .select('id, email, role')
+          .select('id, role')
           .eq('id', session.user.id)
           .eq('role', 'admin')
           .maybeSingle()
@@ -101,7 +100,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Check if user is admin
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('id, email, role')
+        .select('id, role')
         .eq('id', data.user.id)
         .eq('role', 'admin')
         .maybeSingle();
