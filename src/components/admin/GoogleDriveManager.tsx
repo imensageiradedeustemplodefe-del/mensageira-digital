@@ -44,6 +44,7 @@ export function GoogleDriveManager() {
   const [loading, setLoading] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [driveConnected, setDriveConnected] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Import form state
   const [importData, setImportData] = useState({
@@ -52,13 +53,49 @@ export function GoogleDriveManager() {
   });
 
   useEffect(() => {
-    checkDriveConnection();
+    checkAdminStatus();
   }, []);
+
+  const checkAdminStatus = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('Você precisa estar autenticado');
+        return;
+      }
+
+      // Check if user is admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .eq('role', 'admin')
+        .single();
+
+      if (profile) {
+        setIsAdmin(true);
+        await checkDriveConnection();
+      } else {
+        toast.error('Acesso negado. Apenas administradores podem acessar esta função.');
+      }
+    } catch (error) {
+      console.error('Erro ao verificar status de admin:', error);
+      toast.error('Erro ao verificar permissões');
+    }
+  };
 
   const checkDriveConnection = async () => {
     try {
       setLoading(true);
       console.log('Iniciando teste de conexão Google Drive...');
+      
+      // Get current session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Você precisa estar autenticado como admin para usar esta função');
+      }
       
       const { data, error } = await supabase.functions.invoke('google-drive-sync', {
         body: { action: 'list_folders' }
@@ -175,6 +212,28 @@ export function GoogleDriveManager() {
       setLoading(false);
     }
   };
+
+  if (!isAdmin) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Cloud className="w-5 h-5" />
+              Integração com Google Drive
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center py-8">
+            <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Acesso Negado</h3>
+            <p className="text-muted-foreground mb-6">
+              Apenas administradores podem acessar a integração com Google Drive.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!driveConnected) {
     return (

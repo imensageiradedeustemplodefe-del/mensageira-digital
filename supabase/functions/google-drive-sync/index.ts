@@ -32,16 +32,43 @@ serve(async (req) => {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: req.headers.get('Authorization')! }
+        }
+      }
     )
 
-    const authHeader = req.headers.get('Authorization')!
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('Authorization header is required')
+    }
+    
     const token = authHeader.replace('Bearer ', '')
-    const { data } = await supabaseClient.auth.getUser(token)
+    const { data, error: userError } = await supabaseClient.auth.getUser(token)
     const user = data.user
 
-    if (!user) {
+    if (userError || !user) {
+      console.error('Authentication error:', userError)
       throw new Error('Not authenticated')
     }
+
+    console.log('User authenticated:', user.id)
+
+    // Check if user is admin
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .eq('role', 'admin')
+      .single()
+
+    if (profileError || !profile) {
+      console.error('Admin check failed:', profileError)
+      throw new Error('Access denied. Admin only.')
+    }
+
+    console.log('Admin access confirmed')
 
     const body = await req.json()
     const { action, folderId, albumName, albumDescription } = body
