@@ -1,59 +1,22 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { 
-  Cloud, 
-  FolderOpen, 
-  Image, 
-  Download, 
-  RefreshCw, 
-  Eye, 
-  Settings,
-  Upload,
-  CheckCircle,
-  AlertCircle
-} from 'lucide-react';
-
-interface DriveFolder {
-  id: string;
-  name: string;
-  modifiedTime: string;
-}
-
-interface DrivePhoto {
-  id: string;
-  name: string;
-  mimeType: string;
-  modifiedTime: string;
-  webViewLink: string;
-  thumbnailLink?: string;
-}
+import { Cloud, Save, AlertCircle, ExternalLink } from 'lucide-react';
 
 export function GoogleDriveManager() {
-  const [folders, setFolders] = useState<DriveFolder[]>([]);
-  const [selectedFolder, setSelectedFolder] = useState<DriveFolder | null>(null);
-  const [photos, setPhotos] = useState<DrivePhoto[]>([]);
+  const [scriptUrl, setScriptUrl] = useState('');
+  const [folderId, setFolderId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [driveConnected, setDriveConnected] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-
-  // Import form state
-  const [importData, setImportData] = useState({
-    albumName: '',
-    albumDescription: ''
-  });
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     checkAdminStatus();
+    loadSettings();
   }, []);
 
   const checkAdminStatus = async () => {
@@ -65,7 +28,6 @@ export function GoogleDriveManager() {
         return;
       }
 
-      // Check if user is admin
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
@@ -75,7 +37,6 @@ export function GoogleDriveManager() {
 
       if (profile) {
         setIsAdmin(true);
-        await checkDriveConnection();
       } else {
         toast.error('Acesso negado. Apenas administradores podem acessar esta função.');
       }
@@ -85,129 +46,68 @@ export function GoogleDriveManager() {
     }
   };
 
-  const checkDriveConnection = async () => {
+  const loadSettings = async () => {
     try {
-      setLoading(true);
-      console.log('Iniciando teste de conexão Google Drive...');
-      
-      // Get current session
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        throw new Error('Você precisa estar autenticado como admin para usar esta função');
-      }
-      
-      const { data, error } = await supabase.functions.invoke('google-drive-sync', {
-        body: { action: 'list_folders' }
-      });
-
-      console.log('Resposta da função:', { data, error });
-
-      if (error) {
-        console.error('Erro na função:', error);
-        throw error;
-      }
-      
-      setDriveConnected(true);
-      setFolders(data.folders || []);
-      toast.success('Conectado ao Google Drive!');
-    } catch (error) {
-      console.error('Erro ao conectar com Google Drive:', error);
-      setDriveConnected(false);
-      
-      // Mensagem de erro mais específica
-      const errorMessage = error?.message || 'Erro desconhecido';
-      if (errorMessage.includes('Failed to get Google Drive access token')) {
-        toast.error('Erro de autenticação. Verifique se o refresh token ainda é válido.');
-      } else {
-        toast.error(`Erro ao conectar: ${errorMessage}`);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadFolderPhotos = async (folder: DriveFolder) => {
-    try {
-      setLoading(true);
-      setSelectedFolder(folder);
-
-      const { data, error } = await supabase.functions.invoke('google-drive-sync', {
-        body: { 
-          action: 'list_photos',
-          folderId: folder.id 
-        }
-      });
-
-      if (error) throw error;
-      
-      setPhotos(data.photos);
-      setImportData({ 
-        albumName: folder.name,
-        albumDescription: `Fotos do álbum "${folder.name}" importadas do Google Drive`
-      });
-    } catch (error) {
-      console.error('Erro ao carregar fotos:', error);
-      toast.error('Erro ao carregar fotos da pasta');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const importAlbum = async () => {
-    if (!selectedFolder) return;
-
-    try {
-      setLoading(true);
-      
-      const { data, error } = await supabase.functions.invoke('google-drive-sync', {
-        body: { 
-          action: 'import_album',
-          folderId: selectedFolder.id,
-          albumName: importData.albumName,
-          albumDescription: importData.albumDescription
-        }
-      });
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', ['google_drive_script_url', 'google_drive_folder_id']);
 
       if (error) throw error;
 
-      toast.success(
-        `Álbum importado com sucesso! ${data.imported_photos}/${data.total_photos} fotos importadas`
-      );
+      const urlSetting = data?.find(s => s.setting_key === 'google_drive_script_url');
+      const folderSetting = data?.find(s => s.setting_key === 'google_drive_folder_id');
+
+      if (urlSetting) setScriptUrl(urlSetting.setting_value || '');
+      if (folderSetting) setFolderId(folderSetting.setting_value || '');
       
-      setIsImportDialogOpen(false);
-      setSelectedFolder(null);
-      setPhotos([]);
+      if (urlSetting && folderSetting) {
+        setIsSaved(true);
+      }
     } catch (error) {
-      console.error('Erro ao importar álbum:', error);
-      toast.error('Erro ao importar álbum do Google Drive');
-    } finally {
-      setLoading(false);
+      console.error('Erro ao carregar configurações:', error);
     }
   };
 
-  const syncPhotos = async () => {
-    if (!selectedFolder) return;
+  const saveSettings = async () => {
+    if (!scriptUrl.trim()) {
+      toast.error('Informe a URL do Apps Script');
+      return;
+    }
 
     try {
       setLoading(true);
-      
-      const { data, error } = await supabase.functions.invoke('google-drive-sync', {
-        body: { 
-          action: 'sync_photos',
-          folderId: selectedFolder.id
+
+      const settings = [
+        {
+          setting_key: 'google_drive_script_url',
+          setting_value: scriptUrl,
+          setting_type: 'text',
+          category: 'integrations',
+          display_name: 'URL do Google Apps Script'
+        },
+        {
+          setting_key: 'google_drive_folder_id',
+          setting_value: folderId,
+          setting_type: 'text',
+          category: 'integrations',
+          display_name: 'ID da Pasta Principal'
         }
-      });
+      ];
 
-      if (error) throw error;
+      for (const setting of settings) {
+        const { error } = await supabase
+          .from('site_settings')
+          .upsert(setting, { onConflict: 'setting_key' });
 
-      const stats = data.stats;
-      toast.success(
-        `Sincronização concluída! ${stats.new_photos} novas fotos, ${stats.updated_photos} atualizadas`
-      );
-    } catch (error) {
-      console.error('Erro ao sincronizar:', error);
-      toast.error('Erro ao sincronizar fotos');
+        if (error) throw error;
+      }
+
+      setIsSaved(true);
+      toast.success('Configurações salvas com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao salvar configurações:', error);
+      toast.error('Erro ao salvar configurações');
     } finally {
       setLoading(false);
     }
@@ -235,225 +135,110 @@ export function GoogleDriveManager() {
     );
   }
 
-  if (!driveConnected) {
-    return (
-      <div className="p-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Cloud className="w-5 h-5" />
-              Integração com Google Drive
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-center py-8">
-            <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Google Drive não conectado</h3>
-            <p className="text-muted-foreground mb-6">
-              Configure as credenciais do Google Drive para importar suas fotos automaticamente.
-            </p>
-            <Button onClick={checkDriveConnection} disabled={loading}>
-              {loading ? (
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Settings className="w-4 h-4 mr-2" />
-              )}
-              {loading ? 'Conectando...' : 'Tentar Conectar'}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Cloud className="w-6 h-6 text-primary" />
-            Google Drive
-          </h2>
-          <p className="text-muted-foreground">
-            Importe fotos diretamente das suas pastas do Google Drive
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Badge variant="default" className="flex items-center gap-1">
-            <CheckCircle className="w-3 h-3" />
-            Conectado
-          </Badge>
-          <Button variant="outline" onClick={checkDriveConnection} disabled={loading}>
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Atualizar
-          </Button>
-        </div>
-      </div>
+    <div className="p-6 space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Cloud className="w-5 h-5" />
+            Configuração do Google Apps Script
+          </CardTitle>
+          <CardDescription>
+            Configure a integração com Google Drive usando Apps Script
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4 p-4 bg-muted rounded-lg">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div className="space-y-2 text-sm">
+                <p className="font-medium">Instruções de Configuração:</p>
+                <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                  <li>Acesse <a href="https://script.google.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
+                    Google Apps Script <ExternalLink className="w-3 h-3" />
+                  </a></li>
+                  <li>Crie um novo projeto e cole o código do script fornecido pelo ChatGPT</li>
+                  <li>No código, altere o <code className="bg-background px-1 py-0.5 rounded">FOLDER_ID</code> para o ID da sua pasta principal do Drive</li>
+                  <li>Ative os "Serviços Avançados" → Drive API (v2 ou v3)</li>
+                  <li>Implante como "Web app" com acesso "Qualquer pessoa"</li>
+                  <li>Copie a URL gerada e cole abaixo</li>
+                </ol>
+              </div>
+            </div>
+          </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Folders List */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FolderOpen className="w-5 h-5" />
-              Pastas do Google Drive
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading && !selectedFolder ? (
-              <div className="flex items-center justify-center py-8">
-                <RefreshCw className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {folders.map((folder) => (
-                  <div
-                    key={folder.id}
-                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedFolder?.id === folder.id
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                    onClick={() => loadFolderPhotos(folder)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <FolderOpen className="w-4 h-4 text-primary" />
-                      <span className="font-medium">{folder.name}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Modificado: {new Date(folder.modifiedTime).toLocaleDateString('pt-BR')}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="scriptUrl">URL do Apps Script *</Label>
+              <Input
+                id="scriptUrl"
+                type="url"
+                value={scriptUrl}
+                onChange={(e) => {
+                  setScriptUrl(e.target.value);
+                  setIsSaved(false);
+                }}
+                placeholder="https://script.google.com/macros/s/AKfycby.../exec"
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Cole a URL da web app do seu Apps Script
+              </p>
+            </div>
 
-        {/* Photos Preview */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Image className="w-5 h-5" />
-              {selectedFolder ? `Fotos - ${selectedFolder.name}` : 'Selecione uma pasta'}
-            </CardTitle>
-            {selectedFolder && (
-              <div className="flex gap-2">
-                <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm">
-                      <Download className="w-4 h-4 mr-2" />
-                      Importar Álbum
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Importar Álbum do Google Drive</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="albumName">Nome do Álbum</Label>
-                        <Input
-                          id="albumName"
-                          value={importData.albumName}
-                          onChange={(e) => setImportData({ ...importData, albumName: e.target.value })}
-                          placeholder="Nome do álbum"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="albumDescription">Descrição</Label>
-                        <Textarea
-                          id="albumDescription"
-                          value={importData.albumDescription}
-                          onChange={(e) => setImportData({ ...importData, albumDescription: e.target.value })}
-                          placeholder="Descrição do álbum"
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <Button onClick={importAlbum} disabled={loading} className="flex-1">
-                          {loading ? (
-                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <Upload className="w-4 h-4 mr-2" />
-                          )}
-                          {loading ? 'Importando...' : 'Importar'}
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setIsImportDialogOpen(false)}
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                
-                <Button variant="outline" size="sm" onClick={syncPhotos} disabled={loading}>
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Sincronizar
-                </Button>
-              </div>
-            )}
-          </CardHeader>
-          <CardContent>
-            {!selectedFolder ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Selecione uma pasta para visualizar as fotos</p>
-              </div>
-            ) : loading ? (
-              <div className="flex items-center justify-center py-8">
-                <RefreshCw className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            ) : photos.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Image className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhuma foto encontrada nesta pasta</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Badge variant="secondary">
-                    {photos.length} fotos encontradas
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-96 overflow-y-auto">
-                  {photos.slice(0, 12).map((photo) => (
-                    <div key={photo.id} className="relative group">
-                      <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-                        {photo.thumbnailLink ? (
-                          <img
-                            src={photo.thumbnailLink}
-                            alt={photo.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Image className="w-8 h-8 text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                        <Button size="sm" variant="secondary" asChild>
-                          <a href={photo.webViewLink} target="_blank" rel="noopener noreferrer">
-                            <Eye className="w-4 h-4" />
-                          </a>
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {photos.length > 12 && (
-                  <p className="text-xs text-center text-muted-foreground">
-                    Mostrando 12 de {photos.length} fotos
-                  </p>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="folderId">ID da Pasta Principal (opcional)</Label>
+              <Input
+                id="folderId"
+                value={folderId}
+                onChange={(e) => {
+                  setFolderId(e.target.value);
+                  setIsSaved(false);
+                }}
+                placeholder="18nmGpvjaUX_9MyRP1YcZj7rg5yABVHBL"
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Referência do FOLDER_ID configurado no script (para documentação)
+              </p>
+            </div>
+
+            <Button
+              onClick={saveSettings}
+              disabled={loading || !scriptUrl.trim()}
+              className="w-full"
+            >
+              {loading ? (
+                <>
+                  <Save className="mr-2 h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : isSaved ? (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Configuração Salva ✓
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Salvar Configuração
+                </>
+              )}
+            </Button>
+          </div>
+
+          {isSaved && (
+            <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <p className="text-sm text-green-700 dark:text-green-400">
+                ✓ Configuração salva! A galeria agora está conectada ao seu Google Drive.
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Organize suas fotos em subpastas no Drive e elas aparecerão como álbuns na galeria.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
