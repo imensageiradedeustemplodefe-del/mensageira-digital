@@ -6,12 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useGoogleDriveAlbums, useGoogleDrivePhotos } from "@/hooks/useGoogleDriveAlbums";
+import { PhotoLightbox } from "@/components/PhotoLightbox";
 
 const Gallery = () => {
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const [selectedAlbumName, setSelectedAlbumName] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState("");
   const [scriptUrl, setScriptUrl] = useState<string | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // Busca a URL do Apps Script nas configurações
   useEffect(() => {
@@ -54,6 +57,11 @@ const Gallery = () => {
   const handleBackToAlbums = () => {
     setSelectedAlbum(null);
     setSelectedAlbumName('');
+  };
+
+  const handlePhotoClick = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
   };
 
   if (loading && albums.length === 0 && photos.length === 0) {
@@ -146,8 +154,12 @@ const Gallery = () => {
         {selectedAlbum && photos.length > 0 && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {photos.map((photo) => (
-                <Card key={photo.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
+              {photos.map((photo, index) => (
+                <Card 
+                  key={photo.id} 
+                  className="overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                  onClick={() => handlePhotoClick(index)}
+                >
                   <div className="relative h-64 overflow-hidden">
                     <img
                       src={photo.thumbUrl}
@@ -223,6 +235,16 @@ const Gallery = () => {
           </div>
         )}
       </div>
+
+      {/* Photo Lightbox */}
+      {photos.length > 0 && (
+        <PhotoLightbox
+          photos={photos}
+          initialIndex={lightboxIndex}
+          isOpen={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </div>
   );
 };
