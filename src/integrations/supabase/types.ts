@@ -91,6 +91,38 @@ export type Database = {
           },
         ]
       }
+      event_contacts: {
+        Row: {
+          contact_info: string
+          created_at: string | null
+          event_id: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          contact_info: string
+          created_at?: string | null
+          event_id: string
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          contact_info?: string
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_contacts_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_templates: {
         Row: {
           category: string
@@ -130,7 +162,6 @@ export type Database = {
       events: {
         Row: {
           category: string
-          contact_info: string | null
           created_at: string
           description: string | null
           end_date: string | null
@@ -146,7 +177,6 @@ export type Database = {
         }
         Insert: {
           category?: string
-          contact_info?: string | null
           created_at?: string
           description?: string | null
           end_date?: string | null
@@ -162,7 +192,6 @@ export type Database = {
         }
         Update: {
           category?: string
-          contact_info?: string | null
           created_at?: string
           description?: string | null
           end_date?: string | null
@@ -802,6 +831,10 @@ export type Database = {
           p_prayer_request_id: string
         }
         Returns: string
+      }
+      user_has_reacted: {
+        Args: { p_photo_id: string; p_user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
