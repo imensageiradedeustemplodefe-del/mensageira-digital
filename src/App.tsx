@@ -26,7 +26,6 @@ import ComingSoon from "./pages/ComingSoon";
 import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
 import NotificationSettingsPage from "./pages/NotificationSettings";
-import RemoverFundo from "./pages/RemoverFundo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,7 +50,6 @@ const AppContent = () => {
           <Route path="/galeria" element={<Gallery />} />
           <Route path="/testemunhos" element={<Testimonies />} />
           <Route path="/notificacoes" element={<NotificationSettingsPage />} />
-          <Route path="/remover-fundo" element={<RemoverFundo />} />
           <Route path="/menu" element={<MobileMenuPage />} />
           <Route path="/em-breve" element={<ComingSoon />} />
           <Route path="/admin/login" element={<AdminLogin />} />

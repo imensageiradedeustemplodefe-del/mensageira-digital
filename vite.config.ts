@@ -22,39 +22,21 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'react-vendor';
-            }
-            if (id.includes('@radix-ui')) {
-              return 'ui-vendor';
-            }
-            if (id.includes('@supabase')) {
-              return 'supabase-vendor';
-            }
-            if (id.includes('lucide-react')) {
-              return 'icons';
-            }
-            return 'vendor';
-          }
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          'supabase-vendor': ['@supabase/supabase-js'],
         },
       },
     },
     cssCodeSplit: true,
     sourcemap: false,
     minify: 'terser',
-    target: 'es2020',
     terserOptions: {
       compress: {
         drop_console: mode === 'production',
         drop_debugger: mode === 'production',
-        pure_funcs: mode === 'production' ? ['console.log', 'console.info'] : [],
-      },
-      mangle: {
-        safari10: true,
       },
     },
-    chunkSizeWarningLimit: 600,
   },
 }));
