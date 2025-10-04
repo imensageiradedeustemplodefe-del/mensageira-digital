@@ -152,13 +152,17 @@ export const useInAppNotifications = () => {
         });
       }
 
-      // Buscar versos diários (últimos 5)
+      // Buscar versos diários (apenas os recentes - últimos 3 dias)
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      
       const { data: verses } = await supabase
         .from('daily_verses')
         .select('id, created_at, verse_text')
         .eq('is_active', true)
+        .gte('created_at', threeDaysAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(3);
 
       if (verses) {
         verses.forEach(verse => {
@@ -176,13 +180,17 @@ export const useInAppNotifications = () => {
         });
       }
 
-      // Buscar novos álbuns (últimos 5)
+      // Buscar novos álbuns (apenas dos últimos 7 dias)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
       const { data: albums } = await supabase
         .from('gallery_albums')
         .select('id, created_at, name')
         .eq('is_published', true)
+        .gte('created_at', sevenDaysAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(3);
 
       if (albums) {
         albums.forEach(album => {
@@ -200,12 +208,13 @@ export const useInAppNotifications = () => {
         });
       }
 
-      // Buscar lives recentes (últimas 5)
+      // Buscar lives recentes (apenas dos últimos 7 dias)
       const { data: streams } = await supabase
         .from('live_streams')
         .select('id, created_at, title')
+        .gte('created_at', sevenDaysAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(3);
 
       if (streams) {
         streams.forEach(stream => {
@@ -223,13 +232,14 @@ export const useInAppNotifications = () => {
         });
       }
 
-      // Buscar testemunhos aprovados (últimos 5)
+      // Buscar testemunhos aprovados (apenas dos últimos 7 dias)
       const { data: testimonies } = await supabase
         .from('testimonies')
         .select('id, created_at, name')
         .eq('is_approved', true)
+        .gte('created_at', sevenDaysAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(3);
 
       if (testimonies) {
         testimonies.forEach(testimony => {
@@ -247,12 +257,13 @@ export const useInAppNotifications = () => {
         });
       }
 
-      // Buscar orações públicas aprovadas (últimas 5)
+      // Buscar orações públicas aprovadas (apenas dos últimos 7 dias)
       const { data: prayers } = await supabase
         .from('public_prayer_requests')
         .select('id, created_at, display_name')
+        .gte('created_at', sevenDaysAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(3);
 
       if (prayers) {
         prayers.forEach(prayer => {
