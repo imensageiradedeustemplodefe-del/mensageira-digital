@@ -509,6 +509,30 @@ export type Database = {
           },
         ]
       }
+      photo_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          photo_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          photo_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          photo_id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       prayer_requests: {
         Row: {
           allow_public_share: boolean | null

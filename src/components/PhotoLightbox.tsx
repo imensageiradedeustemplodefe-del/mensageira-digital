@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Download, Share2, ChevronLeft, ChevronRight, Facebook, MessageCircle, Heart, Hands } from 'lucide-react';
+import { X, Download, Share2, ChevronLeft, ChevronRight, Facebook, MessageCircle, Heart, Hand } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { toast } from 'sonner';
@@ -53,7 +53,8 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
       const userId = localStorage.getItem('photo_user_id') || crypto.randomUUID();
       localStorage.setItem('photo_user_id', userId);
       const userReactionData = data?.find(r => r.user_id === userId);
-      setUserReaction(userReactionData?.reaction_type || null);
+      const reactionType = userReactionData?.reaction_type;
+      setUserReaction((reactionType === 'love' || reactionType === 'prayer') ? reactionType : null);
     } catch (error) {
       console.error('Error fetching reactions:', error);
     }
@@ -247,7 +248,7 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
                 }`}
                 title="Oração"
               >
-                <Hands className={`w-5 h-5 ${userReaction === 'prayer' ? 'fill-blue-500 text-blue-500' : ''}`} />
+                <Hand className={`w-5 h-5 ${userReaction === 'prayer' ? 'fill-blue-500 text-blue-500' : ''}`} />
                 <span className="text-sm">{reactions.prayers}</span>
               </Button>
             </div>
