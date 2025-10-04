@@ -3,7 +3,9 @@ export type NotificationType =
   | 'new_photos'
   | 'live_stream'
   | 'new_testimony'
-  | 'new_prayer';
+  | 'new_prayer'
+  | 'event_today'
+  | 'live_starting_soon';
 
 export interface InAppNotification {
   id: string;

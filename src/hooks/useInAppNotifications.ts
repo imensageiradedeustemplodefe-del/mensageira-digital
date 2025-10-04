@@ -32,6 +32,16 @@ const getNotificationConfig = (type: NotificationType) => {
       title: '🙏 Nova Oração',
       icon: '🙏',
       url: '/oracoes'
+    },
+    event_today: {
+      title: '⛪ Hoje tem Culto!',
+      icon: '⛪',
+      url: '/eventos'
+    },
+    live_starting_soon: {
+      title: '🔴 Live começando em breve!',
+      icon: '🔴',
+      url: '/live'
     }
   };
   return configs[type];
@@ -63,6 +73,84 @@ export const useInAppNotifications = () => {
     try {
       const readIds = getReadNotifications();
       const allNotifications: InAppNotification[] = [];
+      const today = new Date().toISOString().split('T')[0];
+      const now = new Date();
+      const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+
+      // Buscar eventos de hoje
+      const { data: todayEvents } = await supabase
+        .from('events')
+        .select('id, title, event_date, category')
+        .eq('is_published', true)
+        .gte('event_date', `${today}T00:00:00`)
+        .lte('event_date', `${today}T23:59:59`)
+        .order('event_date', { ascending: true });
+
+      if (todayEvents && todayEvents.length > 0) {
+        todayEvents.forEach(event => {
+          const config = getNotificationConfig('event_today');
+          const eventDate = event.event_date.split('T')[0];
+          const notificationId = `event_today_${event.id}_${eventDate}`;
+          
+          allNotifications.push({
+            id: notificationId,
+            type: 'event_today',
+            title: config.title,
+            message: event.category === 'culto' 
+              ? `Hoje tem culto às ${new Date(event.event_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}!`
+              : `${event.title} - Hoje às ${new Date(event.event_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
+            icon: config.icon,
+            url: config.url,
+            timestamp: event.event_date,
+            isRead: readIds.has(notificationId)
+          });
+        });
+      }
+
+      // Buscar lives que vão começar em breve (próximas 2 horas)
+      const { data: upcomingStreams } = await supabase
+        .from('live_streams')
+        .select('id, title, scheduled_at, is_live')
+        .eq('is_active', true)
+        .or(`is_live.eq.true,and(scheduled_at.gte.${now.toISOString()},scheduled_at.lte.${twoHoursFromNow.toISOString()})`)
+        .order('scheduled_at', { ascending: true })
+        .limit(3);
+
+      if (upcomingStreams && upcomingStreams.length > 0) {
+        upcomingStreams.forEach(stream => {
+          const config = getNotificationConfig('live_starting_soon');
+          const notificationId = `live_soon_${stream.id}`;
+          
+          // Se já está ao vivo
+          if (stream.is_live) {
+            allNotifications.push({
+              id: notificationId,
+              type: 'live_starting_soon',
+              title: '🔴 Transmissão AO VIVO agora!',
+              message: `${stream.title} - Assista agora!`,
+              icon: config.icon,
+              url: config.url,
+              timestamp: stream.scheduled_at || new Date().toISOString(),
+              isRead: readIds.has(notificationId)
+            });
+          } else if (stream.scheduled_at) {
+            // Se está agendada para breve
+            const scheduledTime = new Date(stream.scheduled_at);
+            const minutesUntil = Math.round((scheduledTime.getTime() - now.getTime()) / (1000 * 60));
+            
+            allNotifications.push({
+              id: notificationId,
+              type: 'live_starting_soon',
+              title: config.title,
+              message: `${stream.title} - Começa em ${minutesUntil} minutos!`,
+              icon: config.icon,
+              url: config.url,
+              timestamp: stream.scheduled_at,
+              isRead: readIds.has(notificationId)
+            });
+          }
+        });
+      }
 
       // Buscar versos diários (últimos 5)
       const { data: verses } = await supabase
@@ -182,12 +270,17 @@ export const useInAppNotifications = () => {
         });
       }
 
+      // Remover duplicatas baseadas no ID (deduplicação)
+      const uniqueNotifications = Array.from(
+        new Map(allNotifications.map(item => [item.id, item])).values()
+      );
+
       // Ordenar por data (mais recente primeiro) e limitar
-      allNotifications.sort((a, b) => 
+      uniqueNotifications.sort((a, b) => 
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
 
-      setNotifications(allNotifications.slice(0, NOTIFICATION_LIMIT));
+      setNotifications(uniqueNotifications.slice(0, NOTIFICATION_LIMIT));
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -251,10 +344,19 @@ export const useInAppNotifications = () => {
         .channel('prayers_changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'public_prayer_requests' }, fetchNotifications)
         .subscribe(),
+      
+      supabase
+        .channel('events_changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, fetchNotifications)
+        .subscribe(),
     ];
+
+    // Atualizar notificações a cada 5 minutos para capturar lives próximas
+    const interval = setInterval(fetchNotifications, 5 * 60 * 1000);
 
     return () => {
       channels.forEach(channel => supabase.removeChannel(channel));
+      clearInterval(interval);
     };
   }, [fetchNotifications]);
 
