@@ -759,7 +759,14 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      photo_reaction_counts: {
+        Row: {
+          photo_id: string | null
+          reaction_count: number | null
+          reaction_type: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_encrypted_contact: {
