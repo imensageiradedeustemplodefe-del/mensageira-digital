@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Download, Share2, ChevronLeft, ChevronRight, Facebook, MessageCircle, Heart, HandHeart } from 'lucide-react';
+import { X, Download, Share2, ChevronLeft, ChevronRight, Facebook, MessageCircle, Heart, HandHeart, Flame, Sparkles, Bird } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { toast } from 'sonner';
@@ -20,10 +20,28 @@ interface PhotoLightboxProps {
   onClose: () => void;
 }
 
+type ReactionType = 'love' | 'prayer' | 'amen' | 'hallelujah' | 'glory' | 'fire';
+
+interface Reactions {
+  loves: number;
+  prayers: number;
+  amens: number;
+  hallelujahs: number;
+  glories: number;
+  fires: number;
+}
+
 export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const [reactions, setReactions] = useState<{ loves: number; prayers: number }>({ loves: 0, prayers: 0 });
-  const [userReaction, setUserReaction] = useState<'love' | 'prayer' | null>(null);
+  const [reactions, setReactions] = useState<Reactions>({ 
+    loves: 0, 
+    prayers: 0, 
+    amens: 0, 
+    hallelujahs: 0, 
+    glories: 0, 
+    fires: 0 
+  });
+  const [userReaction, setUserReaction] = useState<ReactionType | null>(null);
   const currentPhoto = photos[currentIndex];
 
   useEffect(() => {
@@ -47,20 +65,30 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
 
       const loves = data?.filter(r => r.reaction_type === 'love').length || 0;
       const prayers = data?.filter(r => r.reaction_type === 'prayer').length || 0;
-      setReactions({ loves, prayers });
+      const amens = data?.filter(r => r.reaction_type === 'amen').length || 0;
+      const hallelujahs = data?.filter(r => r.reaction_type === 'hallelujah').length || 0;
+      const glories = data?.filter(r => r.reaction_type === 'glory').length || 0;
+      const fires = data?.filter(r => r.reaction_type === 'fire').length || 0;
+      
+      setReactions({ loves, prayers, amens, hallelujahs, glories, fires });
 
       // Check if user already reacted
       const userId = localStorage.getItem('photo_user_id') || crypto.randomUUID();
       localStorage.setItem('photo_user_id', userId);
       const userReactionData = data?.find(r => r.user_id === userId);
-      const reactionType = userReactionData?.reaction_type;
-      setUserReaction((reactionType === 'love' || reactionType === 'prayer') ? reactionType : null);
+      const reactionType = userReactionData?.reaction_type as ReactionType;
+      
+      if (['love', 'prayer', 'amen', 'hallelujah', 'glory', 'fire'].includes(reactionType)) {
+        setUserReaction(reactionType);
+      } else {
+        setUserReaction(null);
+      }
     } catch (error) {
       console.error('Error fetching reactions:', error);
     }
   };
 
-  const handleReaction = async (type: 'love' | 'prayer') => {
+  const handleReaction = async (type: ReactionType) => {
     try {
       const userId = localStorage.getItem('photo_user_id') || crypto.randomUUID();
       localStorage.setItem('photo_user_id', userId);
@@ -92,7 +120,16 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
             reaction_type: type
           });
         setUserReaction(type);
-        toast.success(type === 'love' ? 'Amei! ❤️' : 'Oração enviada 🙏');
+        
+        const messages = {
+          love: 'Amei! ❤️',
+          prayer: 'Oração enviada 🙏',
+          amen: 'Amém! 🙌',
+          hallelujah: 'Aleluia! 🕊️',
+          glory: 'Glória a Deus! ⭐',
+          fire: 'Aviva Senhor! 🔥'
+        };
+        toast.success(messages[type]);
       }
       
       await fetchReactions();
@@ -225,31 +262,83 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
         <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black/90 to-transparent p-4">
           <div className="flex flex-col gap-3">
             {/* Reactions Row */}
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleReaction('love')}
-                className={`text-white hover:bg-white/20 gap-2 ${
+                className={`text-white hover:bg-white/20 gap-1.5 ${
                   userReaction === 'love' ? 'bg-white/20' : ''
                 }`}
                 title="Amei"
               >
-                <Heart className={`w-5 h-5 ${userReaction === 'love' ? 'fill-red-500 text-red-500' : ''}`} />
-                <span className="text-sm">{reactions.loves}</span>
+                <Heart className={`w-4 h-4 ${userReaction === 'love' ? 'fill-red-500 text-red-500' : ''}`} />
+                <span className="text-xs">{reactions.loves}</span>
               </Button>
               
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleReaction('prayer')}
-                className={`text-white hover:bg-white/20 gap-2 ${
+                className={`text-white hover:bg-white/20 gap-1.5 ${
                   userReaction === 'prayer' ? 'bg-white/20' : ''
                 }`}
                 title="Oração"
               >
-                <HandHeart className={`w-5 h-5 ${userReaction === 'prayer' ? 'fill-blue-500 text-blue-500' : ''}`} />
-                <span className="text-sm">{reactions.prayers}</span>
+                <HandHeart className={`w-4 h-4 ${userReaction === 'prayer' ? 'fill-blue-500 text-blue-500' : ''}`} />
+                <span className="text-xs">{reactions.prayers}</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleReaction('amen')}
+                className={`text-white hover:bg-white/20 gap-1.5 ${
+                  userReaction === 'amen' ? 'bg-white/20' : ''
+                }`}
+                title="Amém"
+              >
+                <span className={`text-base ${userReaction === 'amen' ? 'scale-125' : ''}`}>🙌</span>
+                <span className="text-xs">{reactions.amens}</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleReaction('hallelujah')}
+                className={`text-white hover:bg-white/20 gap-1.5 ${
+                  userReaction === 'hallelujah' ? 'bg-white/20' : ''
+                }`}
+                title="Aleluia"
+              >
+                <Bird className={`w-4 h-4 ${userReaction === 'hallelujah' ? 'fill-white text-white' : ''}`} />
+                <span className="text-xs">{reactions.hallelujahs}</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleReaction('glory')}
+                className={`text-white hover:bg-white/20 gap-1.5 ${
+                  userReaction === 'glory' ? 'bg-white/20' : ''
+                }`}
+                title="Glória a Deus"
+              >
+                <Sparkles className={`w-4 h-4 ${userReaction === 'glory' ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+                <span className="text-xs">{reactions.glories}</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleReaction('fire')}
+                className={`text-white hover:bg-white/20 gap-1.5 ${
+                  userReaction === 'fire' ? 'bg-white/20' : ''
+                }`}
+                title="Aviva Senhor"
+              >
+                <Flame className={`w-4 h-4 ${userReaction === 'fire' ? 'fill-orange-500 text-orange-500' : ''}`} />
+                <span className="text-xs">{reactions.fires}</span>
               </Button>
             </div>
 
