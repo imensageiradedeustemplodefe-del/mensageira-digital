@@ -28,9 +28,11 @@ const MobileMenuPage = () => {
         <div className="px-4 py-3">
           <div className="flex items-center space-x-3">
             <img 
-              src="/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png" 
+              src="/lovable-uploads/logo-optimized.webp" 
               alt="Logo" 
               className="w-8 h-8 object-contain"
+              width="32"
+              height="32"
             />
             <div>
               <h1 className="text-base font-bold text-foreground">
