@@ -129,6 +129,9 @@ export const useGoogleDrivePhotos = (
 
   useEffect(() => {
     if (scriptUrl) {
+      // Limpa as fotos imediatamente ao mudar de álbum
+      setPhotos([]);
+      setNextPageToken(null);
       fetchPhotos();
     }
   }, [scriptUrl, albumId, order]);
