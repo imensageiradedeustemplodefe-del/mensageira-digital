@@ -11,7 +11,6 @@ const MediaPlayer = lazy(() => import("@/components/MediaPlayer").then(module =>
 const HeroSection = lazy(() => import("@/components/home/HeroSection").then(module => ({ default: module.HeroSection })));
 const UpcomingEvents = lazy(() => import("@/components/home/UpcomingEvents").then(module => ({ default: module.UpcomingEvents })));
 const ContactSection = lazy(() => import("@/components/home/ContactSection").then(module => ({ default: module.ContactSection })));
-const TestNotification = lazy(() => import("@/components/TestNotification").then(module => ({ default: module.TestNotification })));
 
 // Componente de loading skeleton
 const SectionSkeleton = ({ className }: { className?: string }) => (
@@ -93,16 +92,6 @@ const Home = () => {
       <Suspense fallback={<SectionSkeleton className="py-16 bg-background" />}>
         <UpcomingEvents loading={settingsLoading} />
       </Suspense>
-
-      {/* Test Notification Section com Suspense */}
-      <Suspense fallback={<SectionSkeleton className="py-12 bg-accent/30" />}>
-        <section className="py-12 bg-accent/30">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <TestNotification />
-          </div>
-        </section>
-      </Suspense>
-
 
       {/* Contact Info com Suspense */}
       <Suspense fallback={<SectionSkeleton className="py-16 bg-background" />}>
