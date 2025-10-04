@@ -135,14 +135,28 @@ const Gallery = () => {
                   className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 group"
                   onClick={() => handleAlbumClick(album.id, album.name)}
                 >
-                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <FolderOpen className="w-16 h-16 text-primary/50" />
+                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20">
+                    {album.coverUrl ? (
+                      <>
+                        <img
+                          src={album.coverUrl}
+                          alt={album.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <FolderOpen className="w-16 h-16 text-primary/50" />
+                      </div>
+                    )}
                   </div>
                   <CardContent className="p-4">
                     <h3 className="font-semibold text-lg mb-2">{album.name}</h3>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <ImageIcon className="w-4 h-4" />
-                      <span>Ver fotos</span>
+                      <span>{album.photoCount ? `${album.photoCount} fotos` : 'Ver fotos'}</span>
                     </div>
                   </CardContent>
                 </Card>

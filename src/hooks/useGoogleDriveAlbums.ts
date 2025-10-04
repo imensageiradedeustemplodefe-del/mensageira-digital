@@ -12,6 +12,8 @@ export interface DrivePhoto {
 export interface DriveAlbum {
   id: string;
   name: string;
+  coverUrl?: string;
+  photoCount?: number;
 }
 
 export interface DriveGalleryData {
