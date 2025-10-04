@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, Download, Share2, ChevronLeft, ChevronRight, Facebook, MessageCircle } from 'lucide-react';
+import { X, Download, Share2, ChevronLeft, ChevronRight, Facebook, MessageCircle, Heart, Hands } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Photo {
   id: string;
@@ -21,11 +22,84 @@ interface PhotoLightboxProps {
 
 export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [reactions, setReactions] = useState<{ loves: number; prayers: number }>({ loves: 0, prayers: 0 });
+  const [userReaction, setUserReaction] = useState<'love' | 'prayer' | null>(null);
   const currentPhoto = photos[currentIndex];
 
   useEffect(() => {
     setCurrentIndex(initialIndex);
   }, [initialIndex]);
+
+  useEffect(() => {
+    if (currentPhoto?.id) {
+      fetchReactions();
+    }
+  }, [currentPhoto?.id]);
+
+  const fetchReactions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('photo_reactions')
+        .select('*')
+        .eq('photo_id', currentPhoto.id);
+
+      if (error) throw error;
+
+      const loves = data?.filter(r => r.reaction_type === 'love').length || 0;
+      const prayers = data?.filter(r => r.reaction_type === 'prayer').length || 0;
+      setReactions({ loves, prayers });
+
+      // Check if user already reacted
+      const userId = localStorage.getItem('photo_user_id') || crypto.randomUUID();
+      localStorage.setItem('photo_user_id', userId);
+      const userReactionData = data?.find(r => r.user_id === userId);
+      setUserReaction(userReactionData?.reaction_type || null);
+    } catch (error) {
+      console.error('Error fetching reactions:', error);
+    }
+  };
+
+  const handleReaction = async (type: 'love' | 'prayer') => {
+    try {
+      const userId = localStorage.getItem('photo_user_id') || crypto.randomUUID();
+      localStorage.setItem('photo_user_id', userId);
+
+      if (userReaction === type) {
+        // Remove reaction
+        await supabase
+          .from('photo_reactions')
+          .delete()
+          .eq('photo_id', currentPhoto.id)
+          .eq('user_id', userId);
+        setUserReaction(null);
+        toast.success('Reação removida');
+      } else {
+        // Add or update reaction
+        if (userReaction) {
+          await supabase
+            .from('photo_reactions')
+            .delete()
+            .eq('photo_id', currentPhoto.id)
+            .eq('user_id', userId);
+        }
+        
+        await supabase
+          .from('photo_reactions')
+          .insert({
+            photo_id: currentPhoto.id,
+            user_id: userId,
+            reaction_type: type
+          });
+        setUserReaction(type);
+        toast.success(type === 'love' ? 'Amei! ❤️' : 'Oração enviada 🙏');
+      }
+      
+      await fetchReactions();
+    } catch (error) {
+      console.error('Error adding reaction:', error);
+      toast.error('Erro ao reagir');
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,7 +124,9 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(currentPhoto.thumbUrl);
+      // Use a high-resolution URL instead of thumbnail
+      const highResUrl = currentPhoto.viewUrl || currentPhoto.thumbUrl.replace('w400', 'w1920');
+      const response = await fetch(highResUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -62,6 +138,7 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
       window.URL.revokeObjectURL(url);
       toast.success('Download iniciado!');
     } catch (error) {
+      console.error('Download error:', error);
       toast.error('Erro ao baixar a foto');
     }
   };
@@ -86,7 +163,7 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl w-full h-[90vh] p-0 gap-0 bg-black/95">
+      <DialogContent className="max-w-7xl w-full h-[90vh] p-0 gap-0 bg-black/98 backdrop-blur-sm">
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-4">
           <div className="flex items-center justify-between">
@@ -114,9 +191,10 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
         {/* Main Image */}
         <div className="relative w-full h-full flex items-center justify-center p-16">
           <img
-            src={currentPhoto.thumbUrl.replace('w400', 'w1920')}
+            src={currentPhoto.viewUrl || currentPhoto.thumbUrl.replace('w400', 'w1920')}
             alt={currentPhoto.name}
             className="max-w-full max-h-full object-contain animate-fade-in"
+            style={{ objectFit: 'contain' }}
           />
         </div>
 
@@ -143,54 +221,86 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
         )}
 
         {/* Footer with Actions */}
-        <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black/80 to-transparent p-4">
-          <div className="flex items-center justify-between">
-            <div className="text-white/70 text-sm">
-              {currentIndex + 1} / {photos.length}
+        <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black/90 to-transparent p-4">
+          <div className="flex flex-col gap-3">
+            {/* Reactions Row */}
+            <div className="flex items-center justify-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleReaction('love')}
+                className={`text-white hover:bg-white/20 gap-2 ${
+                  userReaction === 'love' ? 'bg-white/20' : ''
+                }`}
+                title="Amei"
+              >
+                <Heart className={`w-5 h-5 ${userReaction === 'love' ? 'fill-red-500 text-red-500' : ''}`} />
+                <span className="text-sm">{reactions.loves}</span>
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleReaction('prayer')}
+                className={`text-white hover:bg-white/20 gap-2 ${
+                  userReaction === 'prayer' ? 'bg-white/20' : ''
+                }`}
+                title="Oração"
+              >
+                <Hands className={`w-5 h-5 ${userReaction === 'prayer' ? 'fill-blue-500 text-blue-500' : ''}`} />
+                <span className="text-sm">{reactions.prayers}</span>
+              </Button>
             </div>
-            
-            <div className="flex items-center gap-2">
-              {/* Share Buttons */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleShareWhatsApp}
-                className="text-white hover:bg-white/20"
-                title="Compartilhar no WhatsApp"
-              >
-                <MessageCircle className="w-5 h-5" />
-              </Button>
+
+            {/* Actions Row */}
+            <div className="flex items-center justify-between">
+              <div className="text-white/70 text-sm">
+                {currentIndex + 1} / {photos.length}
+              </div>
               
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleShareFacebook}
-                className="text-white hover:bg-white/20"
-                title="Compartilhar no Facebook"
-              >
-                <Facebook className="w-5 h-5" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleCopyLink}
-                className="text-white hover:bg-white/20"
-                title="Copiar link"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
-              
-              {/* Download Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleDownload}
-                className="text-white hover:bg-white/20"
-                title="Baixar foto"
-              >
-                <Download className="w-5 h-5" />
-              </Button>
+              <div className="flex items-center gap-2">
+                {/* Share Buttons */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleShareWhatsApp}
+                  className="text-white hover:bg-white/20"
+                  title="Compartilhar no WhatsApp"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleShareFacebook}
+                  className="text-white hover:bg-white/20"
+                  title="Compartilhar no Facebook"
+                >
+                  <Facebook className="w-5 h-5" />
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCopyLink}
+                  className="text-white hover:bg-white/20"
+                  title="Copiar link"
+                >
+                  <Share2 className="w-5 h-5" />
+                </Button>
+                
+                {/* Download Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDownload}
+                  className="text-white hover:bg-white/20"
+                  title="Baixar foto"
+                >
+                  <Download className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
