@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mensageira-app-v1.2';
+const CACHE_NAME = 'mensageira-app-v1.3';
 const OFFLINE_URL = '/offline.html';
 
 // URLs essenciais para cache
@@ -24,7 +24,7 @@ const CACHE_MAX_AGE = {
 
 // Instalar service worker
 self.addEventListener('install', (event) => {
-  console.log('[SW] Install');
+  console.log('[SW] Install - nova versão detectada');
   
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -33,15 +33,15 @@ self.addEventListener('install', (event) => {
         return cache.addAll(ESSENTIAL_FILES);
       })
       .then(() => {
-        console.log('[SW] Skip waiting');
-        self.skipWaiting();
+        console.log('[SW] Skip waiting - forçando ativação imediata');
+        return self.skipWaiting();
       })
   );
 });
 
 // Ativar service worker
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activate');
+  console.log('[SW] Activate - limpando caches antigos');
   
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -54,8 +54,18 @@ self.addEventListener('activate', (event) => {
           })
       );
     }).then(() => {
-      console.log('[SW] Clients claim');
-      self.clients.claim();
+      console.log('[SW] Clients claim - tomando controle de todas as páginas');
+      return self.clients.claim();
+    }).then(() => {
+      // Notifica todos os clientes sobre a atualização
+      return self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({
+            type: 'SW_UPDATED',
+            message: 'Service Worker atualizado com sucesso!'
+          });
+        });
+      });
     })
   );
 });
