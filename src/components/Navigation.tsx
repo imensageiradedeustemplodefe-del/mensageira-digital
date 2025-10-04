@@ -65,11 +65,9 @@ const Navigation = () => {
               </Button>
               <Link to="/" className="flex items-center space-x-2">
                 <img 
-                  src="/lovable-uploads/logo-optimized.webp" 
+                  src="/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png" 
                   alt="Logo" 
                   className="w-6 h-6 object-contain"
-                  width="24"
-                  height="24"
                 />
                 <h1 className="text-lg font-semibold text-foreground">
                   {getPageTitle()}
@@ -104,11 +102,9 @@ const Navigation = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
             <img 
-              src="/lovable-uploads/logo-optimized.webp" 
+              src="/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png" 
               alt="Logo Igreja Mensageira de Deus Templo de Fé" 
               className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
-              width="40"
-              height="40"
             />
             <div className="hidden sm:block">
               <h1 className="text-lg font-bold text-foreground">

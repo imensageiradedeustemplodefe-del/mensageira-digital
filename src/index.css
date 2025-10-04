@@ -19,7 +19,7 @@ All colors MUST be HSL. Based on church brand colors.
     --popover-foreground: 218 25% 20%;
 
     /* Primary Blue - Church Brand */
-    --primary: 210 100% 48%;  /* Darkened for WCAG AA contrast with white text */
+    --primary: 210 100% 56%;  /* #1E90FF */
     --primary-foreground: 0 0% 100%;
     --primary-light: 197 71% 73%;  /* #87CEEB */
 
@@ -29,7 +29,7 @@ All colors MUST be HSL. Based on church brand colors.
 
     /* Accent and Muted */
     --muted: 210 17% 98%;  /* #F8F9FA equivalent */
-    --muted-foreground: 215 16% 44%;  /* Darkened for WCAG AA contrast */
+    --muted-foreground: 215 16% 47%;
 
     --accent: 197 71% 95%;
     --accent-foreground: 218 25% 20%;
