@@ -53,11 +53,6 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
     }
   }, [error]);
 
-  // Se não há mídia carregada OU não iniciou reprodução ainda, não mostrar o player
-  if (!currentMedia || !hasStartedPlayback) {
-    return null;
-  }
-
   const mediaType = getMediaType(currentMedia.media_url);
   const isYouTube = mediaType === 'youtube';
 
@@ -143,6 +138,11 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, dragOffset, isMinimized]);
+
+  // Se não há mídia carregada OU não iniciou reprodução ainda, não mostrar o player
+  if (!currentMedia || !hasStartedPlayback) {
+    return null;
+  }
 
   return (
     <Card
