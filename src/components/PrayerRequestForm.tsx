@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,29 +13,81 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Heart, Send, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+
+// Schema de validação seguro
+const prayerRequestSchema = z.object({
+  name: z.string()
+    .trim()
+    .min(2, 'Nome deve ter pelo menos 2 caracteres')
+    .max(100, 'Nome deve ter no máximo 100 caracteres')
+    .regex(/^[a-zA-ZÀ-ÿ\s]+$/, 'Nome deve conter apenas letras'),
+  email: z.string()
+    .trim()
+    .email('E-mail inválido')
+    .max(255, 'E-mail muito longo')
+    .optional()
+    .or(z.literal('')),
+  phone: z.string()
+    .trim()
+    .max(20, 'Telefone muito longo')
+    .regex(/^[\d\s\-\(\)]*$/, 'Formato de telefone inválido')
+    .optional()
+    .or(z.literal('')),
+  request_text: z.string()
+    .trim()
+    .min(10, 'Pedido deve ter pelo menos 10 caracteres')
+    .max(2000, 'Pedido deve ter no máximo 2000 caracteres')
+    .refine(
+      (val) => !/<[^>]+>/.test(val),
+      'HTML não é permitido'
+    )
+    .refine(
+      (val) => !/https?:\/\/|www\./i.test(val),
+      'URLs não são permitidas no pedido'
+    ),
+  category: z.enum(['geral', 'saude', 'familia', 'trabalho', 'financeiro', 'espiritual', 'relacionamentos']),
+  is_urgent: z.boolean().default(false),
+  allow_public_share: z.boolean().default(false),
+});
 
 export default function PrayerRequestForm() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    request_text: '',
-    category: 'geral',
-    is_urgent: false,
-    allow_public_share: false
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
+  
+  const form = useForm<z.infer<typeof prayerRequestSchema>>({
+    resolver: zodResolver(prayerRequestSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      request_text: '',
+      category: 'geral',
+      is_urgent: false,
+      allow_public_share: false,
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const onSubmit = async (values: z.infer<typeof prayerRequestSchema>) => {
     try {
       const { error } = await supabase
         .from('prayer_requests')
-        .insert([formData]);
+        .insert([{
+          name: values.name,
+          email: values.email || null,
+          phone: values.phone || null,
+          request_text: values.request_text,
+          category: values.category,
+          is_urgent: values.is_urgent,
+          allow_public_share: values.allow_public_share,
+        }]);
 
       if (error) throw error;
 
@@ -42,26 +97,13 @@ export default function PrayerRequestForm() {
         description: "Seu pedido foi recebido e será analisado pela equipe pastoral.",
       });
 
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        request_text: '',
-        category: 'geral',
-        is_urgent: false,
-        allow_public_share: false
-      });
-
+      form.reset();
     } catch (error: any) {
-      console.error('Erro ao enviar pedido:', error);
       toast({
         title: "Erro ao Enviar",
-        description: "Houve um problema ao enviar seu pedido. Tente novamente.",
+        description: error.message || "Houve um problema ao enviar seu pedido. Tente novamente.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -86,141 +128,195 @@ export default function PrayerRequestForm() {
   }
 
   return (
-    <Card className="max-w-2xl mx-auto">
+    <Card className="max-w-2xl mx-auto" role="form" aria-labelledby="prayer-form-title">
       <CardHeader className="text-center">
-        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
           <Heart className="w-6 h-6 text-primary" />
         </div>
-        <CardTitle className="text-2xl">Pedido de Oração</CardTitle>
+        <CardTitle id="prayer-form-title" className="text-2xl">Pedido de Oração</CardTitle>
         <p className="text-muted-foreground">
           Compartilhe sua necessidade de oração conosco. Estaremos intercedendo por você.
         </p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome Completo *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required
-                placeholder="Seu nome"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
+            <div className="grid md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome Completo *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Seu nome"
+                        aria-required="true"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Categoria</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger aria-label="Selecione a categoria">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="geral">Geral</SelectItem>
+                        <SelectItem value="saude">Saúde</SelectItem>
+                        <SelectItem value="familia">Família</SelectItem>
+                        <SelectItem value="trabalho">Trabalho</SelectItem>
+                        <SelectItem value="financeiro">Financeiro</SelectItem>
+                        <SelectItem value="espiritual">Espiritual</SelectItem>
+                        <SelectItem value="relacionamentos">Relacionamentos</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="category">Categoria</Label>
-              <Select 
-                value={formData.category} 
-                onValueChange={(value) => setFormData({...formData, category: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="geral">Geral</SelectItem>
-                  <SelectItem value="saude">Saúde</SelectItem>
-                  <SelectItem value="familia">Família</SelectItem>
-                  <SelectItem value="trabalho">Trabalho</SelectItem>
-                  <SelectItem value="financeiro">Financeiro</SelectItem>
-                  <SelectItem value="espiritual">Espiritual</SelectItem>
-                  <SelectItem value="relacionamentos">Relacionamentos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">E-mail (Opcional)</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                placeholder="seu@email.com"
+            <div className="grid md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-mail (Opcional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="seu@email.com"
+                        autoComplete="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telefone (Opcional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="tel"
+                        placeholder="(00) 00000-0000"
+                        autoComplete="tel"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Telefone (Opcional)</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                placeholder="(00) 00000-0000"
-              />
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="request_text">Pedido de Oração *</Label>
-            <Textarea
-              id="request_text"
-              value={formData.request_text}
-              onChange={(e) => setFormData({...formData, request_text: e.target.value})}
-              required
-              rows={5}
-              placeholder="Compartilhe sua necessidade de oração..."
-              className="resize-none"
+            <FormField
+              control={form.control}
+              name="request_text"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Pedido de Oração *</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      rows={5}
+                      placeholder="Compartilhe sua necessidade de oração..."
+                      className="resize-none"
+                      aria-required="true"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="is_urgent"
-                checked={formData.is_urgent}
-                onCheckedChange={(checked) => 
-                  setFormData({...formData, is_urgent: checked as boolean})
-                }
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="is_urgent"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        aria-label="Marcar como pedido urgente"
+                      />
+                    </FormControl>
+                    <FormLabel className="text-sm font-normal cursor-pointer">
+                      Marcar como pedido urgente
+                    </FormLabel>
+                  </FormItem>
+                )}
               />
-              <Label htmlFor="is_urgent" className="text-sm">
-                Marcar como pedido urgente
-              </Label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="allow_public_share"
-                checked={formData.allow_public_share}
-                onCheckedChange={(checked) => 
-                  setFormData({...formData, allow_public_share: checked as boolean})
-                }
+              
+              <FormField
+                control={form.control}
+                name="allow_public_share"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        aria-label="Permitir compartilhamento público"
+                      />
+                    </FormControl>
+                    <FormLabel className="text-sm font-normal cursor-pointer">
+                      Permitir que minha oração seja compartilhada com outros membros da comunidade
+                    </FormLabel>
+                  </FormItem>
+                )}
               />
-              <Label htmlFor="allow_public_share" className="text-sm">
-                Permitir que minha oração seja compartilhada com outros membros da comunidade
-              </Label>
             </div>
-          </div>
 
-          <Alert>
-            <Heart className="h-4 w-4" />
-            <AlertDescription>
-              Seus dados são tratados com confidencialidade. Apenas a equipe pastoral 
-              terá acesso completo ao seu pedido. Se você permitir o compartilhamento público,
-              outros membros verão apenas seu nome e o pedido de oração.
-            </AlertDescription>
-          </Alert>
+            <Alert role="note">
+              <Heart className="h-4 w-4" aria-hidden="true" />
+              <AlertDescription>
+                Seus dados são tratados com confidencialidade. Apenas a equipe pastoral 
+                terá acesso completo ao seu pedido. Se você permitir o compartilhamento público,
+                outros membros verão apenas seu nome e o pedido de oração.
+              </AlertDescription>
+            </Alert>
 
-          <Button 
-            type="submit" 
-            className="w-full"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Enviando...
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4 mr-2" />
-                Enviar Pedido
-              </>
-            )}
-          </Button>
-        </form>
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+              aria-busy={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" aria-hidden="true" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" aria-hidden="true" />
+                  Enviar Pedido
+                </>
+              )}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

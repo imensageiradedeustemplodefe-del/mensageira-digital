@@ -65,38 +65,43 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section com Suspense */}
-      <Suspense fallback={<SectionSkeleton className="py-16 sm:py-24 bg-gradient-to-br from-primary/10 via-background to-peaceful-blue/20" />}>
-        <HeroSection installable={installable} onInstallClick={handleInstallClick} />
-      </Suspense>
+      {/* Main content wrapper with ID for skip link */}
+      <main id="main-content" role="main">
+        {/* Hero Section com Suspense */}
+        <Suspense fallback={<SectionSkeleton className="py-16 sm:py-24 bg-gradient-to-br from-primary/10 via-background to-peaceful-blue/20" />}>
+          <HeroSection installable={installable} onInstallClick={handleInstallClick} />
+        </Suspense>
 
-      {/* Daily Verse Section com Suspense */}
-      <Suspense fallback={<SectionSkeleton className="py-12 bg-background" />}>
-        <section className="py-12 bg-background">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <DailyVerse />
-          </div>
-        </section>
-      </Suspense>
+        {/* Daily Verse Section com Suspense */}
+        <Suspense fallback={<SectionSkeleton className="py-12 bg-background" />}>
+          <section className="py-12 bg-background" aria-labelledby="daily-verse-heading">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 id="daily-verse-heading" className="sr-only">Palavra do Dia</h2>
+              <DailyVerse />
+            </div>
+          </section>
+        </Suspense>
 
-      {/* Media Player Section com Suspense */}
-      <Suspense fallback={<SectionSkeleton className="py-12 bg-accent/30" />}>
-        <section className="py-12 bg-accent/30">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <MediaPlayer />
-          </div>
-        </section>
-      </Suspense>
+        {/* Media Player Section com Suspense */}
+        <Suspense fallback={<SectionSkeleton className="py-12 bg-accent/30" />}>
+          <section className="py-12 bg-accent/30" aria-labelledby="media-player-heading">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 id="media-player-heading" className="sr-only">Player de Mídia</h2>
+              <MediaPlayer />
+            </div>
+          </section>
+        </Suspense>
 
-      {/* Upcoming Events com Suspense */}
-      <Suspense fallback={<SectionSkeleton className="py-16 bg-background" />}>
-        <UpcomingEvents loading={settingsLoading} />
-      </Suspense>
+        {/* Upcoming Events com Suspense */}
+        <Suspense fallback={<SectionSkeleton className="py-16 bg-background" />}>
+          <UpcomingEvents loading={settingsLoading} />
+        </Suspense>
 
-      {/* Contact Info com Suspense */}
-      <Suspense fallback={<SectionSkeleton className="py-16 bg-background" />}>
-        <ContactSection />
-      </Suspense>
+        {/* Contact Info com Suspense */}
+        <Suspense fallback={<SectionSkeleton className="py-16 bg-background" />}>
+          <ContactSection />
+        </Suspense>
+      </main>
     </div>
   );
 };
