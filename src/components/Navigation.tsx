@@ -3,14 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Users, Calendar, Play, Phone, Heart, Camera, MessageCircle, ChevronDown, User, ArrowLeft, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { SearchBar } from "@/components/SearchBar";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { NotificationBadge } from "@/components/ui/notification-badge";
 import { useNotificationCount } from "@/hooks/useNotificationCount";
 
 const Navigation = () => {
-  const { settings } = useSiteSettings();
   const { count: notificationCount } = useNotificationCount();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
