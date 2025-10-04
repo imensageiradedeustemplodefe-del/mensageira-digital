@@ -55,7 +55,7 @@ const DailyVerse = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-spiritual-glow/5 to-transparent"></div>
         <CardContent className="relative p-6 sm:p-8">
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Palavra do Dia</h3>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Palavra do Dia</h2>
             <p className="text-destructive text-sm">{error}</p>
             <Button 
               variant="outline" 
@@ -77,7 +77,7 @@ const DailyVerse = () => {
       <CardContent className="relative p-6 sm:p-8">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-foreground">Palavra do Dia</h3>
+            <h2 className="text-lg font-semibold text-foreground">Palavra do Dia</h2>
             {verse && verse.category && (
               <span className="text-xs text-muted-foreground capitalize bg-muted/50 px-2 py-1 rounded-full mt-1 inline-block">
                 {verse.category.replace('_', ' ')}
