@@ -12,11 +12,25 @@ const HeroSection = lazy(() => import("@/components/home/HeroSection").then(modu
 const UpcomingEvents = lazy(() => import("@/components/home/UpcomingEvents").then(module => ({ default: module.UpcomingEvents })));
 const ContactSection = lazy(() => import("@/components/home/ContactSection").then(module => ({ default: module.ContactSection })));
 
-// Componente de loading skeleton
+// Componente de loading skeleton com altura fixa para evitar CLS
 const SectionSkeleton = ({ className }: { className?: string }) => (
   <section className={className}>
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <Skeleton className="h-20 w-full rounded-lg" />
+    </div>
+  </section>
+);
+
+// Skeleton específico para DailyVerse com altura fixa
+const DailyVerseSkeleton = () => (
+  <section className="py-12 bg-background">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="rounded-lg bg-gradient-to-br from-primary-light/20 to-warm-gold/30 border-none shadow-lg p-6 sm:p-8 min-h-[200px]">
+        <Skeleton className="h-6 w-32 mb-4" />
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-3/4 mb-2" />
+        <Skeleton className="h-3 w-1/3" />
+      </div>
     </div>
   </section>
 );
@@ -72,15 +86,15 @@ const Home = () => {
           <HeroSection installable={installable} onInstallClick={handleInstallClick} />
         </Suspense>
 
-        {/* Daily Verse Section com Suspense */}
-        <Suspense fallback={<SectionSkeleton className="py-12 bg-background" />}>
-          <section className="py-12 bg-background" aria-labelledby="daily-verse-heading">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 id="daily-verse-heading" className="sr-only">Palavra do Dia</h2>
-              <DailyVerse />
-            </div>
-          </section>
-        </Suspense>
+      {/* Daily Verse Section com Suspense e altura fixa para evitar CLS */}
+      <Suspense fallback={<DailyVerseSkeleton />}>
+        <section className="py-12 bg-background" aria-labelledby="daily-verse-heading">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 id="daily-verse-heading" className="sr-only">Palavra do Dia</h2>
+            <DailyVerse />
+          </div>
+        </section>
+      </Suspense>
 
         {/* Media Player Section com Suspense */}
         <Suspense fallback={<SectionSkeleton className="py-12 bg-accent/30" />}>

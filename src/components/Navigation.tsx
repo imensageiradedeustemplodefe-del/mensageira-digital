@@ -65,6 +65,9 @@ const Navigation = () => {
                   src="/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png" 
                   alt="Logo" 
                   className="w-6 h-6 object-contain"
+                  width="24"
+                  height="24"
+                  loading="eager"
                 />
                 <h1 className="text-lg font-semibold text-foreground">
                   {getPageTitle()}
@@ -102,6 +105,10 @@ const Navigation = () => {
               src="/lovable-uploads/a66b8df0-078f-4966-91ac-e6ead39aced4.png" 
               alt="Logo Igreja Mensageira de Deus Templo de Fé" 
               className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+              width="40"
+              height="40"
+              loading="eager"
+              fetchPriority="high"
             />
             <div className="hidden sm:block">
               <h1 className="text-lg font-bold text-foreground">

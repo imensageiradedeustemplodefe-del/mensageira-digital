@@ -72,7 +72,7 @@ const DailyVerse = () => {
   }
 
   return (
-    <Card className="relative overflow-hidden bg-gradient-to-br from-primary-light/20 to-warm-gold/30 border-none shadow-lg">
+    <Card className="relative overflow-hidden bg-gradient-to-br from-primary-light/20 to-warm-gold/30 border-none shadow-lg min-h-[200px]">
       <div className="absolute inset-0 bg-gradient-to-br from-spiritual-glow/5 to-transparent"></div>
       <CardContent className="relative p-6 sm:p-8">
         <div className="flex items-start justify-between mb-4">

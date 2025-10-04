@@ -15,7 +15,7 @@ export const HeroSection = ({ installable, onInstallClick }: HeroSectionProps) =
         <div className="text-center space-y-6">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
             Bem-vindos à
-            <span className="block text-primary">Mensageira de Deus</span>
+            <span className="block text-primary mt-2">Mensageira de Deus</span>
             <span className="block text-lg sm:text-xl font-normal text-muted-foreground mt-2">
               Templo de Fé
             </span>

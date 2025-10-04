@@ -41,11 +41,13 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
 
   const actualVideoId = extractVideoId(videoId);
 
-  // Load YouTube API
+  // Load YouTube API com loading lazy e async
   useEffect(() => {
     if (!window.YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
+      tag.async = true;
+      tag.defer = true;
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 

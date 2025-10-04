@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mensageira-app-v1.1';
+const CACHE_NAME = 'mensageira-app-v1.2';
 const OFFLINE_URL = '/offline.html';
 
 // URLs essenciais para cache
@@ -6,13 +6,21 @@ const ESSENTIAL_FILES = [
   '/',
   '/offline.html',
   '/manifest.json',
-  // Adicionar outros recursos críticos aqui
 ];
 
 // URLs de API que devem ser cached
 const API_CACHE_URLS = [
-  // Adicionar endpoints da API aqui quando disponíveis
+  '/rest/v1/site_settings',
+  '/rest/v1/daily_verses',
+  '/rest/v1/events'
 ];
+
+// Durações de cache
+const CACHE_MAX_AGE = {
+  images: 30 * 24 * 60 * 60 * 1000, // 30 dias
+  static: 7 * 24 * 60 * 60 * 1000,  // 7 dias  
+  api: 5 * 60 * 1000,                 // 5 minutos
+};
 
 // Instalar service worker
 self.addEventListener('install', (event) => {
