@@ -251,61 +251,97 @@ const DashboardStats = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">Dashboard</h2>
-        <p className="text-muted-foreground">Visão geral das atividades e estatísticas do site</p>
-      </div>
-
-      {/* Stats Cards */}
+      {/* Enhanced Stats Cards with Animations */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="group hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500 hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Testemunhos</CardTitle>
-            <MessageCircle className="h-4 w-4 text-blue-500" />
+            <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+              <MessageCircle className="h-4 w-4 text-blue-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stats.totalTestimonies}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.approvedTestimonies} aprovados de {stats.totalTestimonies}
-            </p>
+            <div className="text-3xl font-bold text-foreground mb-1">{stats.totalTestimonies}</div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 bg-muted rounded-full h-1.5">
+                <div 
+                  className="bg-blue-500 h-1.5 rounded-full transition-all duration-500"
+                  style={{ width: `${(stats.approvedTestimonies / Math.max(stats.totalTestimonies, 1)) * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground whitespace-nowrap">
+                {stats.approvedTestimonies} aprovados
+              </p>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="group hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-500 hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pedidos de Oração</CardTitle>
-            <Heart className="h-4 w-4 text-green-500" />
+            <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
+              <Heart className="h-4 w-4 text-green-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stats.totalPrayerRequests}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.pendingPrayerRequests} aguardando aprovação
+            <div className="text-3xl font-bold text-foreground mb-1">{stats.totalPrayerRequests}</div>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              {stats.pendingPrayerRequests > 0 && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  {stats.pendingPrayerRequests} pendentes
+                </span>
+              )}
+              {stats.pendingPrayerRequests === 0 && (
+                <span className="text-green-600 dark:text-green-400 flex items-center">
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Tudo aprovado
+                </span>
+              )}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="group hover:shadow-lg transition-all duration-300 border-l-4 border-l-orange-500 hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Eventos</CardTitle>
-            <Calendar className="h-4 w-4 text-orange-500" />
+            <div className="h-8 w-8 rounded-full bg-orange-500/10 flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
+              <Calendar className="h-4 w-4 text-orange-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stats.totalEvents}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.upcomingEvents} próximos eventos
+            <div className="text-3xl font-bold text-foreground mb-1">{stats.totalEvents}</div>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              {stats.upcomingEvents > 0 ? (
+                <>
+                  <TrendingUp className="w-3 h-3" />
+                  {stats.upcomingEvents} próximos
+                </>
+              ) : (
+                <span className="text-muted-foreground">Nenhum próximo</span>
+              )}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="group hover:shadow-lg transition-all duration-300 border-l-4 border-l-red-500 hover:scale-105">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Transmissões</CardTitle>
-            <Radio className="h-4 w-4 text-red-500" />
+            <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
+              <Radio className="h-4 w-4 text-red-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stats.totalStreams}</div>
+            <div className="text-3xl font-bold text-foreground mb-1">{stats.totalStreams}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.liveStreams} ativa{stats.liveStreams !== 1 ? 's' : ''} agora
+              {stats.liveStreams > 0 ? (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-1.5 animate-pulse" />
+                  {stats.liveStreams} ao vivo
+                </span>
+              ) : (
+                <span className="text-muted-foreground">Nenhuma ativa</span>
+              )}
             </p>
           </CardContent>
         </Card>
