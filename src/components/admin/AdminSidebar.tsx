@@ -41,22 +41,22 @@ const menuItems = [
     title: "Conteúdo",
     items: [
       { title: "Google Drive", value: "drive", icon: Cloud },
-      { title: "Testemunhos", value: "testimonies", icon: MessageCircle },
+      { title: "Mídia", value: "media", icon: Music },
+      { title: "Transmissões", value: "live", icon: Radio },
     ]
   },
   {
-    title: "Eventos & Mídia",
+    title: "Eventos",
     items: [
       { title: "Eventos", value: "events", icon: Calendar },
       { title: "Modelos", value: "templates", icon: Copy },
-      { title: "Mídia", value: "media", icon: Music },
-      { title: "Transmissões", value: "live", icon: Radio },
     ]
   },
   {
     title: "Comunidade",
     items: [
       { title: "Pedidos de Oração", value: "prayers", icon: Heart },
+      { title: "Testemunhos", value: "testimonies", icon: MessageCircle },
     ]
   }
 ];
