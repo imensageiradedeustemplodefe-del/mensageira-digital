@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Check, X, CheckCircle, ChevronDown, ChevronUp, Shield, AlertTriangle, Heart, Clock, Eye } from 'lucide-react';
+import { Check, X, CheckCircle, ChevronDown, ChevronUp, Shield, AlertTriangle, Heart, Clock, Eye, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -127,13 +127,13 @@ export default function PrayerRequestsManager() {
 
       toast({
         title: "Sucesso",
-        description: "Pedido de oração rejeitado e removido.",
+        description: "Pedido de oração removido.",
       });
     } catch (error) {
-      console.error('Error rejecting prayer request:', error);
+      console.error('Error deleting prayer request:', error);
       toast({
         title: "Erro",
-        description: "Erro ao rejeitar pedido de oração",
+        description: "Erro ao remover pedido de oração",
         variant: "destructive"
       });
     }
@@ -249,13 +249,33 @@ export default function PrayerRequestsManager() {
                   </>
                 )}
                 {request.is_approved && !request.is_completed && (
+                  <>
+                    <Button 
+                      size="sm" 
+                      variant="secondary" 
+                      onClick={() => handleComplete(request.id)}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      Marcar Concluído
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive" 
+                      onClick={() => handleReject(request.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Excluir
+                    </Button>
+                  </>
+                )}
+                {request.is_completed && (
                   <Button 
                     size="sm" 
-                    variant="secondary" 
-                    onClick={() => handleComplete(request.id)}
+                    variant="destructive" 
+                    onClick={() => handleReject(request.id)}
                   >
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    Marcar Concluído
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Excluir
                   </Button>
                 )}
                 <Button 
