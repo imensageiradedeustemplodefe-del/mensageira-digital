@@ -1,6 +1,5 @@
 import { 
   BarChart3, 
-  Bell, 
   MessageCircle, 
   Cloud, 
   Music, 
@@ -34,7 +33,6 @@ const menuItems = [
     title: "Visão Geral",
     items: [
       { title: "Dashboard", value: "dashboard", icon: BarChart3 },
-      { title: "Notificações", value: "notifications", icon: Bell },
     ]
   },
   {

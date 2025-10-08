@@ -11,8 +11,7 @@ import EventsManager from '@/components/admin/EventsManager';
 import EventTemplatesManager from '@/components/admin/EventTemplatesManager';
 import LiveStreamsManager from '@/components/admin/LiveStreamsManager';
 import DashboardStats from '@/components/admin/DashboardStats';
-import PushNotificationsManager from '@/components/admin/PushNotificationsManager';
-import { LogOut, Bell } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 
 const Admin = () => {
@@ -26,7 +25,6 @@ const Admin = () => {
   const getPageTitle = (tab: string) => {
     const titles: { [key: string]: string } = {
       dashboard: 'Dashboard',
-      notifications: 'Notificações Push',
       testimonies: 'Gerenciar Testemunhos',
       drive: 'Integração Google Drive',
       media: 'Biblioteca de Mídia',
@@ -83,7 +81,6 @@ const Admin = () => {
                 <h1 className="text-3xl font-bold tracking-tight">{getPageTitle(activeTab)}</h1>
                 <p className="text-muted-foreground">
                   {activeTab === 'dashboard' && 'Visão geral das atividades e estatísticas'}
-                  {activeTab === 'notifications' && 'Configure e envie notificações push para os usuários'}
                   {activeTab === 'testimonies' && 'Aprove e gerencie os testemunhos recebidos'}
                   {activeTab === 'drive' && 'Sincronize fotos automaticamente do Google Drive'}
                   {activeTab === 'media' && 'Gerencie vídeos, áudios e músicas'}
@@ -97,25 +94,6 @@ const Admin = () => {
               {/* Content */}
               <div className="animate-fade-in">
                 {activeTab === 'dashboard' && <DashboardStats />}
-                {activeTab === 'notifications' && (
-                  <div className="space-y-6">
-                    <div className="bg-card p-6 rounded-lg border">
-                      <h3 className="text-lg font-semibold mb-2">Configurar Notificações</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Para testar notificações, primeiro configure-as no seu dispositivo:
-                      </p>
-                      <a 
-                        href="/notificacoes" 
-                        target="_blank"
-                        className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                      >
-                        <Bell className="w-4 h-4 mr-2" />
-                        Configurar Notificações
-                      </a>
-                    </div>
-                    <PushNotificationsManager />
-                  </div>
-                )}
                 {activeTab === 'testimonies' && <TestimoniesManager />}
                 {activeTab === 'drive' && <GoogleDriveManager />}
                 {activeTab === 'media' && <MediaManager />}
