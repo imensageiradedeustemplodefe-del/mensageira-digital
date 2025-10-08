@@ -37,49 +37,54 @@ const Admin = () => {
   };
 
   return (
-    <SidebarProvider defaultOpen>
+    <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen flex w-full bg-background">
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         
-        <main className="flex-1 flex flex-col">
-          {/* Modern Header */}
+        <main className="flex-1 flex flex-col min-w-0">
+          {/* Mobile-Optimized Header */}
           <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex h-16 items-center gap-4 px-6">
-              <SidebarTrigger />
+            <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-6">
+              <SidebarTrigger className="flex-shrink-0" />
               
-              <div className="flex items-center gap-2 flex-1">
-                <Breadcrumb>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Breadcrumb className="hidden sm:block">
                   <BreadcrumbList>
                     <BreadcrumbItem>
                       <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                      <BreadcrumbPage>{getPageTitle(activeTab)}</BreadcrumbPage>
+                      <BreadcrumbPage className="truncate">{getPageTitle(activeTab)}</BreadcrumbPage>
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
+                
+                {/* Mobile: Show only page title */}
+                <h1 className="sm:hidden text-sm font-semibold truncate">
+                  {getPageTitle(activeTab)}
+                </h1>
               </div>
 
               <Button 
                 onClick={handleLogout} 
                 variant="ghost" 
                 size="sm"
-                className="ml-auto"
+                className="ml-auto flex-shrink-0"
               >
-                <LogOut className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Sair</span>
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline sm:ml-2">Sair</span>
               </Button>
             </div>
           </header>
 
           {/* Content Area */}
           <div className="flex-1 overflow-y-auto">
-            <div className="container mx-auto p-6 space-y-6">
-              {/* Page Header */}
-              <div className="space-y-1">
-                <h1 className="text-3xl font-bold tracking-tight">{getPageTitle(activeTab)}</h1>
-                <p className="text-muted-foreground">
+            <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+              {/* Page Header - Hidden on mobile (shown in header) */}
+              <div className="space-y-1 hidden sm:block">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{getPageTitle(activeTab)}</h1>
+                <p className="text-sm text-muted-foreground">
                   {activeTab === 'dashboard' && 'Visão geral das atividades e estatísticas'}
                   {activeTab === 'testimonies' && 'Aprove e gerencie os testemunhos recebidos'}
                   {activeTab === 'drive' && 'Sincronize fotos automaticamente do Google Drive'}

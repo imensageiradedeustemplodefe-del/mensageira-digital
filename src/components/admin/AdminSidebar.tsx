@@ -60,17 +60,17 @@ const menuItems = [
 ];
 
 export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
-  const { state } = useSidebar();
+  const { state, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   return (
-    <Sidebar className="border-r bg-card">
+    <Sidebar className="border-r bg-card" collapsible="icon">
       <SidebarContent>
-        <div className="px-4 py-6">
+        <div className={cn("px-4 py-4 sm:py-6", isCollapsed && "px-2")}>
           <div className="flex items-center gap-2">
-            <Settings className="w-5 h-5 text-primary" />
+            <Settings className={cn("text-primary flex-shrink-0", isCollapsed ? "w-5 h-5" : "w-4 sm:w-5 h-4 sm:h-5")} />
             {!isCollapsed && (
-              <h2 className="font-semibold text-lg">Admin</h2>
+              <h2 className="font-semibold text-base sm:text-lg">Admin</h2>
             )}
           </div>
         </div>
@@ -89,18 +89,25 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
                   return (
                     <SidebarMenuItem key={item.value}>
                       <SidebarMenuButton
-                        onClick={() => onTabChange(item.value)}
+                        onClick={() => {
+                          onTabChange(item.value);
+                          // Close sidebar on mobile after selection
+                          if (isMobile) {
+                            const trigger = document.querySelector('[data-sidebar="trigger"]') as HTMLElement;
+                            trigger?.click();
+                          }
+                        }}
                         className={cn(
                           "w-full justify-start transition-all",
                           isActive && "bg-primary/10 text-primary font-medium hover:bg-primary/15"
                         )}
-                        tooltip={item.title}
+                        tooltip={isCollapsed ? item.title : undefined}
                       >
                         <item.icon className="w-4 h-4 flex-shrink-0" />
                         {!isCollapsed && (
                           <>
-                            <span className="flex-1">{item.title}</span>
-                            {isActive && <ChevronRight className="w-4 h-4" />}
+                            <span className="flex-1 text-sm">{item.title}</span>
+                            {isActive && <ChevronRight className="w-4 h-4 flex-shrink-0" />}
                           </>
                         )}
                       </SidebarMenuButton>

@@ -208,11 +208,11 @@ export default function PrayerRequestsManager() {
     }, [isExpanded, request.has_contact_info, currentContactInfo, request.id]);
 
     return (
-      <Card className="mb-4">
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
+      <Card className="mb-3 sm:mb-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center flex-wrap gap-2">
                 <Badge variant={getCategoryColor(request.category || 'geral')} className="text-xs">
                   {getCategoryName(request.category || 'geral')}
                 </Badge>
@@ -227,24 +227,25 @@ export default function PrayerRequestsManager() {
                   </Badge>
                 )}
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap gap-2">
                 {!request.is_approved && (
                   <>
                     <Button 
                       size="sm" 
                       onClick={() => handleApprove(request.id)}
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none"
                     >
-                      <Check className="w-4 h-4 mr-1" />
-                      Aprovar
+                      <Check className="w-4 h-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Aprovar</span>
                     </Button>
                     <Button 
                       size="sm" 
                       variant="destructive" 
                       onClick={() => handleReject(request.id)}
+                      className="flex-1 sm:flex-none"
                     >
-                      <X className="w-4 h-4 mr-1" />
-                      Rejeitar
+                      <X className="w-4 h-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Rejeitar</span>
                     </Button>
                   </>
                 )}
@@ -254,17 +255,19 @@ export default function PrayerRequestsManager() {
                       size="sm" 
                       variant="secondary" 
                       onClick={() => handleComplete(request.id)}
+                      className="flex-1 sm:flex-none"
                     >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Marcar Concluído
+                      <CheckCircle className="w-4 h-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Concluído</span>
                     </Button>
                     <Button 
                       size="sm" 
                       variant="destructive" 
                       onClick={() => handleReject(request.id)}
+                      className="flex-1 sm:flex-none"
                     >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Excluir
+                      <Trash2 className="w-4 h-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Excluir</span>
                     </Button>
                   </>
                 )}
@@ -273,15 +276,17 @@ export default function PrayerRequestsManager() {
                     size="sm" 
                     variant="destructive" 
                     onClick={() => handleReject(request.id)}
+                    className="flex-1 sm:flex-none"
                   >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    Excluir
+                    <Trash2 className="w-4 h-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Excluir</span>
                   </Button>
                 )}
                 <Button 
                   size="sm" 
                   variant="ghost" 
                   onClick={onToggle}
+                  className="flex-shrink-0"
                 >
                   {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </Button>
@@ -289,8 +294,8 @@ export default function PrayerRequestsManager() {
             </div>
 
             <div>
-              <p className="font-semibold">{request.name}</p>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="font-semibold text-sm sm:text-base">{request.name}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                 {isExpanded ? request.request_text : `${request.request_text.substring(0, 100)}...`}
               </p>
             </div>
@@ -299,26 +304,26 @@ export default function PrayerRequestsManager() {
               <div className="space-y-3 pt-3 border-t">
                 {request.has_contact_info && (
                   <div className="bg-muted p-3 rounded-lg">
-                    <h4 className="font-medium text-sm mb-2 flex items-center">
-                      <Shield className="w-4 h-4 mr-1" />
+                    <h4 className="font-medium text-xs sm:text-sm mb-2 flex items-center">
+                      <Shield className="w-3 sm:w-4 h-3 sm:h-4 mr-1" />
                       Informações de Contato (Criptografadas)
                     </h4>
                     {currentContactInfo ? (
                       <>
                         {currentContactInfo.email && (
-                          <p className="text-sm"><strong>Email:</strong> {currentContactInfo.email}</p>
+                          <p className="text-xs sm:text-sm"><strong>Email:</strong> {currentContactInfo.email}</p>
                         )}
                         {currentContactInfo.phone && (
-                          <p className="text-sm"><strong>Telefone:</strong> {currentContactInfo.phone}</p>
+                          <p className="text-xs sm:text-sm"><strong>Telefone:</strong> {currentContactInfo.phone}</p>
                         )}
                       </>
                     ) : (
-                      <p className="text-sm text-muted-foreground">Carregando informações de contato...</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Carregando informações de contato...</p>
                     )}
                   </div>
                 )}
                 
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-2 text-xs text-muted-foreground">
                   <span>Criado: {format(new Date(request.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</span>
                   {request.approved_at && (
                     <span>Aprovado: {format(new Date(request.approved_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</span>
@@ -378,30 +383,36 @@ export default function PrayerRequestsManager() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="pending" className="flex items-center gap-2">
-              <Eye className="w-4 h-4" />
-              Pendentes ({pendingRequests.length})
+          <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsTrigger value="pending" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
+              <Eye className="w-3 sm:w-4 h-3 sm:h-4" />
+              <span className="hidden xs:inline">Pendentes</span>
+              <span className="xs:hidden">({pendingRequests.length})</span>
+              <span className="hidden xs:inline">({pendingRequests.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="approved" className="flex items-center gap-2">
-              <Check className="w-4 h-4" />
-              Aprovados ({approvedRequests.length})
+            <TabsTrigger value="approved" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
+              <Check className="w-3 sm:w-4 h-3 sm:h-4" />
+              <span className="hidden xs:inline">Aprovados</span>
+              <span className="xs:hidden">({approvedRequests.length})</span>
+              <span className="hidden xs:inline">({approvedRequests.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="completed" className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4" />
-              Concluídos ({completedRequests.length})
+            <TabsTrigger value="completed" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 text-xs sm:text-sm">
+              <CheckCircle className="w-3 sm:w-4 h-3 sm:h-4" />
+              <span className="hidden xs:inline">Concluídos</span>
+              <span className="xs:hidden">({completedRequests.length})</span>
+              <span className="hidden xs:inline">({completedRequests.length})</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="pending" className="mt-6">
+          <TabsContent value="pending" className="mt-4 sm:mt-6">
             {pendingRequests.length === 0 ? (
-              <div className="text-center py-8">
-                <Eye className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">Nenhum pedido pendente</h3>
-                <p className="text-muted-foreground">Todos os pedidos foram revisados.</p>
+              <div className="text-center py-6 sm:py-8">
+                <Eye className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 sm:mb-4 text-muted-foreground" />
+                <h3 className="text-base sm:text-lg font-semibold mb-2">Nenhum pedido pendente</h3>
+                <p className="text-sm text-muted-foreground">Todos os pedidos foram revisados.</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {pendingRequests.map((request) => (
                   <RequestCard
                     key={request.id}
@@ -414,15 +425,15 @@ export default function PrayerRequestsManager() {
             )}
           </TabsContent>
 
-          <TabsContent value="approved" className="mt-6">
+          <TabsContent value="approved" className="mt-4 sm:mt-6">
             {approvedRequests.length === 0 ? (
-              <div className="text-center py-8">
-                <Check className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">Nenhum pedido aprovado</h3>
-                <p className="text-muted-foreground">Pedidos aprovados aparecerão aqui.</p>
+              <div className="text-center py-6 sm:py-8">
+                <Check className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 sm:mb-4 text-muted-foreground" />
+                <h3 className="text-base sm:text-lg font-semibold mb-2">Nenhum pedido aprovado</h3>
+                <p className="text-sm text-muted-foreground">Pedidos aprovados aparecerão aqui.</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {approvedRequests.map((request) => (
                   <RequestCard
                     key={request.id}
@@ -435,15 +446,15 @@ export default function PrayerRequestsManager() {
             )}
           </TabsContent>
 
-          <TabsContent value="completed" className="mt-6">
+          <TabsContent value="completed" className="mt-4 sm:mt-6">
             {completedRequests.length === 0 ? (
-              <div className="text-center py-8">
-                <CheckCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">Nenhum pedido concluído</h3>
-                <p className="text-muted-foreground">Pedidos concluídos aparecerão aqui.</p>
+              <div className="text-center py-6 sm:py-8">
+                <CheckCircle className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 sm:mb-4 text-muted-foreground" />
+                <h3 className="text-base sm:text-lg font-semibold mb-2">Nenhum pedido concluído</h3>
+                <p className="text-sm text-muted-foreground">Pedidos concluídos aparecerão aqui.</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {completedRequests.map((request) => (
                   <RequestCard
                     key={request.id}
