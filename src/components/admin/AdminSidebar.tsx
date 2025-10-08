@@ -1,9 +1,7 @@
 import { 
   BarChart3, 
   Bell, 
-  FolderOpen, 
   MessageCircle, 
-  Image, 
   Cloud, 
   Music, 
   Calendar, 
@@ -42,8 +40,6 @@ const menuItems = [
   {
     title: "Conteúdo",
     items: [
-      { title: "Álbuns", value: "albums", icon: FolderOpen },
-      { title: "Fotos", value: "gallery", icon: Image },
       { title: "Google Drive", value: "drive", icon: Cloud },
       { title: "Testemunhos", value: "testimonies", icon: MessageCircle },
     ]

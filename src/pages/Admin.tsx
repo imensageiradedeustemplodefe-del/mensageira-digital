@@ -3,8 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import { GalleryManager } from '@/components/admin/GalleryManager';
-import { AlbumsManager } from '@/components/admin/AlbumsManager';
 import { GoogleDriveManager } from '@/components/admin/GoogleDriveManager';
 import { TestimoniesManager } from '@/components/admin/TestimoniesManager';
 import { MediaManager } from '@/components/admin/MediaManager';
@@ -29,9 +27,7 @@ const Admin = () => {
     const titles: { [key: string]: string } = {
       dashboard: 'Dashboard',
       notifications: 'Notificações Push',
-      albums: 'Gerenciar Álbuns',
       testimonies: 'Gerenciar Testemunhos',
-      gallery: 'Galeria de Fotos',
       drive: 'Integração Google Drive',
       media: 'Biblioteca de Mídia',
       events: 'Gerenciar Eventos',
@@ -88,9 +84,7 @@ const Admin = () => {
                 <p className="text-muted-foreground">
                   {activeTab === 'dashboard' && 'Visão geral das atividades e estatísticas'}
                   {activeTab === 'notifications' && 'Configure e envie notificações push para os usuários'}
-                  {activeTab === 'albums' && 'Organize suas fotos em álbuns temáticos'}
                   {activeTab === 'testimonies' && 'Aprove e gerencie os testemunhos recebidos'}
-                  {activeTab === 'gallery' && 'Adicione e organize as fotos da galeria'}
                   {activeTab === 'drive' && 'Sincronize fotos automaticamente do Google Drive'}
                   {activeTab === 'media' && 'Gerencie vídeos, áudios e músicas'}
                   {activeTab === 'events' && 'Crie e publique eventos da igreja'}
@@ -122,9 +116,7 @@ const Admin = () => {
                     <PushNotificationsManager />
                   </div>
                 )}
-                {activeTab === 'albums' && <AlbumsManager />}
                 {activeTab === 'testimonies' && <TestimoniesManager />}
-                {activeTab === 'gallery' && <GalleryManager />}
                 {activeTab === 'drive' && <GoogleDriveManager />}
                 {activeTab === 'media' && <MediaManager />}
                 {activeTab === 'events' && <EventsManager />}
