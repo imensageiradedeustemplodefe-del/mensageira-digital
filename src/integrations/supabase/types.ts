@@ -67,7 +67,7 @@ export type Database = {
           created_at?: string
           encrypted_email?: string | null
           encrypted_phone?: string | null
-          encryption_key_hash?: string
+          encryption_key_hash: string
           id?: string
           prayer_request_id: string
           updated_at?: string
