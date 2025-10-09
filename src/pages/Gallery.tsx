@@ -96,10 +96,10 @@ const Gallery = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-8">
             <Camera className="w-12 h-12 text-primary mx-auto mb-6" />
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h1 className="text-6xl md:text-7xl font-extrabold mb-6 bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent drop-shadow-lg">
               {selectedAlbum ? selectedAlbumName : 'Galeria de Fotos'}
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-lg text-muted-foreground/80 mb-8">
               {selectedAlbum ? 'Explore as fotos deste álbum' : 'Momentos especiais da nossa comunidade'}
             </p>
             {!selectedAlbum && (
