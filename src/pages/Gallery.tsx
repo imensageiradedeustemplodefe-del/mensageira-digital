@@ -130,12 +130,17 @@ const Gallery = () => {
           </Button>
         )}
 
-        {!scriptUrl && (
+        {scriptUrl && !selectedAlbum && albumsLoading && albums.length === 0 && (
+          <div className="text-center py-12">
+            <Loader2 className="w-12 h-12 mx-auto mb-4 text-primary animate-spin" />
+            <p className="text-muted-foreground">Carregando álbuns...</p>
+          </div>
+        )}
+
+        {scriptUrl && !selectedAlbum && !albumsLoading && filteredAlbums.length === 0 && (
           <div className="text-center py-12">
             <FolderOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground">
-              Configure a integração com Google Drive no painel administrativo
-            </p>
+            <p className="text-muted-foreground">Nenhum álbum encontrado</p>
           </div>
         )}
 
