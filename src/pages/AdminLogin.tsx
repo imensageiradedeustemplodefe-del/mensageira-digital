@@ -93,7 +93,7 @@ export default function AdminLogin() {
               disabled={isSubmitting}
             >
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Entrar com Segurança
+              Entrar
             </Button>
             
             <div className="text-center text-sm text-muted-foreground">
