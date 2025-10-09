@@ -173,7 +173,7 @@ const Gallery = () => {
                     <h3 className="font-semibold text-lg mb-2">{album.name}</h3>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <ImageIcon className="w-4 h-4" />
-                      <span>{album.photoCount ? `${album.photoCount} fotos` : 'Ver fotos'}</span>
+                      <span>{album.photoCount ? `${Math.max(0, album.photoCount - 1)} fotos` : 'Ver fotos'}</span>
                     </div>
                   </CardContent>
                 </Card>
