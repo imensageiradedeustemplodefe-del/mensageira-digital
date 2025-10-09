@@ -11,6 +11,7 @@ import { PhotoLightbox } from "@/components/PhotoLightbox";
 const Gallery = () => {
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const [selectedAlbumName, setSelectedAlbumName] = useState<string>('');
+  const [selectedAlbumCoverUrl, setSelectedAlbumCoverUrl] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState("");
   const [scriptUrl, setScriptUrl] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -49,15 +50,31 @@ const Gallery = () => {
 
   const loading = albumsLoading || photosLoading;
 
-  const handleAlbumClick = (albumId: string, albumName: string) => {
+  const handleAlbumClick = (albumId: string, albumName: string, coverUrl?: string) => {
     setSelectedAlbum(albumId);
     setSelectedAlbumName(albumName);
+    setSelectedAlbumCoverUrl(coverUrl || '');
   };
 
   const handleBackToAlbums = () => {
     setSelectedAlbum(null);
     setSelectedAlbumName('');
+    setSelectedAlbumCoverUrl('');
   };
+
+  // Extrair ID da foto de capa da URL do Google Drive
+  const getCoverPhotoId = (coverUrl: string) => {
+    const match = coverUrl.match(/[?&]id=([^&]+)/);
+    return match ? match[1] : null;
+  };
+
+  // Filtrar fotos para remover a foto de capa
+  const filteredPhotos = selectedAlbumCoverUrl 
+    ? photos.filter(photo => {
+        const coverPhotoId = getCoverPhotoId(selectedAlbumCoverUrl);
+        return coverPhotoId !== photo.id;
+      })
+    : photos;
 
   const handlePhotoClick = (index: number) => {
     setLightboxIndex(index);
@@ -133,7 +150,7 @@ const Gallery = () => {
                 <Card
                   key={album.id}
                   className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 group"
-                  onClick={() => handleAlbumClick(album.id, album.name)}
+                  onClick={() => handleAlbumClick(album.id, album.name, album.coverUrl)}
                 >
                   <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20">
                     {album.coverUrl ? (
@@ -165,10 +182,10 @@ const Gallery = () => {
           </div>
         )}
 
-        {selectedAlbum && photos.length > 0 && (
+        {selectedAlbum && filteredPhotos.length > 0 && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {photos.map((photo, index) => (
+              {filteredPhotos.map((photo, index) => (
                 <Card 
                   key={photo.id} 
                   className="overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
@@ -214,7 +231,7 @@ const Gallery = () => {
           </>
         )}
 
-        {selectedAlbum && photos.length === 0 && !loading && (
+        {selectedAlbum && filteredPhotos.length === 0 && !loading && (
           <div className="text-center py-12">
             <ImageIcon className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
             <p className="text-muted-foreground">Nenhuma foto encontrada neste álbum.</p>
@@ -251,9 +268,9 @@ const Gallery = () => {
       </div>
 
       {/* Photo Lightbox */}
-      {photos.length > 0 && (
+      {filteredPhotos.length > 0 && selectedAlbum && (
         <PhotoLightbox
-          photos={photos}
+          photos={filteredPhotos}
           initialIndex={lightboxIndex}
           isOpen={lightboxOpen}
           onClose={() => setLightboxOpen(false)}
