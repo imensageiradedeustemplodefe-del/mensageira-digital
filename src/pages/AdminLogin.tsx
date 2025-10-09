@@ -97,8 +97,7 @@ export default function AdminLogin() {
             </Button>
             
             <div className="text-center text-sm text-muted-foreground">
-              <p>Sistema de login único da igreja</p>
-              <p className="mt-1">Acesso exclusivo para administração.</p>
+              <p>Acesso de Uso Exclusivo Para Palavra Viva</p>
             </div>
           </form>
         </CardContent>
