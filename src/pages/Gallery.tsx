@@ -40,7 +40,7 @@ const Gallery = () => {
     scriptUrl,
     selectedAlbum || undefined,
     24,
-    'newest'
+    'name'
   );
 
   // Filtra álbuns por pesquisa
