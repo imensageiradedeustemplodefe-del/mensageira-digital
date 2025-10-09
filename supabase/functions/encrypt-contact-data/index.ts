@@ -128,8 +128,32 @@ serve(async (req) => {
 
     const { action, prayer_request_id, email, phone } = await req.json();
     
-    // Use a server-side encryption key (should be in environment variables)
-    const encryptionKey = Deno.env.get('CONTACT_ENCRYPTION_KEY') || 'default_server_side_key_2025';
+    // CRITICAL: Use ONLY the secure encryption key from environment
+    // Never use fallback keys - fail fast if not configured properly
+    const encryptionKey = Deno.env.get('CONTACT_ENCRYPTION_KEY');
+    
+    if (!encryptionKey) {
+      console.error('[encrypt-contact-data] SECURITY ERROR: CONTACT_ENCRYPTION_KEY not configured');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Encryption key not configured. Contact system administrator.',
+          code: 'ENCRYPTION_KEY_MISSING'
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Validate encryption key strength (minimum 32 characters)
+    if (encryptionKey.length < 32) {
+      console.error('[encrypt-contact-data] SECURITY ERROR: Weak encryption key');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Encryption key does not meet security requirements',
+          code: 'WEAK_ENCRYPTION_KEY'
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     if (action === 'encrypt_and_store') {
       console.log(`[encrypt-contact-data] Encrypting data for prayer request: ${prayer_request_id}`);
