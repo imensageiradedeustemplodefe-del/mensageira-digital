@@ -50,28 +50,6 @@ const Gallery = () => {
 
   const loading = albumsLoading || photosLoading;
 
-  // Extrai data do nome do álbum (formato: "Nome do Álbum DD-MM" ou "Nome DD-MM-AAAA")
-  const extractDateFromAlbumName = (albumName: string): string | undefined => {
-    // Procura por padrões de data no nome: DD-MM-AAAA ou DD-MM
-    const datePattern = /(\d{1,2})-(\d{1,2})(-(\d{4}))?/;
-    const match = albumName.match(datePattern);
-    
-    if (match) {
-      const day = match[1].padStart(2, '0');
-      const month = match[2].padStart(2, '0');
-      const year = match[4] || new Date().getFullYear().toString();
-      
-      const date = new Date(`${year}-${month}-${day}`);
-      return date.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric'
-      });
-    }
-    
-    return undefined;
-  };
-
   const handleAlbumClick = (albumId: string, albumName: string, coverUrl?: string) => {
     setSelectedAlbum(albumId);
     setSelectedAlbumName(albumName);
@@ -90,14 +68,13 @@ const Gallery = () => {
     return match ? match[1] : null;
   };
 
-  // Filtrar fotos para remover a foto de capa e adicionar data customizada
-  const customDate = selectedAlbumName ? extractDateFromAlbumName(selectedAlbumName) : undefined;
+  // Filtrar fotos para remover a foto de capa
   const filteredPhotos = selectedAlbumCoverUrl 
     ? photos.filter(photo => {
         const coverPhotoId = getCoverPhotoId(selectedAlbumCoverUrl);
         return coverPhotoId !== photo.id;
-      }).map(photo => ({ ...photo, customDate }))
-    : photos.map(photo => ({ ...photo, customDate }));
+      })
+    : photos;
 
   const handlePhotoClick = (index: number) => {
     setLightboxIndex(index);
@@ -228,7 +205,9 @@ const Gallery = () => {
                     />
                   </div>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold text-sm truncate">{photo.name}</h3>
+                    <h3 className="font-semibold text-sm truncate">
+                      {photo.name.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '')}
+                    </h3>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
                       <Calendar className="w-3 h-3" />
                       {new Date(photo.createdTime).toLocaleDateString('pt-BR')}

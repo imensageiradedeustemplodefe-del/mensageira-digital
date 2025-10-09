@@ -11,7 +11,6 @@ interface Photo {
   thumbUrl: string;
   viewUrl: string;
   createdTime: string;
-  customDate?: string;
 }
 
 interface PhotoLightboxProps {
@@ -204,11 +203,13 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
         <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-4">
           <div className="flex items-center justify-between">
             <div className="text-white">
-              <h3 className="font-semibold text-lg truncate max-w-md">{currentPhoto.name}</h3>
+              <h3 className="font-semibold text-lg truncate max-w-md">
+                {currentPhoto.name.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '')}
+              </h3>
               <p className="text-sm text-white/70">
-                {currentPhoto.customDate || new Date(currentPhoto.createdTime).toLocaleDateString('pt-BR', {
+                {new Date(currentPhoto.createdTime).toLocaleDateString('pt-BR', {
                   day: '2-digit',
-                  month: 'long',
+                  month: '2-digit',
                   year: 'numeric'
                 })}
               </p>
