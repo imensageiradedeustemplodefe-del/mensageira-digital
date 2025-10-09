@@ -11,6 +11,7 @@ interface Photo {
   thumbUrl: string;
   viewUrl: string;
   createdTime: string;
+  customDate?: string;
 }
 
 interface PhotoLightboxProps {
@@ -162,18 +163,15 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
 
   const handleDownload = async () => {
     try {
-      // Use a high-resolution URL instead of thumbnail
-      const highResUrl = currentPhoto.viewUrl || currentPhoto.thumbUrl.replace('w400', 'w1920');
-      const response = await fetch(highResUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      // Use Google Drive direct download link
+      const downloadUrl = `https://drive.google.com/uc?export=download&id=${currentPhoto.id}`;
       const link = document.createElement('a');
-      link.href = url;
+      link.href = downloadUrl;
       link.download = currentPhoto.name || 'foto.jpg';
+      link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
       toast.success('Download iniciado!');
     } catch (error) {
       console.error('Download error:', error);
@@ -208,7 +206,7 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
             <div className="text-white">
               <h3 className="font-semibold text-lg truncate max-w-md">{currentPhoto.name}</h3>
               <p className="text-sm text-white/70">
-                {new Date(currentPhoto.createdTime).toLocaleDateString('pt-BR', {
+                {currentPhoto.customDate || new Date(currentPhoto.createdTime).toLocaleDateString('pt-BR', {
                   day: '2-digit',
                   month: 'long',
                   year: 'numeric'
@@ -229,10 +227,11 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
         {/* Main Image */}
         <div className="relative w-full h-full flex items-center justify-center p-16">
           <img
-            src={currentPhoto.viewUrl || currentPhoto.thumbUrl.replace('w400', 'w1920')}
+            src={`https://drive.google.com/thumbnail?id=${currentPhoto.id}&sz=w1920`}
             alt={currentPhoto.name}
             className="max-w-full max-h-full object-contain animate-fade-in"
             style={{ objectFit: 'contain' }}
+            loading="eager"
           />
         </div>
 

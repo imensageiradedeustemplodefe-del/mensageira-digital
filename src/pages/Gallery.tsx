@@ -50,6 +50,28 @@ const Gallery = () => {
 
   const loading = albumsLoading || photosLoading;
 
+  // Extrai data do nome do álbum (formato: "Nome do Álbum DD-MM" ou "Nome DD-MM-AAAA")
+  const extractDateFromAlbumName = (albumName: string): string | undefined => {
+    // Procura por padrões de data no nome: DD-MM-AAAA ou DD-MM
+    const datePattern = /(\d{1,2})-(\d{1,2})(-(\d{4}))?/;
+    const match = albumName.match(datePattern);
+    
+    if (match) {
+      const day = match[1].padStart(2, '0');
+      const month = match[2].padStart(2, '0');
+      const year = match[4] || new Date().getFullYear().toString();
+      
+      const date = new Date(`${year}-${month}-${day}`);
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+    
+    return undefined;
+  };
+
   const handleAlbumClick = (albumId: string, albumName: string, coverUrl?: string) => {
     setSelectedAlbum(albumId);
     setSelectedAlbumName(albumName);
@@ -68,13 +90,14 @@ const Gallery = () => {
     return match ? match[1] : null;
   };
 
-  // Filtrar fotos para remover a foto de capa
+  // Filtrar fotos para remover a foto de capa e adicionar data customizada
+  const customDate = selectedAlbumName ? extractDateFromAlbumName(selectedAlbumName) : undefined;
   const filteredPhotos = selectedAlbumCoverUrl 
     ? photos.filter(photo => {
         const coverPhotoId = getCoverPhotoId(selectedAlbumCoverUrl);
         return coverPhotoId !== photo.id;
-      })
-    : photos;
+      }).map(photo => ({ ...photo, customDate }))
+    : photos.map(photo => ({ ...photo, customDate }));
 
   const handlePhotoClick = (index: number) => {
     setLightboxIndex(index);
