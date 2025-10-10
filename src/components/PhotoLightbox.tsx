@@ -18,6 +18,7 @@ interface PhotoLightboxProps {
   initialIndex: number;
   isOpen: boolean;
   onClose: () => void;
+  albumDate?: string;
 }
 
 type ReactionType = 'love' | 'prayer' | 'amen' | 'hallelujah' | 'glory' | 'fire';
@@ -31,7 +32,7 @@ interface Reactions {
   fires: number;
 }
 
-export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLightboxProps) {
+export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate }: PhotoLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [reactions, setReactions] = useState<Reactions>({ 
     loves: 0, 
@@ -206,13 +207,11 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
               <h3 className="font-semibold text-lg truncate max-w-md">
                 {currentPhoto.name.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '')}
               </h3>
-              <p className="text-sm text-white/70">
-                {new Date(currentPhoto.createdTime).toLocaleDateString('pt-BR', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric'
-                })}
-              </p>
+              {albumDate && (
+                <p className="text-sm text-white/70">
+                  {albumDate}
+                </p>
+              )}
             </div>
             <Button
               variant="ghost"

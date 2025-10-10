@@ -12,10 +12,21 @@ const Gallery = () => {
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const [selectedAlbumName, setSelectedAlbumName] = useState<string>('');
   const [selectedAlbumCoverUrl, setSelectedAlbumCoverUrl] = useState<string>('');
+  const [selectedAlbumDate, setSelectedAlbumDate] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState("");
   const [scriptUrl, setScriptUrl] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  // Função para extrair data do nome do álbum (formato: DD.MM.AAAA ou DD-MM-AAAA)
+  const extractDateFromAlbumName = (albumName: string): string => {
+    const dateMatch = albumName.match(/(\d{2})[\.\-](\d{2})[\.\-](\d{4})/);
+    if (dateMatch) {
+      const [, day, month, year] = dateMatch;
+      return `${day}/${month}/${year}`;
+    }
+    return '';
+  };
 
   // Busca a URL do Apps Script nas configurações
   useEffect(() => {
@@ -54,12 +65,14 @@ const Gallery = () => {
     setSelectedAlbum(albumId);
     setSelectedAlbumName(albumName);
     setSelectedAlbumCoverUrl(coverUrl || '');
+    setSelectedAlbumDate(extractDateFromAlbumName(albumName));
   };
 
   const handleBackToAlbums = () => {
     setSelectedAlbum(null);
     setSelectedAlbumName('');
     setSelectedAlbumCoverUrl('');
+    setSelectedAlbumDate('');
   };
 
   // Extrair ID da foto de capa da URL do Google Drive
@@ -281,6 +294,7 @@ const Gallery = () => {
           initialIndex={lightboxIndex}
           isOpen={lightboxOpen}
           onClose={() => setLightboxOpen(false)}
+          albumDate={selectedAlbumDate}
         />
       )}
     </div>
