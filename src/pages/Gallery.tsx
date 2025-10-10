@@ -50,7 +50,7 @@ const Gallery = () => {
   const { photos, loading: photosLoading, hasMore, loadMore } = useGoogleDrivePhotos(
     scriptUrl,
     selectedAlbum || undefined,
-    24,
+    20,
     'name'
   );
 
