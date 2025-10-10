@@ -60,15 +60,86 @@ serve(async (req) => {
   try {
     console.log('Push notification request received')
     
-    const { title, body, icon = '/favicon.ico', badge = '/favicon.ico', url = '/' } = await req.json() as PushNotificationPayload
+    // SECURITY: Verify authentication and admin role
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      console.error('Missing authorization header')
+      return new Response(JSON.stringify({ error: 'Unauthorized - No authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
       console.error('Missing required environment variables')
-      return new Response('Missing configuration', { status: 500, headers: corsHeaders })
+      return new Response(JSON.stringify({ error: 'Missing configuration' }), { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     }
+
+    // Verify JWT and get user
+    const token = authHeader.replace('Bearer ', '')
+    const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'apikey': supabaseAnonKey
+      }
+    })
+
+    if (!userResponse.ok) {
+      console.error('Invalid JWT token')
+      return new Response(JSON.stringify({ error: 'Unauthorized - Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    const user = await userResponse.json()
+    console.log(`Request from user: ${user.id}`)
+
+    // Check if user has admin role using has_role function
+    const roleCheckResponse = await fetch(
+      `${supabaseUrl}/rest/v1/rpc/has_role`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'apikey': supabaseAnonKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          _user_id: user.id,
+          _role: 'admin'
+        })
+      }
+    )
+
+    if (!roleCheckResponse.ok) {
+      console.error('Role check failed')
+      return new Response(JSON.stringify({ error: 'Failed to verify admin role' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    const isAdmin = await roleCheckResponse.json()
+    
+    if (!isAdmin) {
+      console.error(`User ${user.id} is not an admin`)
+      return new Response(JSON.stringify({ error: 'Forbidden - Admin access required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    console.log(`Admin user ${user.id} authorized to send push notifications`)
+    
+    const { title, body, icon = '/favicon.ico', badge = '/favicon.ico', url = '/' } = await req.json() as PushNotificationPayload
 
     // Get all active push subscriptions from database
     const subscriptionsResponse = await fetch(`${supabaseUrl}/rest/v1/push_subscriptions?is_active=eq.true&select=*`, {
