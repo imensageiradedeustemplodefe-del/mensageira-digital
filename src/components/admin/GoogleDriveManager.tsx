@@ -36,14 +36,14 @@ export function GoogleDriveManager() {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
+      const { data: roleData } = await supabase
+        .from('user_roles')
         .select('role')
-        .eq('id', user.id)
+        .eq('user_id', user.id)
         .eq('role', 'admin')
         .single();
 
-      if (profile) {
+      if (roleData) {
         setIsAdmin(true);
       } else {
         toast.error('Acesso negado. Apenas administradores podem acessar esta função.');

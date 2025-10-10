@@ -16,7 +16,7 @@ export default function AdminLogin() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect if already logged in as admin
-  if (user && profile?.role === 'admin') {
+  if (user && profile?.isAdmin) {
     return <Navigate to="/admin" replace />;
   }
 

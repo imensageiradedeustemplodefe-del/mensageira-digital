@@ -4,7 +4,7 @@ import type { User, Session } from '@supabase/supabase-js';
 
 interface AdminProfile {
   id: string;
-  role: string;
+  isAdmin: boolean;
 }
 
 interface AuthContextType {
@@ -43,16 +43,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch admin profile
+          // Check if user has admin role using user_roles table
           setTimeout(async () => {
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('id, role')
-              .eq('id', session.user.id)
+            const { data: roleData } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', session.user.id)
               .eq('role', 'admin')
               .maybeSingle();
             
-            setProfile(profileData);
+            if (roleData) {
+              setProfile({ id: session.user.id, isAdmin: true });
+            } else {
+              setProfile(null);
+            }
           }, 0);
         } else {
           setProfile(null);
@@ -69,13 +73,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       if (session?.user) {
         supabase
-          .from('profiles')
-          .select('id, role')
-          .eq('id', session.user.id)
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
           .eq('role', 'admin')
           .maybeSingle()
-          .then(({ data: profileData }) => {
-            setProfile(profileData);
+          .then(({ data: roleData }) => {
+            if (roleData) {
+              setProfile({ id: session.user.id, isAdmin: true });
+            } else {
+              setProfile(null);
+            }
             setLoading(false);
           });
       } else {
@@ -97,15 +105,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return { error: 'E-mail ou senha incorretos' };
       }
 
-      // Check if user is admin
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, role')
-        .eq('id', data.user.id)
+      // Check if user has admin role
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', data.user.id)
         .eq('role', 'admin')
         .maybeSingle();
 
-      if (profileError || !profileData) {
+      if (roleError || !roleData) {
         await supabase.auth.signOut();
         return { error: 'Usuário não tem permissão de administrador' };
       }

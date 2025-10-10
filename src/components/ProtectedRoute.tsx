@@ -18,7 +18,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!user || profile?.role !== 'admin') {
+  if (!user || !profile?.isAdmin) {
     return <Navigate to="/admin/login" replace />;
   }
 

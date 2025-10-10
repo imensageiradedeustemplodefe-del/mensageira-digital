@@ -77,19 +77,42 @@ export default function PrayerRequestForm() {
 
   const onSubmit = async (values: z.infer<typeof prayerRequestSchema>) => {
     try {
-      const { error } = await supabase
+      // Step 1: Insert prayer request WITHOUT contact info
+      const { data: requestData, error: insertError } = await supabase
         .from('prayer_requests')
         .insert([{
           name: values.name,
-          email: values.email || null,
-          phone: values.phone || null,
           request_text: values.request_text,
           category: values.category,
           is_urgent: values.is_urgent,
           allow_public_share: values.allow_public_share,
-        }]);
+        }])
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (insertError) throw insertError;
+
+      // Step 2: If contact info provided, encrypt and store separately
+      if ((values.email && values.email.trim()) || (values.phone && values.phone.trim())) {
+        try {
+          const { error: encryptError } = await supabase.functions.invoke('encrypt-contact-data', {
+            body: {
+              action: 'encrypt_and_store',
+              prayer_request_id: requestData.id,
+              email: values.email?.trim() || null,
+              phone: values.phone?.trim() || null
+            }
+          });
+          
+          if (encryptError) {
+            console.warn('Failed to encrypt contact data:', encryptError);
+            // Don't fail the entire request, but log the issue
+          }
+        } catch (contactError) {
+          console.warn('Contact encryption failed:', contactError);
+          // Continue even if contact encryption fails
+        }
+      }
 
       setIsSubmitted(true);
       toast({
