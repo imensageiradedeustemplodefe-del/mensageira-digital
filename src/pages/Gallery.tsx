@@ -308,7 +308,7 @@ const Gallery = () => {
               <CardContent className="p-6 text-center">
                 <Calendar className="w-12 h-12 mx-auto mb-3 text-primary" />
                 <div className="text-3xl font-bold mb-1">
-                  {photos.length > 0 ? new Date(photos[0].createdTime).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }) : '-'}
+                  {filteredAlbums.length > 0 ? extractDateFromAlbumName(filteredAlbums[0].name) || new Date().toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }) : '-'}
                 </div>
                 <div className="text-sm text-muted-foreground">Última atualização</div>
               </CardContent>
