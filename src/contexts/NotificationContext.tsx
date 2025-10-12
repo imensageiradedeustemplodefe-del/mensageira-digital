@@ -82,6 +82,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchNotifications = useCallback(async () => {
     try {
+      setLoading(true);
       const readIds = getReadNotifications();
       const allNotifications: InAppNotification[] = [];
       const today = new Date().toISOString().split('T')[0];
@@ -92,7 +93,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
       // Buscar eventos de hoje
-      const { data: todayEvents } = await supabase
+      const { data: todayEvents, error: eventsError } = await supabase
         .from('events')
         .select('id, title, event_date, category')
         .eq('is_published', true)
@@ -100,7 +101,9 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         .lte('event_date', `${today}T23:59:59`)
         .order('event_date', { ascending: true });
 
-      if (todayEvents && todayEvents.length > 0) {
+      if (eventsError) {
+        console.error('Error fetching events:', eventsError);
+      } else if (todayEvents && todayEvents.length > 0) {
         todayEvents.forEach(event => {
           const config = getNotificationConfig('event_today');
           const eventDate = event.event_date.split('T')[0];
@@ -122,7 +125,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Buscar lives
-      const { data: upcomingStreams } = await supabase
+      const { data: upcomingStreams, error: streamsError } = await supabase
         .from('live_streams')
         .select('id, title, scheduled_at, is_live')
         .eq('is_active', true)
@@ -130,7 +133,9 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         .order('scheduled_at', { ascending: true })
         .limit(3);
 
-      if (upcomingStreams && upcomingStreams.length > 0) {
+      if (streamsError) {
+        console.error('Error fetching streams:', streamsError);
+      } else if (upcomingStreams && upcomingStreams.length > 0) {
         upcomingStreams.forEach(stream => {
           const config = getNotificationConfig('live_starting_soon');
           const notificationId = `live_soon_${stream.id}`;
@@ -165,7 +170,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Buscar versos diários
-      const { data: verses } = await supabase
+      const { data: verses, error: versesError } = await supabase
         .from('daily_verses')
         .select('id, created_at, verse_text')
         .eq('is_active', true)
@@ -173,7 +178,9 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (verses) {
+      if (versesError) {
+        console.error('Error fetching verses:', versesError);
+      } else if (verses) {
         verses.forEach(verse => {
           const config = getNotificationConfig('daily_verse');
           allNotifications.push({
@@ -190,7 +197,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Buscar novos álbuns
-      const { data: albums } = await supabase
+      const { data: albums, error: albumsError } = await supabase
         .from('gallery_albums')
         .select('id, created_at, name')
         .eq('is_published', true)
@@ -198,7 +205,9 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (albums) {
+      if (albumsError) {
+        console.error('Error fetching albums:', albumsError);
+      } else if (albums) {
         albums.forEach(album => {
           const config = getNotificationConfig('new_photos');
           allNotifications.push({
@@ -215,7 +224,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Buscar testemunhos
-      const { data: testimonies } = await supabase
+      const { data: testimonies, error: testimoniesError } = await supabase
         .from('testimonies')
         .select('id, created_at, name')
         .eq('is_approved', true)
@@ -223,7 +232,9 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (testimonies) {
+      if (testimoniesError) {
+        console.error('Error fetching testimonies:', testimoniesError);
+      } else if (testimonies) {
         testimonies.forEach(testimony => {
           const config = getNotificationConfig('new_testimony');
           allNotifications.push({
@@ -240,14 +251,16 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Buscar orações
-      const { data: prayers } = await supabase
+      const { data: prayers, error: prayersError } = await supabase
         .from('public_prayer_requests')
         .select('id, created_at, display_name')
         .gte('created_at', sevenDaysAgo.toISOString())
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (prayers) {
+      if (prayersError) {
+        console.error('Error fetching prayers:', prayersError);
+      } else if (prayers) {
         prayers.forEach(prayer => {
           const config = getNotificationConfig('new_prayer');
           allNotifications.push({
