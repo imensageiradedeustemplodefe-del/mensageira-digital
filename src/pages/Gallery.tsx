@@ -210,10 +210,16 @@ const Gallery = () => {
                     )}
                   </div>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg mb-2">{album.name}</h3>
+                    <h3 className="font-semibold text-lg mb-2 leading-tight min-h-[3.5rem]">
+                      {album.name.split(/(\d{2}[\.\-]\d{2}[\.\-]\d{4})/).map((part, idx) => (
+                        <span key={idx} className={idx === 1 ? "block text-base font-normal text-muted-foreground mt-1" : ""}>
+                          {part.trim()}
+                        </span>
+                      ))}
+                    </h3>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <ImageIcon className="w-4 h-4" />
-                      <span>{album.photoCount ? `${Math.max(0, album.photoCount - 1)} fotos` : 'Ver fotos'}</span>
+                      <span>{album.photoCount ? `${Math.max(0, album.photoCount - 1)} fotos` : "Ver fotos"}</span>
                     </div>
                   </CardContent>
                 </Card>
