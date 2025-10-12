@@ -59,52 +59,84 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
     try {
       const { data, error } = await supabase
         .from('photo_reactions')
-        .select('*')
+        .select('reaction_type, user_id')
         .eq('photo_id', currentPhoto.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching reactions:', error);
+        // Continue with default values
+        setReactions({ loves: 0, prayers: 0, amens: 0, hallelujahs: 0, glories: 0, fires: 0 });
+        setUserReaction(null);
+        return;
+      }
 
-      const loves = data?.filter(r => r.reaction_type === 'love').length || 0;
-      const prayers = data?.filter(r => r.reaction_type === 'prayer').length || 0;
-      const amens = data?.filter(r => r.reaction_type === 'amen').length || 0;
-      const hallelujahs = data?.filter(r => r.reaction_type === 'hallelujah').length || 0;
-      const glories = data?.filter(r => r.reaction_type === 'glory').length || 0;
-      const fires = data?.filter(r => r.reaction_type === 'fire').length || 0;
+      // Count reactions by type
+      const reactionCounts = {
+        loves: 0,
+        prayers: 0,
+        amens: 0,
+        hallelujahs: 0,
+        glories: 0,
+        fires: 0
+      };
+
+      data?.forEach(r => {
+        if (r.reaction_type === 'love') reactionCounts.loves++;
+        else if (r.reaction_type === 'prayer') reactionCounts.prayers++;
+        else if (r.reaction_type === 'amen') reactionCounts.amens++;
+        else if (r.reaction_type === 'hallelujah') reactionCounts.hallelujahs++;
+        else if (r.reaction_type === 'glory') reactionCounts.glories++;
+        else if (r.reaction_type === 'fire') reactionCounts.fires++;
+      });
       
-      setReactions({ loves, prayers, amens, hallelujahs, glories, fires });
+      setReactions(reactionCounts);
 
       // Check if user already reacted
-      const userId = localStorage.getItem('photo_user_id') || crypto.randomUUID();
-      localStorage.setItem('photo_user_id', userId);
-      const userReactionData = data?.find(r => r.user_id === userId);
-      const reactionType = userReactionData?.reaction_type as ReactionType;
-      
-      if (['love', 'prayer', 'amen', 'hallelujah', 'glory', 'fire'].includes(reactionType)) {
-        setUserReaction(reactionType);
+      const userId = localStorage.getItem('photo_user_id');
+      if (userId && data) {
+        const userReactionData = data.find(r => r.user_id === userId);
+        if (userReactionData?.reaction_type) {
+          setUserReaction(userReactionData.reaction_type as ReactionType);
+        } else {
+          setUserReaction(null);
+        }
       } else {
         setUserReaction(null);
       }
     } catch (error) {
       console.error('Error fetching reactions:', error);
+      setReactions({ loves: 0, prayers: 0, amens: 0, hallelujahs: 0, glories: 0, fires: 0 });
+      setUserReaction(null);
     }
   };
 
   const handleReaction = async (type: ReactionType) => {
     try {
-      const userId = localStorage.getItem('photo_user_id') || crypto.randomUUID();
-      localStorage.setItem('photo_user_id', userId);
+      // Get or create user ID
+      let userId = localStorage.getItem('photo_user_id');
+      if (!userId) {
+        userId = crypto.randomUUID();
+        localStorage.setItem('photo_user_id', userId);
+      }
 
       if (userReaction === type) {
         // Remove reaction
-        await supabase
+        const { error } = await supabase
           .from('photo_reactions')
           .delete()
           .eq('photo_id', currentPhoto.id)
           .eq('user_id', userId);
+        
+        if (error) {
+          console.error('Error removing reaction:', error);
+          toast.error('Erro ao remover reação');
+          return;
+        }
+        
         setUserReaction(null);
         toast.success('Reação removida');
       } else {
-        // Add or update reaction
+        // Remove old reaction if exists
         if (userReaction) {
           await supabase
             .from('photo_reactions')
@@ -113,13 +145,21 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
             .eq('user_id', userId);
         }
         
-        await supabase
+        // Add new reaction
+        const { error } = await supabase
           .from('photo_reactions')
           .insert({
             photo_id: currentPhoto.id,
             user_id: userId,
             reaction_type: type
           });
+        
+        if (error) {
+          console.error('Error adding reaction:', error);
+          toast.error('Erro ao adicionar reação');
+          return;
+        }
+        
         setUserReaction(type);
         
         const messages = {
@@ -133,10 +173,11 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
         toast.success(messages[type]);
       }
       
+      // Refresh reactions count
       await fetchReactions();
     } catch (error) {
-      console.error('Error adding reaction:', error);
-      toast.error('Erro ao reagir');
+      console.error('Error handling reaction:', error);
+      toast.error('Erro ao processar reação');
     }
   };
 
