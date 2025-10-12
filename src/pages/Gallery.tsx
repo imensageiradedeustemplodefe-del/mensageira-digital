@@ -54,10 +54,32 @@ const Gallery = () => {
     'name'
   );
 
-  // Filtra álbuns por pesquisa
-  const filteredAlbums = albums.filter(album =>
-    album.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filtra e ordena álbuns por data (mais recente primeiro)
+  const filteredAlbums = albums
+    .filter(album =>
+      album.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      // Extrai datas dos nomes dos álbuns
+      const dateA = a.name.match(/(\d{2})[\.\-](\d{2})[\.\-](\d{4})/);
+      const dateB = b.name.match(/(\d{2})[\.\-](\d{2})[\.\-](\d{4})/);
+      
+      // Se ambos têm data, ordena por data (mais recente primeiro)
+      if (dateA && dateB) {
+        const [, dayA, monthA, yearA] = dateA;
+        const [, dayB, monthB, yearB] = dateB;
+        const timeA = new Date(`${yearA}-${monthA}-${dayA}`).getTime();
+        const timeB = new Date(`${yearB}-${monthB}-${dayB}`).getTime();
+        return timeB - timeA; // Ordem decrescente (mais recente primeiro)
+      }
+      
+      // Se apenas um tem data, prioriza o que tem data
+      if (dateA) return -1;
+      if (dateB) return 1;
+      
+      // Se nenhum tem data, ordena alfabeticamente
+      return a.name.localeCompare(b.name);
+    });
 
   const loading = albumsLoading || photosLoading;
 
