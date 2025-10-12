@@ -124,47 +124,62 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      // Buscar lives
+      // Buscar transmissões ao vivo e próximas
       const { data: upcomingStreams, error: streamsError } = await supabase
         .from('live_streams')
-        .select('id, title, scheduled_at, is_live')
+        .select('id, title, scheduled_at, is_live, is_active')
         .eq('is_active', true)
-        .or(`is_live.eq.true,and(scheduled_at.gte.${now.toISOString()},scheduled_at.lte.${twoHoursFromNow.toISOString()})`)
-        .order('scheduled_at', { ascending: true })
-        .limit(3);
+        .order('scheduled_at', { ascending: true });
 
       if (streamsError) {
         console.error('Error fetching streams:', streamsError);
       } else if (upcomingStreams && upcomingStreams.length > 0) {
         upcomingStreams.forEach(stream => {
-          const config = getNotificationConfig('live_starting_soon');
-          const notificationId = `live_soon_${stream.id}`;
-          
+          // Transmissão ao vivo agora
           if (stream.is_live) {
-            allNotifications.push({
-              id: notificationId,
-              type: 'live_starting_soon',
-              title: '🔴 Transmissão AO VIVO agora!',
-              message: `${stream.title} - Assista agora!`,
-              icon: config.icon,
-              url: config.url,
-              timestamp: stream.scheduled_at || new Date().toISOString(),
-              isRead: readIds.has(notificationId)
-            });
-          } else if (stream.scheduled_at) {
-            const scheduledTime = new Date(stream.scheduled_at);
-            const minutesUntil = Math.round((scheduledTime.getTime() - now.getTime()) / (1000 * 60));
+            const config = getNotificationConfig('live_stream');
+            const notificationId = `live_now_${stream.id}`;
             
             allNotifications.push({
               id: notificationId,
-              type: 'live_starting_soon',
-              title: config.title,
-              message: `${stream.title} - Começa em ${minutesUntil} minutos!`,
+              type: 'live_stream',
+              title: '🔴 AO VIVO AGORA!',
+              message: `${stream.title} - Assista agora!`,
               icon: config.icon,
               url: config.url,
-              timestamp: stream.scheduled_at,
+              timestamp: stream.scheduled_at || now.toISOString(),
               isRead: readIds.has(notificationId)
             });
+          }
+          // Transmissão começando em breve (próximas 2 horas)
+          else if (stream.scheduled_at) {
+            const scheduledTime = new Date(stream.scheduled_at);
+            const minutesUntil = Math.round((scheduledTime.getTime() - now.getTime()) / (1000 * 60));
+            
+            // Mostrar apenas se for nas próximas 2 horas (120 minutos)
+            if (minutesUntil > 0 && minutesUntil <= 120) {
+              const config = getNotificationConfig('live_starting_soon');
+              const notificationId = `live_soon_${stream.id}_${today}`;
+              
+              let timeMessage = '';
+              if (minutesUntil < 60) {
+                timeMessage = `Começa em ${minutesUntil} minutos!`;
+              } else {
+                const hours = Math.floor(minutesUntil / 60);
+                timeMessage = `Começa em ${hours}h`;
+              }
+              
+              allNotifications.push({
+                id: notificationId,
+                type: 'live_starting_soon',
+                title: '🔴 Live começando em breve!',
+                message: `${stream.title} - ${timeMessage}`,
+                icon: config.icon,
+                url: config.url,
+                timestamp: stream.scheduled_at,
+                isRead: readIds.has(notificationId)
+              });
+            }
           }
         });
       }
