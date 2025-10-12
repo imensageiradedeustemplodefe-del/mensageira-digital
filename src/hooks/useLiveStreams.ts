@@ -118,12 +118,13 @@ export const useLiveStreams = (activeOnly = false) => {
 
   const toggleLiveStatus = async (id: string, isLive: boolean) => {
     try {
-      const updates: LiveStreamUpdate = {
+      const updates: any = {
         is_live: isLive,
       };
 
       if (isLive) {
         updates.started_at = new Date().toISOString();
+        updates.ended_at = null;
       } else {
         updates.ended_at = new Date().toISOString();
       }
