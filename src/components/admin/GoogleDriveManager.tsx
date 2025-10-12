@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Cloud, Save, AlertCircle, ExternalLink, FolderOpen, Image, RefreshCw } from 'lucide-react';
+import { Cloud, Save, AlertCircle, ExternalLink, FolderOpen, Image, RefreshCw, Database } from 'lucide-react';
 import { useGoogleDriveAlbums, useGoogleDrivePhotos } from '@/hooks/useGoogleDriveAlbums';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ export function GoogleDriveManager() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
 
   // Fetch albums and photos using existing hooks
   const { albums, loading: albumsLoading, error: albumsError, refetch: refetchAlbums } = useGoogleDriveAlbums(scriptUrl);
@@ -118,6 +119,31 @@ export function GoogleDriveManager() {
       toast.error('Erro ao salvar configurações');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const syncAlbums = async () => {
+    try {
+      setSyncing(true);
+      toast.info('Iniciando sincronização de álbuns...');
+
+      const { data, error } = await supabase.functions.invoke('sync-drive-albums');
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success(
+          `Sincronização concluída! ${data.created || 0} novos álbuns, ${data.updated || 0} atualizados`
+        );
+        refetchAlbums();
+      } else {
+        throw new Error(data?.error || 'Erro desconhecido');
+      }
+    } catch (error: any) {
+      console.error('Erro na sincronização:', error);
+      toast.error(`Erro ao sincronizar: ${error.message}`);
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -236,13 +262,49 @@ export function GoogleDriveManager() {
           </div>
 
           {isSaved && (
-            <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-              <p className="text-sm text-green-700 dark:text-green-400">
-                ✓ Configuração salva! A galeria agora está conectada ao seu Google Drive.
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Organize suas fotos em subpastas no Drive e elas aparecerão como álbuns na galeria.
-              </p>
+            <div className="space-y-4">
+              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                <p className="text-sm text-green-700 dark:text-green-400">
+                  ✓ Configuração salva! A galeria agora está conectada ao seu Google Drive.
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Organize suas fotos em subpastas no Drive e elas aparecerão como álbuns na galeria.
+                </p>
+              </div>
+              
+              <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg space-y-3">
+                <div className="flex items-start gap-2">
+                  <Database className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                      Sincronizar Álbuns com Banco de Dados
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Sincronize os álbuns do Google Drive para o banco de dados do Supabase. 
+                      Isso permitirá que as notificações funcionem quando novos álbuns forem adicionados.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={syncAlbums}
+                  disabled={syncing}
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                >
+                  {syncing ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      Sincronizando...
+                    </>
+                  ) : (
+                    <>
+                      <Database className="mr-2 h-4 w-4" />
+                      Sincronizar Álbuns Agora
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
