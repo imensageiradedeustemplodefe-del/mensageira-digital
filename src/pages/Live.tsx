@@ -7,11 +7,44 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useLiveStreams } from "@/hooks/useLiveStreams";
 import { LiveStream } from "@/types/database";
 
+// Declarar tipos do Facebook SDK
+declare global {
+  interface Window {
+    FB?: {
+      XFBML: {
+        parse: () => void;
+      };
+    };
+  }
+}
+
 const Live = () => {
   const { settings } = useSiteSettings();
   const { streams, loading } = useLiveStreams(true);
   const [activeStream, setActiveStream] = useState<LiveStream | null>(null);
   const [nextService, setNextService] = useState<string>("");
+
+  // Carregar SDK do Facebook
+  useEffect(() => {
+    // Carregar script do Facebook SDK
+    if (window.FB) {
+      window.FB.XFBML.parse();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://connect.facebook.net/pt_BR/sdk.js#xfbml=1&version=v18.0';
+    script.async = true;
+    script.defer = true;
+    script.crossOrigin = 'anonymous';
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
   // Buscar transmissões ativas
   useEffect(() => {
@@ -21,6 +54,15 @@ const Live = () => {
       setActiveStream(liveStream || streams[0] || null);
     }
   }, [streams, loading]);
+
+  // Recarregar Facebook SDK quando mudar stream
+  useEffect(() => {
+    if (activeStream?.platform === 'facebook' && window.FB) {
+      setTimeout(() => {
+        window.FB.XFBML.parse();
+      }, 100);
+    }
+  }, [activeStream]);
 
   // Calcular próximo culto
   useEffect(() => {
@@ -164,13 +206,23 @@ const Live = () => {
         </div>
       </section>
 
-      {/* YouTube Player */}
+      {/* Video Player */}
       <section className="py-8">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card className="overflow-hidden border-none shadow-lg">
             <CardContent className="p-0">
               <div className="aspect-video bg-muted/30 relative">
-                {activeStream && activeStream.embed_url ? (
+                {activeStream && activeStream.platform === 'facebook' ? (
+                  <div className="absolute inset-0 w-full h-full">
+                    <div 
+                      className="fb-video w-full h-full" 
+                      data-href={activeStream.stream_url}
+                      data-width="auto"
+                      data-show-text="false"
+                      data-allowfullscreen="true"
+                    ></div>
+                  </div>
+                ) : activeStream && activeStream.embed_url ? (
                   <iframe
                     src={activeStream.embed_url}
                     title={activeStream.title}
