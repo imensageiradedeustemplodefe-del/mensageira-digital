@@ -136,22 +136,15 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
         setUserReaction(null);
         toast.success('Reação removida');
       } else {
-        // Remove old reaction if exists
-        if (userReaction) {
-          await supabase
-            .from('photo_reactions')
-            .delete()
-            .eq('photo_id', currentPhoto.id)
-            .eq('user_id', userId);
-        }
-        
-        // Add new reaction
+        // Use upsert to handle insert or update automatically
         const { error } = await supabase
           .from('photo_reactions')
-          .insert({
+          .upsert({
             photo_id: currentPhoto.id,
             user_id: userId,
             reaction_type: type
+          }, {
+            onConflict: 'photo_id,user_id'
           });
         
         if (error) {
