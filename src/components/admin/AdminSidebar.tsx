@@ -8,7 +8,8 @@ import {
   Heart, 
   Radio,
   Settings,
-  ChevronRight
+  ChevronRight,
+  Bell
 } from "lucide-react";
 import {
   Sidebar,
@@ -55,6 +56,7 @@ const menuItems = [
     items: [
       { title: "Pedidos de Oração", value: "prayers", icon: Heart },
       { title: "Testemunhos", value: "testimonies", icon: MessageCircle },
+      { title: "Notificações", value: "notifications", icon: Bell },
     ]
   }
 ];

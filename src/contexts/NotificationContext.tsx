@@ -300,6 +300,32 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
+      // Buscar notificações personalizadas
+      const { data: customNotifs, error: customError } = await supabase
+        .from('custom_notifications')
+        .select('id, title, message, icon, url, created_at')
+        .eq('is_active', true)
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (customError) {
+        console.error('Error fetching custom notifications:', customError);
+      } else if (customNotifs) {
+        customNotifs.forEach(notif => {
+          allNotifications.push({
+            id: `custom_${notif.id}`,
+            type: 'daily_verse', // usando tipo genérico
+            title: notif.title,
+            message: notif.message,
+            icon: notif.icon,
+            url: notif.url,
+            timestamp: notif.created_at,
+            isRead: readIds.has(`custom_${notif.id}`)
+          });
+        });
+      }
+
       const uniqueNotifications = Array.from(
         new Map(allNotifications.map(item => [item.id, item])).values()
       );
@@ -397,6 +423,16 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'events' }, () => {
           toast.success('⛪ Novo evento adicionado!');
           fetchNotifications();
+        })
+        .subscribe(),
+      
+      supabase
+        .channel('custom_notifications_changes')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'custom_notifications' }, (payload: any) => {
+          if (payload.new?.is_active) {
+            toast.success(`${payload.new.icon} ${payload.new.title}`);
+            fetchNotifications();
+          }
         })
         .subscribe(),
     ];

@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      custom_notifications: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          message: string
+          title: string
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          message: string
+          title: string
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          message?: string
+          title?: string
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
       daily_verses: {
         Row: {
           book_name: string
