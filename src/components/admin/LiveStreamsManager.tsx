@@ -99,7 +99,8 @@ const LiveStreamsManager = () => {
         const youtubeId = extractYouTubeId(streamUrl);
         return youtubeId ? `https://www.youtube.com/embed/${youtubeId}` : streamUrl;
       case 'facebook':
-        return streamUrl.replace('facebook.com', 'facebook.com/plugins/video.php?href=');
+        const encodedUrl = encodeURIComponent(streamUrl);
+        return `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false&width=734&t=0`;
       default:
         return streamUrl;
     }
