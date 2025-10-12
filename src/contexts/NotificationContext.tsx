@@ -169,30 +169,39 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      // Buscar versos diários
-      const { data: verses, error: versesError } = await supabase
+      // Criar notificação diária do versículo do dia
+      const { data: allVerses, error: versesError } = await supabase
         .from('daily_verses')
-        .select('id, created_at, verse_text')
+        .select('id, verse_text, verse_reference, created_at')
         .eq('is_active', true)
-        .gte('created_at', sevenDaysAgo.toISOString())
-        .order('created_at', { ascending: false })
-        .limit(5);
+        .order('created_at');
 
       if (versesError) {
         console.error('Error fetching verses:', versesError);
-      } else if (verses) {
-        verses.forEach(verse => {
-          const config = getNotificationConfig('daily_verse');
-          allNotifications.push({
-            id: `verse_${verse.id}`,
-            type: 'daily_verse',
-            title: config.title,
-            message: 'Uma nova palavra de inspiração está disponível!',
-            icon: config.icon,
-            url: config.url,
-            timestamp: verse.created_at,
-            isRead: readIds.has(`verse_${verse.id}`)
-          });
+      } else if (allVerses && allVerses.length > 0) {
+        // Criar uma notificação única para hoje
+        const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+        const seed = dayOfYear + (now.getFullYear() * 365);
+        const verseIndex = seed % allVerses.length;
+        const todayVerse = allVerses[verseIndex];
+        
+        const config = getNotificationConfig('daily_verse');
+        const todayDate = now.toISOString().split('T')[0];
+        const notificationId = `daily_verse_${todayDate}`;
+        
+        // Criar notificação com timestamp de hoje às 6h da manhã
+        const todayMorning = new Date(now);
+        todayMorning.setHours(6, 0, 0, 0);
+        
+        allNotifications.push({
+          id: notificationId,
+          type: 'daily_verse',
+          title: config.title,
+          message: `${todayVerse.verse_reference} - Confira a palavra de hoje!`,
+          icon: config.icon,
+          url: config.url,
+          timestamp: todayMorning.toISOString(),
+          isRead: readIds.has(notificationId)
         });
       }
 
