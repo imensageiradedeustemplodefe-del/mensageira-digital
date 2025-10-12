@@ -163,19 +163,31 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
 
   const handleDownload = async () => {
     try {
-      // Use Google Drive direct download link
-      const downloadUrl = `https://drive.google.com/uc?export=download&id=${currentPhoto.id}`;
+      toast.success('Preparando download...');
+      
+      // Fetch the image and convert to blob
+      const imageUrl = `https://drive.google.com/thumbnail?id=${currentPhoto.id}&sz=w1920`;
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = downloadUrl;
+      link.href = url;
       link.download = currentPhoto.name || 'foto.jpg';
-      link.target = '_blank';
       document.body.appendChild(link);
       link.click();
+      
+      // Cleanup
       document.body.removeChild(link);
-      toast.success('Download iniciado!');
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('Download concluído!');
     } catch (error) {
       console.error('Download error:', error);
-      toast.error('Erro ao baixar a foto');
+      toast.error('Não foi possível baixar a foto. Tente abrir em nova aba.');
+      // Fallback: open in new tab
+      window.open(`https://drive.google.com/file/d/${currentPhoto.id}/view`, '_blank');
     }
   };
 
