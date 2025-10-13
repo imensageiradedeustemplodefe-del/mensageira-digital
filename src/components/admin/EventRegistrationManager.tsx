@@ -67,19 +67,19 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
 
   const [optionInput, setOptionInput] = useState("");
 
-  // Templates rápidos de formulários
+  // Templates rápidos de formulários - todos os campos podem ser editados
   const QUICK_TEMPLATES = {
     basic: [
-      { field_name: "nome_completo", field_type: "text", field_label: "Nome Completo", is_required: true },
-      { field_name: "email", field_type: "email", field_label: "Email", is_required: true },
-      { field_name: "telefone", field_type: "phone", field_label: "Telefone", is_required: true },
+      { field_name: "campo_1", field_type: "text", field_label: "Campo 1", is_required: true },
+      { field_name: "campo_2", field_type: "text", field_label: "Campo 2", is_required: true },
+      { field_name: "campo_3", field_type: "text", field_label: "Campo 3", is_required: true },
     ],
     complete: [
-      { field_name: "nome_completo", field_type: "text", field_label: "Nome Completo", is_required: true },
-      { field_name: "email", field_type: "email", field_label: "Email", is_required: true },
-      { field_name: "telefone", field_type: "phone", field_label: "Telefone", is_required: true },
-      { field_name: "data_nascimento", field_type: "date", field_label: "Data de Nascimento", is_required: false },
-      { field_name: "observacoes", field_type: "textarea", field_label: "Observações", is_required: false },
+      { field_name: "campo_1", field_type: "text", field_label: "Campo 1", is_required: true },
+      { field_name: "campo_2", field_type: "text", field_label: "Campo 2", is_required: true },
+      { field_name: "campo_3", field_type: "text", field_label: "Campo 3", is_required: true },
+      { field_name: "campo_4", field_type: "text", field_label: "Campo 4", is_required: false },
+      { field_name: "campo_5", field_type: "text", field_label: "Campo 5", is_required: false },
     ],
   };
 
@@ -393,34 +393,35 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
                     onClick={() => applyTemplate('basic')}
                     className="p-6 border-2 rounded-lg hover:border-primary transition-all text-left bg-background"
                   >
-                    <h3 className="font-semibold text-lg mb-2">📋 Básico</h3>
+                    <h3 className="font-semibold text-lg mb-2">📋 Básico (3 campos)</h3>
                     <p className="text-sm text-muted-foreground mb-3">
-                      Formulário simples com 3 campos essenciais
+                      Cria 3 campos que você pode configurar com qualquer tipo
                     </p>
                     <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• Nome Completo</li>
-                      <li>• Email</li>
-                      <li>• Telefone</li>
+                      <li>• 3 campos de texto simples</li>
+                      <li>• Configure o tipo depois (texto, email, telefone, etc.)</li>
                     </ul>
                   </button>
                   <button
                     onClick={() => applyTemplate('complete')}
                     className="p-6 border-2 rounded-lg hover:border-primary transition-all text-left bg-background"
                   >
-                    <h3 className="font-semibold text-lg mb-2">📝 Completo</h3>
+                    <h3 className="font-semibold text-lg mb-2">📝 Completo (5 campos)</h3>
                     <p className="text-sm text-muted-foreground mb-3">
-                      Formulário detalhado com 5 campos
+                      Cria 5 campos que você pode configurar com qualquer tipo
                     </p>
                     <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• Nome Completo, Email, Telefone</li>
-                      <li>• Data de Nascimento</li>
-                      <li>• Observações</li>
+                      <li>• 5 campos de texto simples</li>
+                      <li>• Configure o tipo depois (data, seleção, checkbox, etc.)</li>
                     </ul>
                   </button>
                 </div>
                 <div className="mt-4 pt-4 border-t text-center">
                   <p className="text-sm text-muted-foreground mb-3">
-                    Ou crie um formulário personalizado do zero
+                    Ou crie campos um por um do zero
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    💡 Após criar com um template, você pode editar cada campo para mudar o tipo
                   </p>
                 </div>
               </CardContent>
