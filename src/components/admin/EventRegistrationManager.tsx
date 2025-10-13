@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, GripVertical, Eye, ChevronUp, ChevronDown, Copy, Settings2, X, Edit } from "lucide-react";
+import { Plus, Trash2, GripVertical, Eye, ChevronUp, ChevronDown, Copy, Settings2, X, Edit, FileSpreadsheet, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,7 @@ interface Registration {
   event_id: string;
   registration_data: any;
   synced_to_sheets: boolean;
+  spreadsheet_id?: string;
   created_at: string;
 }
 
@@ -56,6 +57,7 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
   const [viewingRegistration, setViewingRegistration] = useState<Registration | null>(null);
   const [editingField, setEditingField] = useState<RegistrationField | null>(null);
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const { toast } = useToast();
 
   const [newField, setNewField] = useState({
@@ -437,6 +439,53 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
   const handleViewDetails = (registration: Registration) => {
     setViewingRegistration(registration);
     setViewDialogOpen(true);
+  };
+
+  const handleSyncToSheets = async () => {
+    setSyncing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-event-registration', {
+        body: { eventId }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sincronização concluída!",
+        description: `${data.syncedCount} inscrições foram sincronizadas com sucesso.`,
+      });
+
+      // Recarregar as inscrições para atualizar o status
+      await fetchRegistrations();
+
+      // Se houver spreadsheetId, mostrar link
+      if (data.spreadsheetId) {
+        setTimeout(() => {
+          toast({
+            title: "Planilha criada!",
+            description: "Clique para abrir a planilha no Google Sheets",
+            action: (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${data.spreadsheetId}`, '_blank')}
+              >
+                Abrir Planilha
+              </Button>
+            ),
+          });
+        }, 500);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro ao sincronizar",
+        description: error.message || "Verifique se as credenciais do Google Drive estão configuradas.",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncing(false);
+    }
   };
 
   return (
@@ -943,16 +992,26 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium">Total de Inscrições</p>
-                      <p className="text-2xl font-bold">{registrations.length}</p>
+                    <div className="flex gap-8">
+                      <div>
+                        <p className="text-sm font-medium">Total de Inscrições</p>
+                        <p className="text-2xl font-bold">{registrations.length}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Sincronizadas</p>
+                        <p className="text-2xl font-bold">
+                          {registrations.filter((r) => r.synced_to_sheets).length}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">Sincronizadas</p>
-                      <p className="text-2xl font-bold">
-                        {registrations.filter((r) => r.synced_to_sheets).length}
-                      </p>
-                    </div>
+                    <Button
+                      onClick={handleSyncToSheets}
+                      disabled={syncing || registrations.filter(r => !r.synced_to_sheets).length === 0}
+                      className="gap-2"
+                    >
+                      <FileSpreadsheet className="w-4 h-4" />
+                      {syncing ? "Sincronizando..." : "Sincronizar com Google Sheets"}
+                    </Button>
                   </div>
 
                   <div className="space-y-3 max-h-[600px] overflow-y-auto">
@@ -965,6 +1024,16 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
                                 {new Date(registration.created_at).toLocaleString("pt-BR")}
                               </p>
                               <div className="flex items-center gap-2">
+                                {registration.synced_to_sheets && registration.spreadsheet_id && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${registration.spreadsheet_id}`, '_blank')}
+                                    title="Abrir planilha no Google Sheets"
+                                  >
+                                    <FileSpreadsheet className="w-4 h-4 text-green-600" />
+                                  </Button>
+                                )}
                                 {registration.synced_to_sheets && (
                                   <Badge variant="outline" className="text-xs bg-green-50">
                                     ✓ Sincronizado
