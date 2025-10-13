@@ -28,6 +28,21 @@ const Gallery = () => {
     return '';
   };
 
+  // Função para obter o dia da semana em português
+  const getDayOfWeek = (dateString: string): string => {
+    if (!dateString) return '';
+    const [day, month, year] = dateString.split('/');
+    const date = new Date(`${year}-${month}-${day}`);
+    const daysOfWeek = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    return daysOfWeek[date.getDay()];
+  };
+
+  // Função para extrair a categoria do nome do álbum (primeira palavra antes da data)
+  const extractCategoryFromAlbumName = (albumName: string): string => {
+    const parts = albumName.split(/(\d{2}[\.\-]\d{2}[\.\-]\d{4})/);
+    return parts[0]?.trim() || albumName;
+  };
+
   // Busca a URL do Apps Script nas configurações
   useEffect(() => {
     const fetchScriptUrl = async () => {
@@ -131,12 +146,28 @@ const Gallery = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-8">
             <Camera className="w-12 h-12 text-primary mx-auto mb-6" />
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              {selectedAlbum ? selectedAlbumName : 'Galeria de Fotos'}
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground mb-8">
-              {selectedAlbum ? 'Explore as fotos deste álbum' : 'Momentos especiais da nossa comunidade'}
-            </p>
+            {selectedAlbum ? (
+              <>
+                <h1 className="text-3xl md:text-4xl font-bold mb-2 text-foreground">
+                  {extractCategoryFromAlbumName(selectedAlbumName)} - {getDayOfWeek(selectedAlbumDate)} - {selectedAlbumDate}
+                </h1>
+                <p className="text-xl md:text-2xl font-semibold text-primary mb-4">
+                  {selectedAlbumName}
+                </p>
+                <p className="text-base md:text-lg text-muted-foreground mb-8">
+                  Explore as fotos deste momento especial
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
+                  Galeria de Fotos
+                </h1>
+                <p className="text-base md:text-lg text-muted-foreground mb-8">
+                  Momentos especiais da nossa comunidade
+                </p>
+              </>
+            )}
             {!selectedAlbum && (
               <div className="relative max-w-md mx-auto">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
