@@ -133,6 +133,7 @@ export function SiteSettingsManager() {
       case 'pages': return FileText;
       case 'events': return Calendar;
       case 'home': return Home;
+      case 'integrations': return Settings;
       default: return Settings;
     }
   };
@@ -148,6 +149,7 @@ export function SiteSettingsManager() {
       case 'pages': return 'Conteúdo das Páginas';
       case 'events': return 'Eventos e Cultos';
       case 'home': return 'Página Inicial';
+      case 'integrations': return 'Integrações Google';
       default: return 'Configurações';
     }
   };
