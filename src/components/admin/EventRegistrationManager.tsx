@@ -10,6 +10,7 @@ import { Plus, Trash2, GripVertical, Eye, ChevronUp, ChevronDown, Copy, Settings
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface RegistrationField {
   id: string;
@@ -66,22 +67,16 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
   });
 
   const [optionInput, setOptionInput] = useState("");
-
-  // Templates rápidos de formulários - todos os campos podem ser editados
-  const QUICK_TEMPLATES = {
-    basic: [
-      { field_name: "campo_1", field_type: "text", field_label: "Campo 1", is_required: true },
-      { field_name: "campo_2", field_type: "text", field_label: "Campo 2", is_required: true },
-      { field_name: "campo_3", field_type: "text", field_label: "Campo 3", is_required: true },
-    ],
-    complete: [
-      { field_name: "campo_1", field_type: "text", field_label: "Campo 1", is_required: true },
-      { field_name: "campo_2", field_type: "text", field_label: "Campo 2", is_required: true },
-      { field_name: "campo_3", field_type: "text", field_label: "Campo 3", is_required: true },
-      { field_name: "campo_4", field_type: "text", field_label: "Campo 4", is_required: false },
-      { field_name: "campo_5", field_type: "text", field_label: "Campo 5", is_required: false },
-    ],
-  };
+  
+  // Estado para configuração rápida de 5 campos
+  const [quickFields, setQuickFields] = useState([
+    { field_label: "", field_type: "text", is_required: true },
+    { field_label: "", field_type: "text", is_required: true },
+    { field_label: "", field_type: "text", is_required: true },
+    { field_label: "", field_type: "text", is_required: true },
+    { field_label: "", field_type: "text", is_required: true },
+  ]);
+  const [showQuickSetup, setShowQuickSetup] = useState(true);
 
   useEffect(() => {
     fetchFields();
@@ -333,22 +328,35 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
       .replace(/^_|_$/g, "");
   };
 
-  const applyTemplate = async (templateKey: 'basic' | 'complete') => {
-    const template = QUICK_TEMPLATES[templateKey];
-    
-    const inserts = template.map((field, index) => ({
-      event_id: eventId,
-      ...field,
-      field_order: fields.length + index,
-    }));
+  const handleSaveQuickFields = async () => {
+    // Filtrar apenas campos com label preenchido
+    const fieldsToSave = quickFields
+      .filter(field => field.field_label.trim() !== "")
+      .map((field, index) => ({
+        event_id: eventId,
+        field_name: generateFieldName(field.field_label),
+        field_type: field.field_type,
+        field_label: field.field_label,
+        is_required: field.is_required,
+        field_order: fields.length + index,
+      }));
+
+    if (fieldsToSave.length === 0) {
+      toast({
+        title: "Nenhum campo para salvar",
+        description: "Preencha pelo menos um campo com um nome",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const { error } = await supabase
       .from("event_registration_fields")
-      .insert(inserts);
+      .insert(fieldsToSave);
 
     if (error) {
       toast({
-        title: "Erro ao aplicar template",
+        title: "Erro ao salvar campos",
         description: error.message,
         variant: "destructive",
       });
@@ -356,10 +364,11 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
     }
 
     toast({
-      title: "Template aplicado!",
-      description: `${template.length} campos foram adicionados ao formulário`,
+      title: "Campos salvos!",
+      description: `${fieldsToSave.length} campo(s) adicionado(s) ao formulário`,
     });
 
+    setShowQuickSetup(false);
     fetchFields();
   };
 
@@ -378,51 +387,83 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
         </TabsList>
 
         <TabsContent value="fields" className="space-y-4">
-          {/* Templates Rápidos */}
-          {fields.length === 0 && (
+          {/* Configuração Rápida de 5 Campos */}
+          {fields.length === 0 && showQuickSetup && (
             <Card className="bg-gradient-to-br from-primary/5 to-accent/5">
               <CardHeader>
-                <CardTitle className="text-lg">Templates Rápidos</CardTitle>
+                <CardTitle className="text-lg">Configure até 5 Campos</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Comece rapidamente com um modelo pronto
+                  Escolha o tipo e nome de cada campo. Você pode configurar de 1 a 5 campos.
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <button
-                    onClick={() => applyTemplate('basic')}
-                    className="p-6 border-2 rounded-lg hover:border-primary transition-all text-left bg-background"
-                  >
-                    <h3 className="font-semibold text-lg mb-2">📋 Básico (3 campos)</h3>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Cria 3 campos que você pode configurar com qualquer tipo
-                    </p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• 3 campos de texto simples</li>
-                      <li>• Configure o tipo depois (texto, email, telefone, etc.)</li>
-                    </ul>
-                  </button>
-                  <button
-                    onClick={() => applyTemplate('complete')}
-                    className="p-6 border-2 rounded-lg hover:border-primary transition-all text-left bg-background"
-                  >
-                    <h3 className="font-semibold text-lg mb-2">📝 Completo (5 campos)</h3>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Cria 5 campos que você pode configurar com qualquer tipo
-                    </p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• 5 campos de texto simples</li>
-                      <li>• Configure o tipo depois (data, seleção, checkbox, etc.)</li>
-                    </ul>
-                  </button>
+                <div className="space-y-4">
+                  {quickFields.map((field, index) => (
+                    <div key={index} className="p-4 border-2 rounded-lg bg-background">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="font-bold text-lg text-primary">#{index + 1}</span>
+                        <Input
+                          placeholder={`Nome do campo ${index + 1} (ex: Nome Completo, Email...)`}
+                          value={field.field_label}
+                          onChange={(e) => {
+                            const newFields = [...quickFields];
+                            newFields[index].field_label = e.target.value;
+                            setQuickFields(newFields);
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <Label className="text-xs text-muted-foreground mb-2 block">Tipo do Campo</Label>
+                          <Select
+                            value={field.field_type}
+                            onValueChange={(value) => {
+                              const newFields = [...quickFields];
+                              newFields[index].field_type = value;
+                              setQuickFields(newFields);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-background z-50">
+                              {FIELD_TYPES.map((type) => (
+                                <SelectItem key={type.value} value={type.value}>
+                                  <span className="flex items-center gap-2">
+                                    <span>{type.icon}</span>
+                                    <span>{type.label}</span>
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-xs text-muted-foreground">Obrigatório</Label>
+                          <Switch
+                            checked={field.is_required}
+                            onCheckedChange={(checked) => {
+                              const newFields = [...quickFields];
+                              newFields[index].is_required = checked;
+                              setQuickFields(newFields);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="mt-4 pt-4 border-t text-center">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Ou crie campos um por um do zero
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    💡 Após criar com um template, você pode editar cada campo para mudar o tipo
-                  </p>
+                <div className="mt-6 flex gap-3">
+                  <Button onClick={handleSaveQuickFields} className="flex-1">
+                    Salvar Campos
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowQuickSetup(false)}
+                  >
+                    Configurar Manualmente
+                  </Button>
                 </div>
               </CardContent>
             </Card>
