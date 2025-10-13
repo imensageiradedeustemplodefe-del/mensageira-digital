@@ -61,7 +61,26 @@ const getNotificationConfig = (type: NotificationType) => {
 const getReadNotifications = (): Set<string> => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? new Set(JSON.parse(stored)) : new Set();
+    if (!stored) return new Set();
+    
+    const data = JSON.parse(stored);
+    const readIds = new Set<string>(data.ids || []);
+    const lastCleanup = data.lastCleanup || 0;
+    
+    // Limpar notificações lidas antigas (mais de 7 dias)
+    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    if (lastCleanup < sevenDaysAgo) {
+      const today = new Date().toISOString().split('T')[0];
+      const cleanedIds = Array.from(readIds).filter(id => {
+        // Manter notificações lidas de hoje
+        if (id.includes(today)) return true;
+        // Remover notificações antigas
+        return false;
+      });
+      return new Set(cleanedIds);
+    }
+    
+    return readIds;
   } catch {
     return new Set();
   }
@@ -69,7 +88,11 @@ const getReadNotifications = (): Set<string> => {
 
 const saveReadNotifications = (readIds: Set<string>) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(readIds)));
+    const data = {
+      ids: Array.from(readIds),
+      lastCleanup: Date.now()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (error) {
     console.error('Error saving read notifications:', error);
   }
@@ -184,7 +207,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      // Criar notificação diária do versículo do dia
+      // Criar notificação diária do versículo do dia (sempre no topo e não lida)
       const { data: allVerses, error: versesError } = await supabase
         .from('daily_verses')
         .select('id, verse_text, verse_reference, created_at')
@@ -204,10 +227,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         const todayDate = now.toISOString().split('T')[0];
         const notificationId = `daily_verse_${todayDate}`;
         
-        // Criar notificação com timestamp de hoje às 6h da manhã
-        const todayMorning = new Date(now);
-        todayMorning.setHours(6, 0, 0, 0);
-        
+        // Criar notificação com timestamp atual para aparecer no topo
+        // A palavra do dia sempre aparece como não lida
         allNotifications.push({
           id: notificationId,
           type: 'daily_verse',
@@ -215,8 +236,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           message: `${todayVerse.verse_reference} - Confira a palavra de hoje!`,
           icon: config.icon,
           url: config.url,
-          timestamp: todayMorning.toISOString(),
-          isRead: readIds.has(notificationId)
+          timestamp: now.toISOString(),
+          isRead: false // Sempre não lida para garantir que apareça
         });
       }
 
