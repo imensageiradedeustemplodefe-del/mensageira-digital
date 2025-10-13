@@ -67,6 +67,22 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
 
   const [optionInput, setOptionInput] = useState("");
 
+  // Templates rápidos de formulários
+  const QUICK_TEMPLATES = {
+    basic: [
+      { field_name: "nome_completo", field_type: "text", field_label: "Nome Completo", is_required: true },
+      { field_name: "email", field_type: "email", field_label: "Email", is_required: true },
+      { field_name: "telefone", field_type: "phone", field_label: "Telefone", is_required: true },
+    ],
+    complete: [
+      { field_name: "nome_completo", field_type: "text", field_label: "Nome Completo", is_required: true },
+      { field_name: "email", field_type: "email", field_label: "Email", is_required: true },
+      { field_name: "telefone", field_type: "phone", field_label: "Telefone", is_required: true },
+      { field_name: "data_nascimento", field_type: "date", field_label: "Data de Nascimento", is_required: false },
+      { field_name: "observacoes", field_type: "textarea", field_label: "Observações", is_required: false },
+    ],
+  };
+
   useEffect(() => {
     fetchFields();
     fetchRegistrations();
@@ -317,6 +333,36 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
       .replace(/^_|_$/g, "");
   };
 
+  const applyTemplate = async (templateKey: 'basic' | 'complete') => {
+    const template = QUICK_TEMPLATES[templateKey];
+    
+    const inserts = template.map((field, index) => ({
+      event_id: eventId,
+      ...field,
+      field_order: fields.length + index,
+    }));
+
+    const { error } = await supabase
+      .from("event_registration_fields")
+      .insert(inserts);
+
+    if (error) {
+      toast({
+        title: "Erro ao aplicar template",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Template aplicado!",
+      description: `${template.length} campos foram adicionados ao formulário`,
+    });
+
+    fetchFields();
+  };
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="fields" className="w-full">
@@ -332,10 +378,64 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
         </TabsList>
 
         <TabsContent value="fields" className="space-y-4">
+          {/* Templates Rápidos */}
+          {fields.length === 0 && (
+            <Card className="bg-gradient-to-br from-primary/5 to-accent/5">
+              <CardHeader>
+                <CardTitle className="text-lg">Templates Rápidos</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Comece rapidamente com um modelo pronto
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => applyTemplate('basic')}
+                    className="p-6 border-2 rounded-lg hover:border-primary transition-all text-left bg-background"
+                  >
+                    <h3 className="font-semibold text-lg mb-2">📋 Básico</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Formulário simples com 3 campos essenciais
+                    </p>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• Nome Completo</li>
+                      <li>• Email</li>
+                      <li>• Telefone</li>
+                    </ul>
+                  </button>
+                  <button
+                    onClick={() => applyTemplate('complete')}
+                    className="p-6 border-2 rounded-lg hover:border-primary transition-all text-left bg-background"
+                  >
+                    <h3 className="font-semibold text-lg mb-2">📝 Completo</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Formulário detalhado com 5 campos
+                    </p>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• Nome Completo, Email, Telefone</li>
+                      <li>• Data de Nascimento</li>
+                      <li>• Observações</li>
+                    </ul>
+                  </button>
+                </div>
+                <div className="mt-4 pt-4 border-t text-center">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Ou crie um formulário personalizado do zero
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">Configurar Formulário</CardTitle>
+                <div>
+                  <CardTitle className="text-lg">Configurar Formulário</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {fields.length} campo(s) configurado(s)
+                  </p>
+                </div>
                 <Dialog
                   open={dialogOpen}
                   onOpenChange={(open) => {
@@ -358,20 +458,22 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
                     <div className="space-y-6">
                       <div>
                         <Label className="text-base font-semibold mb-3 block">
-                          Tipo de Campo
+                          1. Escolha o Tipo de Campo
                         </Label>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                           {FIELD_TYPES.map((type) => (
                             <button
                               key={type.value}
                               type="button"
-                              onClick={() =>
-                                setNewField({ ...newField, field_type: type.value })
-                              }
-                              className={`p-4 rounded-lg border-2 transition-all hover:border-primary ${
+                              onClick={(e) => {
+                                e.preventDefault();
+                                console.log("Tipo selecionado:", type.value);
+                                setNewField({ ...newField, field_type: type.value });
+                              }}
+                              className={`p-4 rounded-lg border-2 transition-all hover:border-primary hover:shadow-md cursor-pointer ${
                                 newField.field_type === type.value
-                                  ? "border-primary bg-primary/5"
-                                  : "border-border"
+                                  ? "border-primary bg-primary/10 shadow-sm"
+                                  : "border-border bg-background"
                               }`}
                             >
                               <div className="text-2xl mb-2">{type.icon}</div>
@@ -379,45 +481,63 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
                               <div className="text-xs text-muted-foreground mt-1">
                                 {type.description}
                               </div>
+                              {newField.field_type === type.value && (
+                                <div className="mt-2 text-primary text-xs font-semibold">
+                                  ✓ Selecionado
+                                </div>
+                              )}
                             </button>
                           ))}
+                        </div>
+                        {newField.field_type && (
+                          <div className="mt-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                            <p className="text-sm text-primary font-medium">
+                              ✓ Tipo selecionado:{" "}
+                              {FIELD_TYPES.find((t) => t.value === newField.field_type)?.label}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="field_label">2. Rótulo do Campo *</Label>
+                          <Input
+                            id="field_label"
+                            placeholder="Ex: Nome Completo"
+                            value={newField.field_label}
+                            onChange={(e) => {
+                              const label = e.target.value;
+                              setNewField({
+                                ...newField,
+                                field_label: label,
+                                field_name: newField.field_name || generateFieldName(label),
+                              });
+                            }}
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Este é o texto que aparecerá no formulário
+                          </p>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="field_name">3. Nome da Variável *</Label>
+                          <Input
+                            id="field_name"
+                            placeholder="Ex: nome_completo"
+                            value={newField.field_name}
+                            onChange={(e) =>
+                              setNewField({ ...newField, field_name: e.target.value })
+                            }
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Use apenas letras minúsculas, números e underline (gerado automaticamente)
+                          </p>
                         </div>
                       </div>
 
                       <div>
-                        <Label htmlFor="field_label">Rótulo do Campo *</Label>
-                        <Input
-                          id="field_label"
-                          placeholder="Ex: Nome Completo"
-                          value={newField.field_label}
-                          onChange={(e) => {
-                            const label = e.target.value;
-                            setNewField({
-                              ...newField,
-                              field_label: label,
-                              field_name: newField.field_name || generateFieldName(label),
-                            });
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="field_name">Nome da Variável *</Label>
-                        <Input
-                          id="field_name"
-                          placeholder="Ex: nome_completo"
-                          value={newField.field_name}
-                          onChange={(e) =>
-                            setNewField({ ...newField, field_name: e.target.value })
-                          }
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Use apenas letras minúsculas, números e underline
-                        </p>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="field_placeholder">Placeholder (opcional)</Label>
+                        <Label htmlFor="field_placeholder">4. Placeholder (opcional)</Label>
                         <Input
                           id="field_placeholder"
                           placeholder="Ex: Digite seu nome completo"
@@ -426,11 +546,17 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
                             setNewField({ ...newField, field_placeholder: e.target.value })
                           }
                         />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Texto de exemplo que aparece dentro do campo vazio
+                        </p>
                       </div>
 
                       {newField.field_type === "select" && (
-                        <div>
-                          <Label>Opções do Menu *</Label>
+                        <div className="border-2 border-primary/20 rounded-lg p-4 bg-primary/5">
+                          <Label className="text-base font-semibold">5. Opções do Menu *</Label>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Adicione as opções que aparecerão no menu dropdown
+                          </p>
                           <div className="space-y-2 mt-2">
                             <div className="flex gap-2">
                               <Input
@@ -472,10 +598,10 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center justify-between p-4 border-2 rounded-lg bg-muted/50">
                         <div>
-                          <Label htmlFor="is_required" className="cursor-pointer">
-                            Campo Obrigatório
+                          <Label htmlFor="is_required" className="cursor-pointer text-base font-semibold">
+                            {newField.field_type === "select" ? "6." : "5."} Campo Obrigatório
                           </Label>
                           <p className="text-sm text-muted-foreground">
                             O usuário será obrigado a preencher este campo
