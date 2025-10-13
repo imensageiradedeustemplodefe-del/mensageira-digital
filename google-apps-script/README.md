@@ -1,18 +1,23 @@
 # Configuração do Google Apps Script para Inscrições de Eventos
 
-Este script gerencia automaticamente as inscrições de eventos, criando planilhas organizadas na pasta "Inscrições_Eventos" do seu Google Drive.
+Este script gerencia automaticamente as inscrições de eventos, criando planilhas organizadas em uma pasta específica do seu Google Drive.
 
 ## Passo 1: Criar o Script
 
 1. Acesse [Google Apps Script](https://script.google.com/)
 2. Clique em "Novo projeto"
 3. Cole o código do arquivo `EventRegistrations.gs`
-4. Renomeie o projeto para "Gerenciador de Inscrições - Igreja"
+4. **IMPORTANTE**: No código, substitua o `FOLDER_ID` pelo ID da sua pasta do Google Drive
+   - Abra a pasta desejada no Google Drive
+   - Copie o ID da URL (a parte após `/folders/`)
+   - Exemplo: `https://drive.google.com/drive/folders/1Tpu1Pv6SkQK-kr2ShiRp9OjSLRCjQRrR`
+   - O ID é: `1Tpu1Pv6SkQK-kr2ShiRp9OjSLRCjQRrR`
+5. Renomeie o projeto para "Gerenciador de Inscrições - Igreja"
 
 ## Passo 2: Configurar Permissões
 
 O script precisa das seguintes permissões:
-- **Google Drive**: Para criar a pasta "Inscrições_Eventos" e as planilhas
+- **Google Drive**: Para acessar a pasta configurada e criar planilhas
 - **Google Sheets**: Para adicionar e formatar dados nas planilhas
 
 ## Passo 3: Fazer o Deploy como Web App
@@ -47,13 +52,15 @@ O script precisa das seguintes permissões:
 
 ## Como Funciona
 
-### Estrutura de Pastas
+### Estrutura de Arquivos
+
+O script cria planilhas diretamente na pasta que você configurou:
+
 ```
-Google Drive (Raiz)
-└── Inscrições_Eventos/
-    ├── Inscrições - [Nome do Evento] - [Data].xlsx
-    ├── Inscrições - [Outro Evento] - [Data].xlsx
-    └── ...
+📁 [Sua Pasta Configurada]
+  ├── Inscrições - [Nome do Evento] - [Data].xlsx
+  ├── Inscrições - [Outro Evento] - [Data].xlsx
+  └── ...
 ```
 
 ### Dados Sincronizados
@@ -83,7 +90,9 @@ A planilha contém:
 - Revise as permissões do script no Google
 - Tente fazer um novo deploy do script
 
-### Planilha não aparece no Drive
+### Planilha não aparece na pasta configurada
+- Verifique se o FOLDER_ID está correto no código
+- Certifique-se de que você tem permissão de edição na pasta
 - Verifique se autorizou as permissões do script
 - Procure na lixeira do Google Drive
 - Verifique se há erros no log do Apps Script

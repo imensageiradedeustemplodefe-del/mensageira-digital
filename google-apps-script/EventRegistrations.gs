@@ -1,16 +1,33 @@
 // Google Apps Script para gerenciar Inscrições de Eventos
 // Deploy este script como Web App e use o URL no Lovable
 
+/**
+ * CONFIGURAÇÃO OBRIGATÓRIA:
+ * Substitua o FOLDER_ID abaixo pelo ID da sua pasta do Google Drive
+ * 
+ * Como obter o ID da pasta:
+ * 1. Abra a pasta no Google Drive
+ * 2. Copie o ID da URL (a parte após /folders/)
+ * 3. Exemplo: https://drive.google.com/drive/folders/1Tpu1Pv6SkQK-kr2ShiRp9OjSLRCjQRrR
+ *    O ID é: 1Tpu1Pv6SkQK-kr2ShiRp9OjSLRCjQRrR
+ */
+
+// ⬇️ CONFIGURE O ID DA SUA PASTA AQUI ⬇️
+const FOLDER_ID = '1Tpu1Pv6SkQK-kr2ShiRp9OjSLRCjQRrR';
+
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     const { eventTitle, registrations, fields } = data;
     
-    // Nome da pasta principal
-    const mainFolderName = "Inscrições_Eventos";
-    
-    // Buscar ou criar a pasta principal
-    let mainFolder = getOrCreateFolder(mainFolderName);
+    // Obtém a pasta configurada pelo ID
+    let mainFolder;
+    try {
+      mainFolder = DriveApp.getFolderById(FOLDER_ID);
+    } catch (error) {
+      throw new Error('Erro ao acessar a pasta: ' + error.message + 
+        '. Verifique se o FOLDER_ID está correto e se você tem permissão de acesso.');
+    }
     
     // Nome da planilha baseado no evento
     const spreadsheetName = `Inscrições - ${eventTitle} - ${new Date().toLocaleDateString('pt-BR')}`;
@@ -59,17 +76,6 @@ function doPost(e) {
         error: error.toString()
       }))
       .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function getOrCreateFolder(folderName, parentFolder) {
-  const parent = parentFolder || DriveApp.getRootFolder();
-  const folders = parent.getFoldersByName(folderName);
-  
-  if (folders.hasNext()) {
-    return folders.next();
-  } else {
-    return parent.createFolder(folderName);
   }
 }
 
