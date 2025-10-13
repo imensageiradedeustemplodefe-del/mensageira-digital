@@ -16,6 +16,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface CustomNotification {
   id: string;
@@ -173,15 +180,33 @@ export const CustomNotificationsManager = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="icon">Ícone</Label>
-                <Input
-                  id="icon"
+                <Select
                   value={formData.icon}
-                  onChange={(e) =>
-                    setFormData({ ...formData, icon: e.target.value })
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, icon: value })
                   }
-                  placeholder="📢"
-                  maxLength={5}
-                />
+                >
+                  <SelectTrigger id="icon">
+                    <SelectValue placeholder="Selecione um ícone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="📢">📢 Megafone</SelectItem>
+                    <SelectItem value="🔔">🔔 Sino</SelectItem>
+                    <SelectItem value="⭐">⭐ Estrela</SelectItem>
+                    <SelectItem value="🎉">🎉 Celebração</SelectItem>
+                    <SelectItem value="📅">📅 Calendário</SelectItem>
+                    <SelectItem value="🎵">🎵 Música</SelectItem>
+                    <SelectItem value="📖">📖 Livro</SelectItem>
+                    <SelectItem value="🙏">🙏 Oração</SelectItem>
+                    <SelectItem value="✨">✨ Brilho</SelectItem>
+                    <SelectItem value="💡">💡 Ideia</SelectItem>
+                    <SelectItem value="❤️">❤️ Coração</SelectItem>
+                    <SelectItem value="🎯">🎯 Alvo</SelectItem>
+                    <SelectItem value="📣">📣 Alto-falante</SelectItem>
+                    <SelectItem value="🌟">🌟 Destaque</SelectItem>
+                    <SelectItem value="🔥">🔥 Fogo</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
