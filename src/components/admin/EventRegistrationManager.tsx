@@ -70,13 +70,14 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
   
   // Estado para configuração rápida de 5 campos
   const [quickFields, setQuickFields] = useState([
-    { field_label: "", field_type: "text", is_required: true },
-    { field_label: "", field_type: "text", is_required: true },
-    { field_label: "", field_type: "text", is_required: true },
-    { field_label: "", field_type: "text", is_required: true },
-    { field_label: "", field_type: "text", is_required: true },
+    { field_label: "", field_type: "text", is_required: true, field_placeholder: "", field_options: [] as string[] },
+    { field_label: "", field_type: "text", is_required: true, field_placeholder: "", field_options: [] as string[] },
+    { field_label: "", field_type: "text", is_required: true, field_placeholder: "", field_options: [] as string[] },
+    { field_label: "", field_type: "text", is_required: true, field_placeholder: "", field_options: [] as string[] },
+    { field_label: "", field_type: "text", is_required: true, field_placeholder: "", field_options: [] as string[] },
   ]);
   const [showQuickSetup, setShowQuickSetup] = useState(true);
+  const [quickFieldOptionInputs, setQuickFieldOptionInputs] = useState<string[]>(["", "", "", "", ""]);
 
   useEffect(() => {
     fetchFields();
@@ -337,7 +338,9 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
         field_name: generateFieldName(field.field_label),
         field_type: field.field_type,
         field_label: field.field_label,
+        field_placeholder: field.field_placeholder || null,
         is_required: field.is_required,
+        field_options: field.field_type === "select" && field.field_options.length > 0 ? field.field_options : null,
         field_order: fields.length + index,
       }));
 
@@ -345,6 +348,20 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
       toast({
         title: "Nenhum campo para salvar",
         description: "Preencha pelo menos um campo com um nome",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validar campos do tipo select
+    const invalidSelectFields = fieldsToSave.filter(
+      field => field.field_type === "select" && (!field.field_options || field.field_options.length === 0)
+    );
+
+    if (invalidSelectFields.length > 0) {
+      toast({
+        title: "Campos incompletos",
+        description: "Campos do tipo 'Lista de Opções' precisam ter pelo menos uma opção",
         variant: "destructive",
       });
       return;
@@ -370,6 +387,25 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
 
     setShowQuickSetup(false);
     fetchFields();
+  };
+
+  const addQuickFieldOption = (fieldIndex: number) => {
+    const optionValue = quickFieldOptionInputs[fieldIndex].trim();
+    if (!optionValue) return;
+
+    const newFields = [...quickFields];
+    newFields[fieldIndex].field_options = [...newFields[fieldIndex].field_options, optionValue];
+    setQuickFields(newFields);
+
+    const newInputs = [...quickFieldOptionInputs];
+    newInputs[fieldIndex] = "";
+    setQuickFieldOptionInputs(newInputs);
+  };
+
+  const removeQuickFieldOption = (fieldIndex: number, optionIndex: number) => {
+    const newFields = [...quickFields];
+    newFields[fieldIndex].field_options = newFields[fieldIndex].field_options.filter((_, i) => i !== optionIndex);
+    setQuickFields(newFields);
   };
 
   return (
@@ -399,8 +435,8 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
               <CardContent>
                 <div className="space-y-4">
                   {quickFields.map((field, index) => (
-                    <div key={index} className="p-4 border-2 rounded-lg bg-background">
-                      <div className="flex items-center gap-2 mb-3">
+                    <div key={index} className="p-4 border-2 rounded-lg bg-background space-y-3">
+                      <div className="flex items-center gap-2">
                         <span className="font-bold text-lg text-primary">#{index + 1}</span>
                         <Input
                           placeholder={`Nome do campo ${index + 1} (ex: Nome Completo, Email...)`}
@@ -413,14 +449,18 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
                           className="flex-1"
                         />
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
                           <Label className="text-xs text-muted-foreground mb-2 block">Tipo do Campo</Label>
                           <Select
                             value={field.field_type}
                             onValueChange={(value) => {
                               const newFields = [...quickFields];
                               newFields[index].field_type = value;
+                              // Limpar opções se mudar de select para outro tipo
+                              if (value !== "select") {
+                                newFields[index].field_options = [];
+                              }
                               setQuickFields(newFields);
                             }}
                           >
@@ -461,6 +501,80 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
                           />
                         </div>
                       </div>
+
+                      {/* Campos específicos por tipo */}
+                      {(field.field_type === "text" || field.field_type === "email" || 
+                        field.field_type === "phone" || field.field_type === "number" || 
+                        field.field_type === "textarea") && (
+                        <div>
+                          <Label className="text-xs text-muted-foreground mb-2 block">
+                            Placeholder (opcional)
+                          </Label>
+                          <Input
+                            placeholder="Texto de exemplo..."
+                            value={field.field_placeholder}
+                            onChange={(e) => {
+                              const newFields = [...quickFields];
+                              newFields[index].field_placeholder = e.target.value;
+                              setQuickFields(newFields);
+                            }}
+                          />
+                        </div>
+                      )}
+
+                      {field.field_type === "select" && (
+                        <div className="border-2 border-primary/20 rounded-lg p-3 bg-primary/5">
+                          <Label className="text-sm font-semibold mb-2 block">
+                            Opções da Lista
+                          </Label>
+                          <div className="space-y-2">
+                            <div className="flex gap-2">
+                              <Input
+                                placeholder="Digite uma opção"
+                                value={quickFieldOptionInputs[index]}
+                                onChange={(e) => {
+                                  const newInputs = [...quickFieldOptionInputs];
+                                  newInputs[index] = e.target.value;
+                                  setQuickFieldOptionInputs(newInputs);
+                                }}
+                                onKeyPress={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    addQuickFieldOption(index);
+                                  }
+                                }}
+                              />
+                              <Button 
+                                type="button" 
+                                size="sm"
+                                onClick={() => addQuickFieldOption(index)}
+                              >
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            {field.field_options.length > 0 && (
+                              <div className="space-y-1">
+                                {field.field_options.map((option, optionIndex) => (
+                                  <div
+                                    key={optionIndex}
+                                    className="flex items-center justify-between p-2 bg-background rounded border"
+                                  >
+                                    <span className="text-sm">{option}</span>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => removeQuickFieldOption(index, optionIndex)}
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
