@@ -133,8 +133,11 @@ const Gallery = () => {
 
   if (loading && albums.length === 0 && photos.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 animate-fade-in">
+        <Camera className="w-16 h-16 text-primary animate-pulse" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-lg font-medium text-foreground">Carregando momentos especiais...</p>
+        <p className="text-sm text-muted-foreground">Preparando as memórias da nossa comunidade</p>
       </div>
     );
   }
@@ -197,9 +200,11 @@ const Gallery = () => {
         )}
 
         {scriptUrl && !selectedAlbum && albumsLoading && albums.length === 0 && (
-          <div className="text-center py-12">
-            <Loader2 className="w-12 h-12 mx-auto mb-4 text-primary animate-spin" />
-            <p className="text-muted-foreground">Carregando álbuns...</p>
+          <div className="text-center py-12 animate-fade-in">
+            <FolderOpen className="w-16 h-16 mx-auto mb-4 text-primary animate-pulse" />
+            <Loader2 className="w-10 h-10 mx-auto mb-4 text-primary animate-spin" />
+            <p className="text-lg font-medium text-foreground mb-2">Carregando álbuns especiais...</p>
+            <p className="text-sm text-muted-foreground">Organizando suas memórias ❤️</p>
           </div>
         )}
 
@@ -301,7 +306,7 @@ const Gallery = () => {
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Carregando...
+                      Carregando mais momentos...
                     </>
                   ) : (
                     'Carregar mais fotos'
