@@ -425,7 +425,17 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
                             }}
                           >
                             <SelectTrigger>
-                              <SelectValue />
+                              <SelectValue>
+                                {(() => {
+                                  const selectedType = FIELD_TYPES.find(t => t.value === field.field_type);
+                                  return selectedType ? (
+                                    <span className="flex items-center gap-2">
+                                      <span>{selectedType.icon}</span>
+                                      <span>{selectedType.label}</span>
+                                    </span>
+                                  ) : "Selecione...";
+                                })()}
+                              </SelectValue>
                             </SelectTrigger>
                             <SelectContent className="bg-background z-50">
                               {FIELD_TYPES.map((type) => (
