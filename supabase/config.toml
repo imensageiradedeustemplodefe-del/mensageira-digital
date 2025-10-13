@@ -8,3 +8,6 @@ verify_jwt = true
 
 [functions.sync-drive-albums]
 verify_jwt = false
+
+[functions.sync-event-registration]
+verify_jwt = false

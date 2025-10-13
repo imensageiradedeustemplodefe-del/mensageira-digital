@@ -26,11 +26,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Calendar, Edit, Trash2, Plus, MapPin, Users, Clock } from 'lucide-react';
+import { Calendar, Edit, Trash2, Plus, MapPin, Users, Clock, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { EventRegistrationManager } from './EventRegistrationManager';
 
 interface Event {
   id: string;
@@ -65,6 +66,8 @@ export default function EventsManager() {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [managingEventId, setManagingEventId] = useState<string | null>(null);
+  const [managingEventTitle, setManagingEventTitle] = useState<string>('');
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -507,6 +510,19 @@ export default function EventsManager() {
                     </div>
 
                     <div className="flex items-center space-x-2 ml-4">
+                      {event.registration_required && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setManagingEventId(event.id);
+                            setManagingEventTitle(event.title);
+                          }}
+                          title="Gerenciar Formulário de Inscrição"
+                        >
+                          <Settings className="w-3 h-3" />
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
@@ -548,6 +564,18 @@ export default function EventsManager() {
           </div>
         )}
       </CardContent>
+
+      {/* Dialog para gerenciar formulário de inscrição */}
+      <Dialog open={!!managingEventId} onOpenChange={(open) => !open && setManagingEventId(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Gerenciar Formulário de Inscrição</DialogTitle>
+          </DialogHeader>
+          {managingEventId && (
+            <EventRegistrationManager eventId={managingEventId} eventTitle={managingEventTitle} />
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

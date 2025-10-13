@@ -159,6 +159,97 @@ export type Database = {
           },
         ]
       }
+      event_registration_fields: {
+        Row: {
+          created_at: string
+          event_id: string
+          field_label: string
+          field_name: string
+          field_options: string[] | null
+          field_order: number
+          field_placeholder: string | null
+          field_type: string
+          id: string
+          is_required: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          field_label: string
+          field_name: string
+          field_options?: string[] | null
+          field_order?: number
+          field_placeholder?: string | null
+          field_type?: string
+          id?: string
+          is_required?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          field_label?: string
+          field_name?: string
+          field_options?: string[] | null
+          field_order?: number
+          field_placeholder?: string | null
+          field_type?: string
+          id?: string
+          is_required?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registration_fields_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_registrations: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          registration_data: Json
+          spreadsheet_id: string | null
+          synced_at: string | null
+          synced_to_sheets: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          registration_data: Json
+          spreadsheet_id?: string | null
+          synced_at?: string | null
+          synced_to_sheets?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          registration_data?: Json
+          spreadsheet_id?: string | null
+          synced_at?: string | null
+          synced_to_sheets?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_templates: {
         Row: {
           category: string

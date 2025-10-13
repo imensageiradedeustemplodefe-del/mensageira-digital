@@ -18,6 +18,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Events from "./pages/Events";
+import EventRegistration from "./pages/EventRegistration";
 import Live from "./pages/Live";
 import Contact from "./pages/Contact";
 import Prayer from "./pages/Prayer";
@@ -45,6 +46,7 @@ const AppContent = () => {
           <Route path="/" element={<Home />} />
           <Route path="/sobre" element={<About />} />
           <Route path="/eventos" element={<Events />} />
+          <Route path="/eventos/:eventId/inscricao" element={<EventRegistration />} />
           <Route path="/live" element={<Live />} />
           <Route path="/contato" element={<Contact />} />
           <Route path="/oracoes" element={<Prayer />} />

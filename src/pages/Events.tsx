@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { Calendar, MapPin, Clock, Users, Heart } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Calendar, MapPin, Clock, Users, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/SearchBar";
 import { ShareButton } from "@/components/ShareButton";
 import { supabase } from "@/integrations/supabase/client";
@@ -192,12 +194,18 @@ const Events = () => {
                           </div>
 
                           {event.registration_required && (
-                            <div className="pt-2 border-t">
+                            <div className="pt-2 border-t space-y-2">
                               <Badge variant="outline" className="text-orange-600 border-orange-600">
                                 Inscrição Obrigatória
                               </Badge>
+                              <Link to={`/eventos/${event.id}/inscricao`} className="block">
+                                <Button className="w-full" size="sm">
+                                  <UserPlus className="w-4 h-4 mr-2" />
+                                  Inscrever-se
+                                </Button>
+                              </Link>
                               {event.contact_info && (
-                                <p className="text-xs text-muted-foreground mt-2">
+                                <p className="text-xs text-muted-foreground">
                                   Contato: {event.contact_info}
                                 </p>
                               )}
