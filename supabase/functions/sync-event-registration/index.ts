@@ -6,10 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface GoogleSheetsRow {
-  values: any[][];
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -67,114 +63,46 @@ serve(async (req) => {
 
     console.log(`Found ${registrations.length} registrations to sync`);
 
-    // Obter token de acesso do Google
-    const clientId = Deno.env.get("GOOGLE_DRIVE_CLIENT_ID");
-    const clientSecret = Deno.env.get("GOOGLE_DRIVE_CLIENT_SECRET");
-    const refreshToken = Deno.env.get("GOOGLE_DRIVE_REFRESH_TOKEN");
+    // Buscar configuração do Apps Script
+    const { data: settings, error: settingsError } = await supabaseClient
+      .from("site_settings")
+      .select("setting_value")
+      .eq("setting_key", "event_registration_script_url")
+      .single();
 
-    if (!clientId || !clientSecret || !refreshToken) {
-      throw new Error("Google Drive credentials not configured");
+    if (settingsError || !settings?.setting_value) {
+      throw new Error("Google Apps Script URL não configurado. Configure em Configurações do Site.");
     }
 
-    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+    const scriptUrl = settings.setting_value;
+    console.log("Using Apps Script URL:", scriptUrl);
+
+    // Enviar dados para o Google Apps Script
+    const scriptResponse = await fetch(scriptUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        refresh_token: refreshToken,
-        grant_type: "refresh_token",
+        eventTitle: event.title,
+        fields: fields,
+        registrations: registrations,
       }),
     });
 
-    if (!tokenResponse.ok) {
-      throw new Error("Failed to refresh Google access token");
+    if (!scriptResponse.ok) {
+      const errorText = await scriptResponse.text();
+      throw new Error(`Apps Script error: ${errorText}`);
     }
 
-    const { access_token } = await tokenResponse.json();
-
-    // Criar ou buscar planilha
-    let spreadsheetId = registrations[0].spreadsheet_id;
-
-    if (!spreadsheetId) {
-      // Criar nova planilha
-      const createResponse = await fetch(
-        "https://sheets.googleapis.com/v4/spreadsheets",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            properties: {
-              title: `Inscrições - ${event.title} - ${new Date().toLocaleDateString("pt-BR")}`,
-            },
-            sheets: [
-              {
-                properties: {
-                  title: "Inscrições",
-                },
-              },
-            ],
-          }),
-        }
-      );
-
-      if (!createResponse.ok) {
-        throw new Error("Failed to create spreadsheet");
-      }
-
-      const spreadsheet = await createResponse.json();
-      spreadsheetId = spreadsheet.spreadsheetId;
-      console.log("Created new spreadsheet:", spreadsheetId);
-
-      // Adicionar cabeçalho
-      const headers = fields.map((f) => f.field_label);
-      headers.push("Data de Inscrição");
-
-      await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Inscrições!A1:append?valueInputOption=RAW`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            values: [headers],
-          }),
-        }
-      );
+    const scriptResult = await scriptResponse.json();
+    
+    if (!scriptResult.success) {
+      throw new Error(scriptResult.error || "Apps Script returned error");
     }
 
-    // Preparar dados para inserir
-    const rows = registrations.map((reg) => {
-      const row = fields.map((field) => reg.registration_data[field.field_name] || "");
-      row.push(new Date(reg.created_at).toLocaleString("pt-BR"));
-      return row;
-    });
-
-    // Inserir dados na planilha
-    const appendResponse = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Inscrições!A2:append?valueInputOption=RAW`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          values: rows,
-        }),
-      }
-    );
-
-    if (!appendResponse.ok) {
-      throw new Error("Failed to append data to spreadsheet");
-    }
-
-    console.log(`Appended ${rows.length} rows to spreadsheet`);
+    const spreadsheetId = scriptResult.spreadsheetId;
+    console.log(`Apps Script created/updated spreadsheet: ${spreadsheetId}`);
 
     // Marcar inscrições como sincronizadas
     const updatePromises = registrations.map((reg) =>
