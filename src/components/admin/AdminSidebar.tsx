@@ -58,6 +58,12 @@ const menuItems = [
       { title: "Testemunhos", value: "testimonies", icon: MessageCircle },
       { title: "Notificações", value: "notifications", icon: Bell },
     ]
+  },
+  {
+    title: "Configurações",
+    items: [
+      { title: "Configurações do Site", value: "settings", icon: Settings },
+    ]
   }
 ];
 

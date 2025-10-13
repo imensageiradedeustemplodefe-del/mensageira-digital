@@ -12,6 +12,7 @@ import EventTemplatesManager from '@/components/admin/EventTemplatesManager';
 import LiveStreamsManager from '@/components/admin/LiveStreamsManager';
 import { CustomNotificationsManager } from '@/components/admin/CustomNotificationsManager';
 import DashboardStats from '@/components/admin/DashboardStats';
+import { SiteSettingsManager } from '@/components/admin/SiteSettingsManager';
 import { LogOut } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 
@@ -34,6 +35,7 @@ const Admin = () => {
       prayers: 'Pedidos de Oração',
       live: 'Transmissões ao Vivo',
       notifications: 'Notificações Personalizadas',
+      settings: 'Configurações do Site',
     };
     return titles[tab] || 'Painel Administrativo';
   };
@@ -96,6 +98,7 @@ const Admin = () => {
                   {activeTab === 'prayers' && 'Gerencie os pedidos de oração recebidos'}
                   {activeTab === 'live' && 'Configure transmissões ao vivo'}
                   {activeTab === 'notifications' && 'Envie notificações personalizadas aos usuários'}
+                  {activeTab === 'settings' && 'Configure informações gerais, contato e integrações'}
                 </p>
               </div>
 
@@ -110,6 +113,7 @@ const Admin = () => {
                 {activeTab === 'prayers' && <PrayerRequestsManager />}
                 {activeTab === 'live' && <LiveStreamsManager />}
                 {activeTab === 'notifications' && <CustomNotificationsManager />}
+                {activeTab === 'settings' && <SiteSettingsManager />}
               </div>
             </div>
           </div>
