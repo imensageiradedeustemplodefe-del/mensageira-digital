@@ -53,6 +53,7 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [viewingRegistration, setViewingRegistration] = useState<Registration | null>(null);
   const [editingField, setEditingField] = useState<RegistrationField | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -406,6 +407,36 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
     const newFields = [...quickFields];
     newFields[fieldIndex].field_options = newFields[fieldIndex].field_options.filter((_, i) => i !== optionIndex);
     setQuickFields(newFields);
+  };
+
+  const handleDeleteRegistration = async (registrationId: string) => {
+    if (!confirm("Tem certeza que deseja excluir esta inscrição?")) return;
+
+    const { error } = await supabase
+      .from("event_registrations")
+      .delete()
+      .eq("id", registrationId);
+
+    if (error) {
+      toast({
+        title: "Erro ao excluir inscrição",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Inscrição excluída",
+      description: "A inscrição foi excluída com sucesso",
+    });
+
+    fetchRegistrations();
+  };
+
+  const handleViewDetails = (registration: Registration) => {
+    setViewingRegistration(registration);
+    setViewDialogOpen(true);
   };
 
   return (
@@ -933,24 +964,47 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
                               <p className="text-xs text-muted-foreground">
                                 {new Date(registration.created_at).toLocaleString("pt-BR")}
                               </p>
-                              {registration.synced_to_sheets && (
-                                <Badge variant="outline" className="text-xs bg-green-50">
-                                  ✓ Sincronizado
-                                </Badge>
-                              )}
+                              <div className="flex items-center gap-2">
+                                {registration.synced_to_sheets && (
+                                  <Badge variant="outline" className="text-xs bg-green-50">
+                                    ✓ Sincronizado
+                                  </Badge>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleViewDetails(registration)}
+                                  title="Ver detalhes"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteRegistration(registration.id)}
+                                  title="Excluir inscrição"
+                                >
+                                  <Trash2 className="w-4 h-4 text-destructive" />
+                                </Button>
+                              </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {Object.entries(registration.registration_data).map(
-                                ([key, value]) => (
+                              {Object.entries(registration.registration_data)
+                                .slice(0, 4)
+                                .map(([key, value]) => (
                                   <div key={key} className="border-l-2 border-primary pl-3">
                                     <p className="text-xs font-medium text-muted-foreground uppercase">
                                       {key.replace(/_/g, " ")}
                                     </p>
                                     <p className="text-sm font-medium">{String(value)}</p>
                                   </div>
-                                )
-                              )}
+                                ))}
                             </div>
+                            {Object.keys(registration.registration_data).length > 4 && (
+                              <p className="text-xs text-muted-foreground text-center">
+                                +{Object.keys(registration.registration_data).length - 4} campos adicionais
+                              </p>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
@@ -962,6 +1016,74 @@ export const EventRegistrationManager = ({ eventId, eventTitle }: EventRegistrat
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Modal de Visualização de Detalhes */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalhes da Inscrição</DialogTitle>
+          </DialogHeader>
+          {viewingRegistration && (
+            <div className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">Data da Inscrição</p>
+                    <p className="text-sm font-semibold">
+                      {new Date(viewingRegistration.created_at).toLocaleString("pt-BR")}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">Status</p>
+                    {viewingRegistration.synced_to_sheets ? (
+                      <Badge variant="outline" className="bg-green-50">
+                        ✓ Sincronizado
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">Pendente</Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-3">Informações do Inscrito</h3>
+                <div className="space-y-3">
+                  {Object.entries(viewingRegistration.registration_data).map(([key, value]) => (
+                    <div key={key} className="p-3 border-l-4 border-primary bg-muted/30 rounded-r">
+                      <p className="text-xs font-medium text-muted-foreground uppercase mb-1">
+                        {key.replace(/_/g, " ")}
+                      </p>
+                      <p className="text-sm font-medium break-words">{String(value)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-4 border-t">
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setViewDialogOpen(false);
+                    handleDeleteRegistration(viewingRegistration.id);
+                  }}
+                  className="flex-1"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Excluir Inscrição
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setViewDialogOpen(false)}
+                  className="flex-1"
+                >
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
