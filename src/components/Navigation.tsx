@@ -144,27 +144,31 @@ const Navigation = () => {
             <div className="relative">
               <Button
                 variant="ghost"
-                className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent"
+                className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isDropdownOpen
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                }`}
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
                 <Heart className="w-4 h-4 mr-2" />
                 Ministérios
-                <ChevronDown className="w-3 h-3 ml-1" />
+                <ChevronDown className={`w-3 h-3 ml-1 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
               </Button>
               
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-background/95 backdrop-blur-md border border-border rounded-lg shadow-xl z-[100]">
-                  <div className="py-2">
+                <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-lg z-[100] overflow-hidden">
+                  <div className="py-1">
                     {ministryPages.map((item) => {
                       const Icon = item.icon;
                       return (
                         <Link
                           key={item.name}
                           to={item.href}
-                          className={`flex items-center px-4 py-2 text-sm transition-colors ${
+                          className={`flex items-center px-4 py-2.5 text-sm transition-colors ${
                             isActive(item.href)
                               ? "bg-primary text-primary-foreground"
-                              : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                              : "text-foreground hover:bg-accent"
                           }`}
                           onClick={() => setIsDropdownOpen(false)}
                         >
