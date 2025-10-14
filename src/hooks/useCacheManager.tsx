@@ -116,15 +116,7 @@ export const useCacheManager = () => {
     }
   };
 
-  // Limpa cache automaticamente apenas a cada 24 horas para não afetar o PWA
-  useEffect(() => {
-    const interval = setInterval(() => {
-      console.info('Scheduled daily cache refresh');
-      clearCacheAutomatically();
-    }, 24 * 60 * 60 * 1000); // 24 horas
-
-    return () => clearInterval(interval);
-  }, [clearCacheAutomatically]);
+  // Removido: cache só é limpo quando usuário clica em atualizar
 
   return { 
     isClearing, 

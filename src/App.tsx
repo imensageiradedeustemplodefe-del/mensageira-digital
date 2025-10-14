@@ -12,8 +12,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import MobileMenuPage from "@/components/MobileMenuPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { GlobalAudioPlayer } from "@/components/GlobalAudioPlayer";
-import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
-import { useCacheManager } from "@/hooks/useCacheManager";
+import { UpdateNotification } from "@/components/UpdateNotification";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -33,9 +32,6 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  // Ativa gerenciamento automático de cache
-  useServiceWorkerUpdate();
-  useCacheManager();
   const isMobile = useIsMobile();
 
   return (
@@ -73,6 +69,7 @@ const AppContent = () => {
       {!isMobile && <Footer />}
       {isMobile && <MobileBottomNav />}
       <GlobalAudioPlayer />
+      <UpdateNotification />
     </div>
   );
 };

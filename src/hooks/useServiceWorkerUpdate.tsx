@@ -1,27 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { useCacheManager } from './useCacheManager';
 
 export const useServiceWorkerUpdate = () => {
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  const { toast } = useToast();
-  const { clearCacheAutomatically } = useCacheManager();
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       // Escuta mensagens do service worker
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'SW_UPDATED') {
-          setUpdateAvailable(true);
-          
-          // Apenas notifica, sem recarregar automaticamente
-          toast({
-            title: "Nova versão disponível!",
-            description: "Clique para atualizar o app.",
-            duration: 10000,
-          });
-          
-          // Aguarda ação do usuário
           setUpdateAvailable(true);
         }
       });
@@ -48,16 +34,16 @@ export const useServiceWorkerUpdate = () => {
         });
       });
 
-      // Verifica por atualizações periodicamente (a cada 1 hora)
+      // Verifica por atualizações periodicamente (a cada 10 minutos)
       const interval = setInterval(() => {
         navigator.serviceWorker.ready.then((registration) => {
           registration.update();
         });
-      }, 60 * 60 * 1000); // 1 hora
+      }, 10 * 60 * 1000); // 10 minutos
 
       return () => clearInterval(interval);
     }
-  }, [toast]);
+  }, []);
 
   const forceUpdate = () => {
     if ('serviceWorker' in navigator) {
