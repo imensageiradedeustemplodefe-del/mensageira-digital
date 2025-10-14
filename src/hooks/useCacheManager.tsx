@@ -6,22 +6,6 @@ export const useCacheManager = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Detecta quando a página foi recarregada
-    const handlePageLoad = () => {
-      const navigationEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
-      const isReload = navigationEntries.length > 0 && 
-        (navigationEntries[0].type === 'reload' || 
-         window.performance.navigation?.type === 1);
-
-      if (isReload) {
-        console.log('Page reload detected - clearing cache automatically');
-        clearCacheAutomatically();
-      }
-    };
-
-    // Executa na primeira carga
-    handlePageLoad();
-
     // Escuta mensagens do service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', (event) => {
@@ -34,19 +18,6 @@ export const useCacheManager = () => {
         }
       });
     }
-
-    // Força limpeza do cache no beforeunload (antes de sair da página)
-    const handleBeforeUnload = () => {
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ type: 'FORCE_UPDATE' });
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
   }, [toast]);
 
   const clearCacheAutomatically = async () => {
@@ -145,15 +116,15 @@ export const useCacheManager = () => {
     }
   };
 
-  // Limpa cache automaticamente a cada 5 minutos
+  // Limpa cache automaticamente apenas a cada 24 horas para não afetar o PWA
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log('Scheduled cache refresh');
+      console.info('Scheduled daily cache refresh');
       clearCacheAutomatically();
-    }, 5 * 60 * 1000); // 5 minutos
+    }, 24 * 60 * 60 * 1000); // 24 horas
 
     return () => clearInterval(interval);
-  }, []);
+  }, [clearCacheAutomatically]);
 
   return { 
     isClearing, 

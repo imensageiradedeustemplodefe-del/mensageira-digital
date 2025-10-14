@@ -14,18 +14,15 @@ export const useServiceWorkerUpdate = () => {
         if (event.data && event.data.type === 'SW_UPDATED') {
           setUpdateAvailable(true);
           
-          // Mostra notificação de atualização disponível
+          // Apenas notifica, sem recarregar automaticamente
           toast({
             title: "Nova versão disponível!",
-            description: "O app foi atualizado automaticamente com as últimas melhorias.",
-            duration: 5000,
+            description: "Clique para atualizar o app.",
+            duration: 10000,
           });
-
-          // Limpa cache e recarrega a página após um breve delay
-          clearCacheAutomatically();
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
+          
+          // Aguarda ação do usuário
+          setUpdateAvailable(true);
         }
       });
 
@@ -51,12 +48,12 @@ export const useServiceWorkerUpdate = () => {
         });
       });
 
-      // Verifica por atualizações periodicamente (a cada 30 segundos)
+      // Verifica por atualizações periodicamente (a cada 1 hora)
       const interval = setInterval(() => {
         navigator.serviceWorker.ready.then((registration) => {
           registration.update();
         });
-      }, 30000);
+      }, 60 * 60 * 1000); // 1 hora
 
       return () => clearInterval(interval);
     }
