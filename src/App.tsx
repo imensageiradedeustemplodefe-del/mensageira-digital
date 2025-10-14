@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +14,7 @@ import MobileMenuPage from "@/components/MobileMenuPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { GlobalAudioPlayer } from "@/components/GlobalAudioPlayer";
 import { UpdateNotification } from "@/components/UpdateNotification";
+import { SplashScreen } from "@/components/SplashScreen";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -74,22 +76,30 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <NotificationProvider>
-          <AudioProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AppContent />
-            </BrowserRouter>
-          </AudioProvider>
-        </NotificationProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <AudioProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <AppContent />
+              </BrowserRouter>
+            </AudioProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
