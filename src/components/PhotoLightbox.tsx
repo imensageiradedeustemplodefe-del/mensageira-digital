@@ -119,8 +119,11 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
         localStorage.setItem('photo_user_id', userId);
       }
 
+      console.log('Starting reaction:', { type, photoId: currentPhoto.id, userId, currentReaction: userReaction });
+
       if (userReaction === type) {
         // Remove reaction
+        console.log('Removing reaction...');
         const { error } = await supabase
           .from('photo_reactions')
           .delete()
@@ -129,15 +132,17 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
         
         if (error) {
           console.error('Error removing reaction:', error);
-          toast.error('Erro ao remover reação');
+          toast.error(`Erro ao remover reação: ${error.message}`);
           return;
         }
         
+        console.log('Reaction removed successfully');
         setUserReaction(null);
         toast.success('Reação removida');
       } else {
         // Use upsert to handle insert or update automatically
-        const { error } = await supabase
+        console.log('Adding/updating reaction...');
+        const { data, error } = await supabase
           .from('photo_reactions')
           .upsert({
             photo_id: currentPhoto.id,
@@ -145,14 +150,16 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
             reaction_type: type
           }, {
             onConflict: 'photo_id,user_id'
-          });
+          })
+          .select();
         
         if (error) {
           console.error('Error adding reaction:', error);
-          toast.error('Erro ao adicionar reação');
+          toast.error(`Erro ao adicionar reação: ${error.message}`);
           return;
         }
         
+        console.log('Reaction added successfully:', data);
         setUserReaction(type);
         
         const messages = {
@@ -167,6 +174,7 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
       }
       
       // Refresh reactions count
+      console.log('Refreshing reaction counts...');
       await fetchReactions();
     } catch (error) {
       console.error('Error handling reaction:', error);
@@ -273,10 +281,9 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
         {/* Main Image */}
         <div className="relative w-full h-full flex items-center justify-center p-16">
           <img
-            src={`https://drive.google.com/thumbnail?id=${currentPhoto.id}&sz=w1920`}
+            src={`https://drive.google.com/uc?id=${currentPhoto.id}&export=view`}
             alt={currentPhoto.name}
             className="max-w-full max-h-full object-contain animate-fade-in"
-            style={{ objectFit: 'contain' }}
             loading="eager"
           />
         </div>
