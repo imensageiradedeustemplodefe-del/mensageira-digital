@@ -281,7 +281,7 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
         {/* Main Image */}
         <div className="relative w-full h-full flex items-center justify-center p-16">
           <img
-            src={`https://drive.google.com/uc?id=${currentPhoto.id}&export=view`}
+            src={currentPhoto.viewUrl || `https://drive.google.com/uc?id=${currentPhoto.id}&export=view`}
             alt={currentPhoto.name}
             className="max-w-full max-h-full object-contain animate-fade-in"
             loading="eager"
