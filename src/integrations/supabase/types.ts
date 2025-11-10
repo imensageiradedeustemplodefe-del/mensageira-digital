@@ -926,7 +926,7 @@ export type Database = {
         }[]
       }
       get_public_church_info: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           category: string
           display_name: string
@@ -935,7 +935,7 @@ export type Database = {
         }[]
       }
       get_public_prayer_requests: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           category: string
           created_at: string
@@ -946,7 +946,7 @@ export type Database = {
         }[]
       }
       get_sanitized_prayer_requests: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           category: string
           created_at: string
@@ -963,14 +963,8 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin_user: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      notify_todays_events: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      is_admin_user: { Args: never; Returns: boolean }
+      notify_todays_events: { Args: never; Returns: undefined }
       sanitize_prayer_request_for_public: {
         Args: { p_email?: string; p_name: string; p_phone?: string }
         Returns: string
