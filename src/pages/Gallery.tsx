@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useGoogleDriveAlbums, useGoogleDrivePhotos } from "@/hooks/useGoogleDriveAlbums";
+import { useGoogleDrivePhotos } from "@/hooks/useGoogleDriveAlbums";
+import { useGalleryAlbums } from "@/hooks/useGalleryAlbums";
 import { PhotoLightbox } from "@/components/PhotoLightbox";
 
 const Gallery = () => {
@@ -60,8 +61,18 @@ const Gallery = () => {
     fetchScriptUrl();
   }, []);
   
-  // Busca álbuns e fotos do Google Drive
-  const { albums, loading: albumsLoading } = useGoogleDriveAlbums(scriptUrl);
+  // Busca álbuns do Supabase (sincronizados pelo admin)
+  const { albums: supabaseAlbums, loading: albumsLoading } = useGalleryAlbums(true);
+  
+  // Converte álbuns do Supabase para o formato esperado
+  const albums = supabaseAlbums.map(album => ({
+    id: album.id,
+    name: album.name,
+    coverUrl: album.cover_photo_url || '',
+    photoCount: album.photos?.length || 0
+  }));
+  
+  // Busca fotos do Google Drive quando um álbum é selecionado
   const { photos, loading: photosLoading, hasMore, loadMore } = useGoogleDrivePhotos(
     scriptUrl,
     selectedAlbum || undefined,
