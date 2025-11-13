@@ -24,15 +24,56 @@ export interface DriveGalleryData {
   items: DrivePhoto[];
 }
 
+const CACHE_KEY = 'google_drive_albums_cache';
+const CACHE_TIMESTAMP_KEY = 'google_drive_albums_cache_timestamp';
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 horas em ms
+
 export const useGoogleDriveAlbums = (scriptUrl: string | null) => {
   const [albums, setAlbums] = useState<DriveAlbum[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAlbums = async () => {
+  // Carrega álbuns do cache
+  const loadFromCache = (): DriveAlbum[] | null => {
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      const timestamp = sessionStorage.getItem(CACHE_TIMESTAMP_KEY);
+      
+      if (cached && timestamp) {
+        const age = Date.now() - parseInt(timestamp);
+        if (age < CACHE_DURATION) {
+          return JSON.parse(cached);
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao carregar cache:', err);
+    }
+    return null;
+  };
+
+  // Salva álbuns no cache
+  const saveToCache = (data: DriveAlbum[]) => {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      sessionStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+    } catch (err) {
+      console.error('Erro ao salvar cache:', err);
+    }
+  };
+
+  const fetchAlbums = async (forceRefresh = false) => {
     if (!scriptUrl) {
       setError('URL do script não configurada');
       return;
+    }
+
+    // Se não for refresh forçado, tenta carregar do cache primeiro
+    if (!forceRefresh) {
+      const cachedAlbums = loadFromCache();
+      if (cachedAlbums && cachedAlbums.length > 0) {
+        setAlbums(cachedAlbums);
+        return;
+      }
     }
 
     try {
@@ -47,7 +88,10 @@ export const useGoogleDriveAlbums = (scriptUrl: string | null) => {
       }
 
       const data = await response.json();
-      setAlbums(data.albums || []);
+      const albumsData = data.albums || [];
+      
+      setAlbums(albumsData);
+      saveToCache(albumsData);
     } catch (err) {
       console.error('Erro ao buscar álbuns:', err);
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
@@ -66,7 +110,7 @@ export const useGoogleDriveAlbums = (scriptUrl: string | null) => {
     albums,
     loading,
     error,
-    refetch: fetchAlbums
+    refetch: () => fetchAlbums(true)
   };
 };
 
