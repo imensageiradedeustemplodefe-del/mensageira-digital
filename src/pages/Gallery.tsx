@@ -11,6 +11,7 @@ import { PhotoLightbox } from "@/components/PhotoLightbox";
 
 const Gallery = () => {
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
+  const [selectedDriveFolderId, setSelectedDriveFolderId] = useState<string | null>(null);
   const [selectedAlbumName, setSelectedAlbumName] = useState<string>('');
   const [selectedAlbumCoverUrl, setSelectedAlbumCoverUrl] = useState<string>('');
   const [selectedAlbumDate, setSelectedAlbumDate] = useState<string>('');
@@ -65,17 +66,18 @@ const Gallery = () => {
   const { albums: supabaseAlbums, loading: albumsLoading } = useGalleryAlbums(true);
   
   // Converte álbuns do Supabase para o formato esperado
-  const albums = supabaseAlbums.map(album => ({
+  const albums = (supabaseAlbums || []).map(album => ({
     id: album.id,
     name: album.name,
     coverUrl: album.cover_photo_url || '',
-    photoCount: album.photos?.length || 0
+    photoCount: album.photos?.length || 0,
+    driveFolderId: (album as any).drive_folder_id || null
   }));
   
-  // Busca fotos do Google Drive quando um álbum é selecionado
+  // Busca fotos do Google Drive quando um álbum é selecionado (usando o drive_folder_id)
   const { photos: drivePhotos, loading: photosLoading, hasMore, loadMore } = useGoogleDrivePhotos(
     scriptUrl,
-    selectedAlbum || undefined,
+    selectedDriveFolderId || undefined,
     20,
     'name'
   );
@@ -112,8 +114,9 @@ const Gallery = () => {
 
   const loading = albumsLoading || photosLoading;
 
-  const handleAlbumClick = (albumId: string, albumName: string, coverUrl?: string) => {
+  const handleAlbumClick = (albumId: string, albumName: string, coverUrl?: string, driveFolderId?: string) => {
     setSelectedAlbum(albumId);
+    setSelectedDriveFolderId(driveFolderId || null);
     setSelectedAlbumName(albumName);
     setSelectedAlbumCoverUrl(coverUrl || '');
     setSelectedAlbumDate(extractDateFromAlbumName(albumName));
@@ -121,6 +124,7 @@ const Gallery = () => {
 
   const handleBackToAlbums = () => {
     setSelectedAlbum(null);
+    setSelectedDriveFolderId(null);
     setSelectedAlbumName('');
     setSelectedAlbumCoverUrl('');
     setSelectedAlbumDate('');
@@ -240,7 +244,7 @@ const Gallery = () => {
                 <Card
                   key={album.id}
                   className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 group"
-                  onClick={() => handleAlbumClick(album.id, album.name, album.coverUrl)}
+                  onClick={() => handleAlbumClick(album.id, album.name, album.coverUrl, album.driveFolderId)}
                 >
                   <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20">
                     {album.coverUrl ? (

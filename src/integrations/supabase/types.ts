@@ -339,6 +339,7 @@ export type Database = {
           cover_photo_url: string | null
           created_at: string
           description: string | null
+          drive_folder_id: string | null
           event_date: string | null
           id: string
           is_published: boolean | null
@@ -349,6 +350,7 @@ export type Database = {
           cover_photo_url?: string | null
           created_at?: string
           description?: string | null
+          drive_folder_id?: string | null
           event_date?: string | null
           id?: string
           is_published?: boolean | null
@@ -359,6 +361,7 @@ export type Database = {
           cover_photo_url?: string | null
           created_at?: string
           description?: string | null
+          drive_folder_id?: string | null
           event_date?: string | null
           id?: string
           is_published?: boolean | null
