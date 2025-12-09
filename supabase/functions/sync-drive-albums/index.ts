@@ -99,7 +99,8 @@ serve(async (req) => {
         cover_photo_url: album.coverUrl || null,
         event_date: eventDate,
         is_published: true,
-        description: `Álbum sincronizado do Google Drive${dateMatch ? ` - ${dateMatch[0]}` : ''}`
+        description: `Álbum sincronizado do Google Drive${dateMatch ? ` - ${dateMatch[0]}` : ''}`,
+        drive_folder_id: album.id // Salva o ID da pasta do Google Drive
       };
 
       if (existingAlbum) {
