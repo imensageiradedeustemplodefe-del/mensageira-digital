@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { X, Download, Share2, ChevronLeft, ChevronRight, Facebook, MessageCircle, Heart, HandHeart, Flame, Sparkles, Bird } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 interface Photo {
   id: string;
   name: string;
@@ -207,9 +207,14 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
     try {
       toast.success('Preparando download...');
       
-      // Fetch the image and convert to blob
-      const imageUrl = `https://drive.google.com/thumbnail?id=${currentPhoto.id}&sz=w1920`;
+      // Usar URL de tamanho original para download
+      const imageUrl = `https://lh3.googleusercontent.com/d/${currentPhoto.id}=s0`;
       const response = await fetch(imageUrl);
+      
+      if (!response.ok) {
+        throw new Error('Falha ao baixar imagem');
+      }
+      
       const blob = await response.blob();
       
       // Create a download link
@@ -227,7 +232,7 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
       toast.success('Download concluído!');
     } catch (error) {
       console.error('Download error:', error);
-      toast.error('Não foi possível baixar a foto. Tente abrir em nova aba.');
+      toast.error('Não foi possível baixar a foto. Abrindo em nova aba...');
       // Fallback: open in new tab
       window.open(`https://drive.google.com/file/d/${currentPhoto.id}/view`, '_blank');
     }
@@ -251,9 +256,20 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
 
   if (!currentPhoto) return null;
 
+  // URL para tamanho original do Google Drive (s0 = sem redimensionamento)
+  const fullSizeImageUrl = `https://lh3.googleusercontent.com/d/${currentPhoto.id}=s0`;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl w-full h-[90vh] p-0 gap-0 bg-black/98 backdrop-blur-sm">
+        {/* Accessibility: Hidden title and description for screen readers */}
+        <VisuallyHidden.Root>
+          <DialogTitle>Visualizador de Foto</DialogTitle>
+          <DialogDescription>
+            Foto {currentIndex + 1} de {photos.length}: {currentPhoto.name}
+          </DialogDescription>
+        </VisuallyHidden.Root>
+
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-4">
           <div className="flex items-center justify-between">
@@ -278,13 +294,21 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
           </div>
         </div>
 
-        {/* Main Image */}
+        {/* Main Image - Full size */}
         <div className="relative w-full h-full flex items-center justify-center p-16">
           <img
-            src={currentPhoto.viewUrl || `https://drive.google.com/uc?id=${currentPhoto.id}&export=view`}
+            src={fullSizeImageUrl}
             alt={currentPhoto.name}
             className="max-w-full max-h-full object-contain animate-fade-in"
             loading="eager"
+            onError={(e) => {
+              // Fallback para URL alternativa se a principal falhar
+              const target = e.target as HTMLImageElement;
+              if (!target.dataset.fallback) {
+                target.dataset.fallback = 'true';
+                target.src = currentPhoto.viewUrl || `https://drive.google.com/thumbnail?id=${currentPhoto.id}&sz=w1920`;
+              }
+            }}
           />
         </div>
 
