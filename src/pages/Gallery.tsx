@@ -73,12 +73,15 @@ const Gallery = () => {
   }));
   
   // Busca fotos do Google Drive quando um álbum é selecionado
-  const { photos, loading: photosLoading, hasMore, loadMore } = useGoogleDrivePhotos(
+  const { photos: drivePhotos, loading: photosLoading, hasMore, loadMore } = useGoogleDrivePhotos(
     scriptUrl,
     selectedAlbum || undefined,
     20,
     'name'
   );
+  
+  // Garante que photos sempre seja um array
+  const photos = drivePhotos || [];
 
   // Filtra e ordena álbuns por data (mais recente primeiro)
   const filteredAlbums = albums
