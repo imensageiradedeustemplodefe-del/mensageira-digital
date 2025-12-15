@@ -7,6 +7,7 @@ export interface GalleryAlbum {
   description?: string;
   cover_photo_url?: string;
   event_date?: string;
+  drive_folder_id?: string | null;
   is_published: boolean;
   created_at: string;
   updated_at: string;
