@@ -71,7 +71,7 @@ const Gallery = () => {
     name: album.name,
     coverUrl: album.cover_photo_url || '',
     photoCount: album.photos?.length || 0,
-    driveFolderId: (album as any).drive_folder_id || null
+    driveFolderId: album.drive_folder_id || null
   }));
   
   // Busca fotos do Google Drive quando um álbum é selecionado (usando o drive_folder_id)

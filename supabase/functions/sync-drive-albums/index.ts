@@ -85,7 +85,7 @@ serve(async (req) => {
       // Verificar se o álbum já existe no Supabase
       const { data: existingAlbum, error: selectError } = await supabase
         .from('gallery_albums')
-        .select('id, name, cover_photo_url')
+        .select('id, name, cover_photo_url, drive_folder_id')
         .eq('name', album.name)
         .maybeSingle();
 
@@ -104,8 +104,13 @@ serve(async (req) => {
       };
 
       if (existingAlbum) {
-        // Atualizar álbum existente se a capa mudou
-        if (existingAlbum.cover_photo_url !== album.coverUrl) {
+        // Atualiza se a capa mudou OU se o drive_folder_id ainda não foi preenchido/mudou
+        const shouldUpdate =
+          existingAlbum.cover_photo_url !== (album.coverUrl || null) ||
+          !existingAlbum.drive_folder_id ||
+          existingAlbum.drive_folder_id !== album.id;
+
+        if (shouldUpdate) {
           const { error: updateError } = await supabase
             .from('gallery_albums')
             .update(albumData)
