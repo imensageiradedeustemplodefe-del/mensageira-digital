@@ -22,8 +22,48 @@ serve(async (req) => {
   try {
     console.log('🔄 Iniciando sincronização de álbuns do Google Drive...');
 
-    // Criar cliente Supabase com privilégios de admin
+    // Verificar autenticação
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('❌ Autenticação não fornecida');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Autenticação necessária' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Criar cliente Supabase para validar autenticação
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
+
+    // Validar token do usuário
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+
+    if (authError || !user) {
+      console.error('❌ Autenticação inválida:', authError?.message);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Autenticação inválida' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verificar se o usuário é admin
+    const { data: isAdmin, error: roleError } = await supabaseAuth
+      .rpc('has_role', { _user_id: user.id, _role: 'admin' });
+
+    if (roleError || !isAdmin) {
+      console.error('❌ Acesso negado - usuário não é admin:', user.id);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Acesso de administrador necessário' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('✅ Usuário autenticado como admin:', user.id);
+
+    // Criar cliente Supabase com privilégios de admin para operações
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
