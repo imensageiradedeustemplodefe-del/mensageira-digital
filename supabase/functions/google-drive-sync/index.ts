@@ -55,16 +55,12 @@ serve(async (req) => {
 
     console.log('User authenticated:', user.id)
 
-    // Check if user is admin
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .eq('role', 'admin')
-      .single()
+    // Check if user is admin using has_role RPC
+    const { data: isAdmin, error: roleError } = await supabaseClient
+      .rpc('has_role', { _user_id: user.id, _role: 'admin' });
 
-    if (profileError || !profile) {
-      console.error('Admin check failed:', profileError)
+    if (roleError || !isAdmin) {
+      console.error('Admin check failed:', roleError?.message || 'User is not admin');
       throw new Error('Access denied. Admin only.')
     }
 
