@@ -44,6 +44,24 @@ export const UpcomingEvents = ({ loading = false }: UpcomingEventsProps) => {
       date: "2º Domingo do Mês",
       time: settings.sunday_service_time || "19:30",
       description: "Celebração da Santa Ceia do Senhor, momento sagrado de comunhão e renovação espiritual."
+    },
+    {
+      title: "Louvorzão dos Jovens",
+      date: "1º Sábado do Mês",
+      time: "19:30",
+      description: "Noite especial de louvor e adoração com os jovens. Venha participar desse momento de celebração!"
+    },
+    {
+      title: "Preparação para Santa Ceia",
+      date: "2º Sábado do Mês",
+      time: "19:30",
+      description: "Reunião de preparação espiritual para a celebração da Santa Ceia. Momento de reflexão e consagração."
+    },
+    {
+      title: "Lavacar",
+      date: "3º Sábado do Mês",
+      time: "08:00",
+      description: "Evento de lavagem de carros em prol da igreja. Venha apoiar e participar desse momento de comunhão!"
     }
   ];
   return (
