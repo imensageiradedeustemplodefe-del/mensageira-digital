@@ -57,20 +57,17 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
 
   const fetchReactions = async () => {
     try {
-      const { data, error } = await supabase
-        .from('photo_reactions')
-        .select('reaction_type, user_id')
+      // Fetch aggregated counts from view (doesn't expose user_ids)
+      const { data: counts, error: countsError } = await supabase
+        .from('photo_reaction_counts')
+        .select('reaction_type, reaction_count')
         .eq('photo_id', currentPhoto.id);
 
-      if (error) {
-        console.error('Error fetching reactions:', error);
-        // Continue with default values
-        setReactions({ loves: 0, prayers: 0, amens: 0, hallelujahs: 0, glories: 0, fires: 0 });
-        setUserReaction(null);
-        return;
+      if (countsError) {
+        console.error('Error fetching reaction counts:', countsError);
       }
 
-      // Count reactions by type
+      // Build reaction counts from aggregated view
       const reactionCounts = {
         loves: 0,
         prayers: 0,
@@ -80,24 +77,28 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
         fires: 0
       };
 
-      data?.forEach(r => {
-        if (r.reaction_type === 'love') reactionCounts.loves++;
-        else if (r.reaction_type === 'prayer') reactionCounts.prayers++;
-        else if (r.reaction_type === 'amen') reactionCounts.amens++;
-        else if (r.reaction_type === 'hallelujah') reactionCounts.hallelujahs++;
-        else if (r.reaction_type === 'glory') reactionCounts.glories++;
-        else if (r.reaction_type === 'fire') reactionCounts.fires++;
+      counts?.forEach(r => {
+        const count = Number(r.reaction_count) || 0;
+        if (r.reaction_type === 'love') reactionCounts.loves = count;
+        else if (r.reaction_type === 'prayer') reactionCounts.prayers = count;
+        else if (r.reaction_type === 'amen') reactionCounts.amens = count;
+        else if (r.reaction_type === 'hallelujah') reactionCounts.hallelujahs = count;
+        else if (r.reaction_type === 'glory') reactionCounts.glories = count;
+        else if (r.reaction_type === 'fire') reactionCounts.fires = count;
       });
       
       setReactions(reactionCounts);
 
-      // Check if user already reacted
+      // User reaction state is tracked client-side only now
+      // We store the reaction type in localStorage alongside the user_id
       const userId = localStorage.getItem('photo_user_id');
-      if (userId && data) {
-        const userReactionData = data.find(r => r.user_id === userId);
-        if (userReactionData?.reaction_type) {
-          setUserReaction(userReactionData.reaction_type as ReactionType);
-        } else {
+      if (userId) {
+        const storedReactions = localStorage.getItem('photo_reactions') || '{}';
+        try {
+          const reactionsMap = JSON.parse(storedReactions);
+          const userReactionType = reactionsMap[currentPhoto.id];
+          setUserReaction(userReactionType || null);
+        } catch {
           setUserReaction(null);
         }
       } else {
@@ -119,11 +120,17 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
         localStorage.setItem('photo_user_id', userId);
       }
 
-      console.log('Starting reaction:', { type, photoId: currentPhoto.id, userId, currentReaction: userReaction });
+      // Get stored reactions map
+      const storedReactions = localStorage.getItem('photo_reactions') || '{}';
+      let reactionsMap: Record<string, string> = {};
+      try {
+        reactionsMap = JSON.parse(storedReactions);
+      } catch {
+        reactionsMap = {};
+      }
 
       if (userReaction === type) {
         // Remove reaction
-        console.log('Removing reaction...');
         const { error } = await supabase
           .from('photo_reactions')
           .delete()
@@ -136,22 +143,28 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
           return;
         }
         
-        console.log('Reaction removed successfully');
+        // Update localStorage
+        delete reactionsMap[currentPhoto.id];
+        localStorage.setItem('photo_reactions', JSON.stringify(reactionsMap));
+        
         setUserReaction(null);
         toast.success('Reação removida');
       } else {
-        // Use upsert to handle insert or update automatically
-        console.log('Adding/updating reaction...');
-        const { data, error } = await supabase
+        // First delete any existing reaction, then insert new one
+        // (upsert requires SELECT which is now blocked)
+        await supabase
           .from('photo_reactions')
-          .upsert({
+          .delete()
+          .eq('photo_id', currentPhoto.id)
+          .eq('user_id', userId);
+
+        const { error } = await supabase
+          .from('photo_reactions')
+          .insert({
             photo_id: currentPhoto.id,
             user_id: userId,
             reaction_type: type
-          }, {
-            onConflict: 'photo_id,user_id'
-          })
-          .select();
+          });
         
         if (error) {
           console.error('Error adding reaction:', error);
@@ -159,7 +172,10 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
           return;
         }
         
-        console.log('Reaction added successfully:', data);
+        // Update localStorage
+        reactionsMap[currentPhoto.id] = type;
+        localStorage.setItem('photo_reactions', JSON.stringify(reactionsMap));
+        
         setUserReaction(type);
         
         const messages = {
@@ -174,7 +190,6 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
       }
       
       // Refresh reactions count
-      console.log('Refreshing reaction counts...');
       await fetchReactions();
     } catch (error) {
       console.error('Error handling reaction:', error);
