@@ -228,7 +228,12 @@ const Contact = () => {
                   <div className="space-y-3 text-muted-foreground">
                     <div className="flex items-start">
                       <Mail className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm break-all">E-mail: {settings.contact_email_secretary || settings.church_email}</span>
+                      <a 
+                        href={`mailto:${settings.contact_email_secretary || settings.church_email || 'imensageiradedeustemplodefe@gmail.com'}`}
+                        className="text-sm break-all hover:text-primary transition-colors"
+                      >
+                        {settings.contact_email_secretary || settings.church_email || 'imensageiradedeustemplodefe@gmail.com'}
+                      </a>
                     </div>
                     <div className="flex items-center">
                       <div className="w-4 h-4 mr-2 bg-blue-600 rounded flex-shrink-0"></div>
