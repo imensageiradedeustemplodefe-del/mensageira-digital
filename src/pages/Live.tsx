@@ -192,12 +192,6 @@ const Live = () => {
                   )}
                 </div>
                 <div className="flex items-center space-x-4 text-muted-foreground">
-                  {activeStream?.is_live && (
-                    <div className="flex items-center space-x-1">
-                      <Users className="w-4 h-4" />
-                      <span className="text-sm">{activeStream.viewer_count} visualizando</span>
-                    </div>
-                  )}
                   <span className="text-sm">Canal: Mensageira de Deus Templo de Fé</span>
                 </div>
               </div>
@@ -265,6 +259,22 @@ const Live = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* YouTube Chat - Only show when live and YouTube platform */}
+          {activeStream?.is_live && activeStream.platform === 'youtube' && activeStream.chat_enabled && (
+            <Card className="mt-4 overflow-hidden border-none shadow-lg">
+              <CardContent className="p-0">
+                <div className="aspect-video max-h-[400px]">
+                  <iframe
+                    src={`https://www.youtube.com/live_chat?v=${activeStream.stream_url.match(/(?:v=|\/)([\w-]{11})/)?.[1] || ''}&embed_domain=${window.location.hostname}`}
+                    title="Chat ao Vivo"
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  ></iframe>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Stream Links */}
           <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6 px-4">
@@ -341,7 +351,7 @@ const Live = () => {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
             {services.map((service, index) => (
               <Card key={index} className="hover:shadow-lg transition-all duration-300 bg-card/60 backdrop-blur">
                 <CardHeader className="pb-3">
