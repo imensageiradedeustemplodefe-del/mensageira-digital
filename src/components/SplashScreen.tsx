@@ -11,16 +11,24 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
-      setTimeout(onComplete, 300); // Wait for fade out animation
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, []);
 
-  if (!isVisible) return null;
+  useEffect(() => {
+    if (!isVisible) {
+      const fadeTimer = setTimeout(onComplete, 300);
+      return () => clearTimeout(fadeTimer);
+    }
+  }, [isVisible, onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/80 animate-in fade-in">
+    <div 
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/80 transition-opacity duration-300 ${
+        isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}
+    >
       <div className="flex flex-col items-center gap-8 px-6 animate-in zoom-in-50 duration-500">
         {/* Logo */}
         <img 
