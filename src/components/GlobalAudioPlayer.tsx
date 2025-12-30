@@ -1,22 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useAudio } from '@/contexts/AudioContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Volume2, VolumeX, Radio, X, Minimize2, Maximize2, GripVertical } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Radio, X, Minimize2, Maximize2 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { toast } from '@/hooks/use-toast';
 
 interface GlobalAudioPlayerProps {
   onClose?: () => void;
 }
-
-// Helper function to detect media type
-const getMediaType = (url: string): 'spotify' | 'youtube' | 'radio' | 'audio' => {
-  if (url.includes('spotify.com')) return 'spotify';
-  if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
-  if (url.includes('stream.') || url.includes('radio') || url.includes('.fm')) return 'radio';
-  return 'audio';
-};
 
 export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose }) => {
   const {
@@ -35,14 +27,13 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
     closePlayer
   } = useAudio();
 
-  // Estado para minimizar e arrastar
   const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 16, y: 16 }); // bottom-4 right-4 = 16px
+  const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const playerRef = useRef<HTMLDivElement>(null);
 
-  // Mostrar toast quando há erro
+  // Toast para erros
   useEffect(() => {
     if (error) {
       toast({
@@ -53,67 +44,68 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
     }
   }, [error]);
 
-  // Handle dragging
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
+  // Dimensões do player
+  const getPlayerSize = useCallback(() => {
+    return isMinimized ? { width: 180, height: 60 } : { width: 300, height: 200 };
+  }, [isMinimized]);
 
-      const newX = e.clientX - dragOffset.x;
-      const newY = e.clientY - dragOffset.y;
-
-      // Limites da tela
-      const maxX = window.innerWidth - (isMinimized ? 200 : 320);
-      const maxY = window.innerHeight - (isMinimized ? 80 : 250);
-
-      setPosition({
-        x: Math.max(16, Math.min(newX, maxX)),
-        y: Math.max(16, Math.min(newY, maxY))
-      });
+  // Iniciar drag
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const target = e.currentTarget;
+    target.setPointerCapture(e.pointerId);
+    
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      posX: position.x,
+      posY: position.y
     };
+  }, [position]);
 
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
+  // Durante drag
+  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    
+    e.preventDefault();
+    
+    const deltaX = e.clientX - dragStartRef.current.x;
+    const deltaY = e.clientY - dragStartRef.current.y;
+    
+    const { width, height } = getPlayerSize();
+    const maxX = window.innerWidth - width - 10;
+    const maxY = window.innerHeight - height - 10;
+    
+    const newX = Math.max(10, Math.min(dragStartRef.current.posX + deltaX, maxX));
+    const newY = Math.max(10, Math.min(dragStartRef.current.posY - deltaY, maxY));
+    
+    setPosition({ x: newX, y: newY });
+  }, [isDragging, getPlayerSize]);
 
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
+  // Finalizar drag
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    setIsDragging(false);
+  }, [isDragging]);
 
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, dragOffset, isMinimized]);
-
-  // Se não há mídia carregada OU não iniciou reprodução ainda, não mostrar o player
   if (!currentMedia || !hasStartedPlayback) {
     return null;
   }
 
-  const mediaType = getMediaType(currentMedia.media_url);
-  const isYouTube = mediaType === 'youtube';
-
   const handlePlayPause = async () => {
     try {
-      console.log('[GlobalAudioPlayer] Play/Pause clicked, isPlaying:', isPlaying, 'loading:', loading);
-      
       if (isPlaying) {
         pause();
       } else {
         await play();
       }
-    } catch (error) {
-      console.error('[GlobalAudioPlayer] Play/Pause error:', error);
-      // Reset loading state if there's an error
-      if (loading) {
-        setTimeout(() => {
-          if (error) {
-            // Force clear loading state after error
-            console.log('[GlobalAudioPlayer] Forcing loading state reset');
-          }
-        }, 2000);
-      }
+    } catch (err) {
+      console.error('[GlobalAudioPlayer] Play/Pause error:', err);
     }
   };
 
@@ -123,99 +115,89 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
 
   const handleClose = () => {
     closePlayer();
-    onClose?.(); // Chamar callback opcional se fornecido
+    onClose?.();
   };
 
   const handleMinimize = () => {
     setIsMinimized(!isMinimized);
   };
 
-  // Funções para arrastar
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Só permite arrastar pela área de grip
-    if (!(e.target as HTMLElement).closest('.drag-handle')) return;
-    
-    setIsDragging(true);
-    const rect = playerRef.current?.getBoundingClientRect();
-    if (rect) {
-      setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      });
-    }
-  };
-
   return (
     <Card
       ref={playerRef}
-      className={`fixed shadow-xl z-[9999] bg-background/95 backdrop-blur-sm border-2 border-border/50 transition-all ${
-        isDragging ? 'cursor-grabbing' : 'cursor-default'
-      } ${isMinimized ? 'w-48' : 'w-80'}`}
+      className={`fixed shadow-2xl z-[9999] bg-background/98 backdrop-blur-md border border-border/60 rounded-xl overflow-hidden transition-[width,height] duration-200 ease-out ${
+        isDragging ? 'shadow-2xl scale-[1.02]' : 'hover:shadow-xl'
+      }`}
       style={{
         left: `${position.x}px`,
         bottom: `${position.y}px`,
-        right: 'auto',
-        top: 'auto'
+        width: isMinimized ? '180px' : '300px',
+        touchAction: 'none',
+        userSelect: 'none',
       }}
-      onMouseDown={handleMouseDown}
     >
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <GripVertical className="w-4 h-4 text-muted-foreground drag-handle cursor-grab hover:text-primary" />
-            <Radio className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium">{isMinimized ? '' : 'Reproduzindo'}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleMinimize}
-              className="h-6 w-6 p-0 hover:bg-muted"
-              title={isMinimized ? 'Expandir' : 'Minimizar'}
-            >
-              {isMinimized ? <Maximize2 className="w-3 h-3" /> : <Minimize2 className="w-3 h-3" />}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleClose}
-              className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
-              title="Fechar player"
-            >
-              <X className="w-3 h-3" />
-            </Button>
-          </div>
+      {/* Drag Handle - toda a área do header é arrastável */}
+      <div
+        className={`flex items-center justify-between px-3 py-2 bg-muted/40 border-b border-border/30 ${
+          isDragging ? 'cursor-grabbing' : 'cursor-grab'
+        }`}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+      >
+        <div className="flex items-center gap-2 pointer-events-none">
+          <Radio className="w-3.5 h-3.5 text-primary" />
+          {!isMinimized && (
+            <span className="text-xs font-medium text-muted-foreground">Player</span>
+          )}
         </div>
+        <div className="flex items-center gap-0.5" onPointerDown={(e) => e.stopPropagation()}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleMinimize}
+            className="h-6 w-6 p-0 hover:bg-muted rounded-md"
+            title={isMinimized ? 'Expandir' : 'Minimizar'}
+          >
+            {isMinimized ? <Maximize2 className="w-3 h-3" /> : <Minimize2 className="w-3 h-3" />}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleClose}
+            className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive rounded-md"
+            title="Fechar"
+          >
+            <X className="w-3 h-3" />
+          </Button>
+        </div>
+      </div>
 
+      <CardContent className="p-3">
         {!isMinimized ? (
           <div className="space-y-3">
-            {/* Informações da mídia */}
+            {/* Info da mídia */}
             <div className="text-center">
               <h4 className="font-medium text-sm truncate">{currentMedia.title}</h4>
               {currentMedia.artist && (
                 <p className="text-xs text-muted-foreground truncate">{currentMedia.artist}</p>
               )}
-              <div className="flex items-center justify-center gap-2 mt-1">
+              <div className="flex items-center justify-center gap-2 mt-1.5">
                 <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-red-500 animate-pulse' : 'bg-muted-foreground'}`} />
-                <span className="text-xs text-muted-foreground">
-                  {isPlaying ? 'NO AR' : 'FORA DO AR'}
+                <span className="text-xs text-muted-foreground font-medium">
+                  {isPlaying ? 'AO VIVO' : 'PAUSADO'}
                 </span>
-                {isYouTube && (
-                  <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
-                    YouTube
-                  </span>
-                )}
               </div>
             </div>
 
             {/* Controles */}
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-3">
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={toggleMute}
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 rounded-full"
                 disabled={loading}
               >
                 {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -225,19 +207,19 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
                 size="sm"
                 onClick={handlePlayPause}
                 disabled={loading}
-                className="h-10 w-10 p-0 bg-primary hover:bg-primary/90 disabled:opacity-50"
+                className="h-11 w-11 p-0 rounded-full bg-primary hover:bg-primary/90 shadow-md"
                 title={loading ? 'Carregando...' : (isPlaying ? 'Pausar' : 'Reproduzir')}
               >
                 {loading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
                 ) : isPlaying ? (
-                  <Pause className="w-4 h-4" />
+                  <Pause className="w-5 h-5" />
                 ) : (
-                  <Play className="w-4 h-4" />
+                  <Play className="w-5 h-5 ml-0.5" />
                 )}
               </Button>
 
-              <div className="flex-1 max-w-20">
+              <div className="w-20">
                 <Slider
                   value={[isMuted ? 0 : volume]}
                   onValueChange={handleVolumeChange}
@@ -249,55 +231,48 @@ export const GlobalAudioPlayer: React.FC<GlobalAudioPlayerProps> = ({ onClose })
               </div>
             </div>
 
-            {/* Status de carregamento ou erro */}
+            {/* Status */}
             {loading && !error && (
-              <div className="text-xs text-center text-muted-foreground bg-muted/50 p-2 rounded">
-                {isYouTube ? 'Carregando player do YouTube...' : 'Conectando...'}
+              <div className="text-xs text-center text-muted-foreground bg-muted/50 py-1.5 px-2 rounded-md">
+                Conectando...
               </div>
             )}
 
             {error && (
-              <div className="text-xs text-destructive text-center bg-destructive/10 p-2 rounded">
-                {error}
+              <div className="text-xs text-destructive text-center bg-destructive/10 py-1.5 px-2 rounded-md flex items-center justify-center gap-2">
+                <span className="truncate">{error}</span>
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={clearError}
-                  className="ml-2 h-auto p-0 text-xs underline"
+                  className="h-auto p-0 text-xs underline shrink-0"
                 >
-                  Dispensar
+                  OK
                 </Button>
-              </div>
-            )}
-
-            {/* Dica para YouTube */}
-            {isYouTube && !error && !loading && (
-              <div className="text-xs text-center text-muted-foreground bg-blue-50 p-2 rounded">
-                🎵 Reproduzindo áudio do YouTube
               </div>
             )}
           </div>
         ) : (
           /* Versão Minimizada */
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
               size="sm"
               onClick={handlePlayPause}
               disabled={loading}
-              className="h-8 w-8 p-0 bg-primary hover:bg-primary/90"
+              className="h-8 w-8 p-0 rounded-full bg-primary hover:bg-primary/90 shrink-0"
             >
               {loading ? (
-                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-3 h-3 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
               ) : isPlaying ? (
-                <Pause className="w-3 h-3" />
+                <Pause className="w-3.5 h-3.5" />
               ) : (
-                <Play className="w-3 h-3" />
+                <Play className="w-3.5 h-3.5 ml-0.5" />
               )}
             </Button>
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-xs font-medium truncate">{currentMedia.title}</p>
               <div className="flex items-center gap-1">
-                <div className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-red-500 animate-pulse' : 'bg-muted-foreground'}`} />
+                <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isPlaying ? 'bg-red-500 animate-pulse' : 'bg-muted-foreground'}`} />
                 <span className="text-[10px] text-muted-foreground">
                   {isPlaying ? 'AO VIVO' : 'PARADO'}
                 </span>
