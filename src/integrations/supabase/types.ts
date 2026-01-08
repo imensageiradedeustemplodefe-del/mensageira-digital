@@ -920,6 +920,10 @@ export type Database = {
       }
     }
     Functions: {
+      add_photo_reaction: {
+        Args: { p_photo_id: string; p_reaction_type: string; p_user_id: string }
+        Returns: Json
+      }
       delete_own_reaction: {
         Args: { p_photo_id: string; p_user_id: string }
         Returns: boolean

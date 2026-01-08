@@ -150,24 +150,25 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
         setUserReaction(null);
         toast.success('Reação removida');
       } else {
-        // First delete any existing reaction using secure function, then insert new one
-        await supabase
-          .rpc('delete_own_reaction', {
+        // Use secure RPC function to add reaction (handles delete+insert atomically)
+        const { data, error } = await supabase
+          .rpc('add_photo_reaction', {
             p_photo_id: currentPhoto.id,
-            p_user_id: userId
-          });
-
-        const { error } = await supabase
-          .from('photo_reactions')
-          .insert({
-            photo_id: currentPhoto.id,
-            user_id: userId,
-            reaction_type: type
+            p_user_id: userId,
+            p_reaction_type: type
           });
         
         if (error) {
           console.error('Error adding reaction:', error);
           toast.error(`Erro ao adicionar reação: ${error.message}`);
+          return;
+        }
+        
+        // Check if the function returned success
+        const result = data as { success: boolean; error?: string } | null;
+        if (!result?.success) {
+          console.error('Error adding reaction:', result?.error);
+          toast.error(`Erro ao adicionar reação: ${result?.error || 'Unknown error'}`);
           return;
         }
         
