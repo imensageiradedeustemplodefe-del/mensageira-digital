@@ -130,12 +130,12 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
       }
 
       if (userReaction === type) {
-        // Remove reaction
-        const { error } = await supabase
-          .from('photo_reactions')
-          .delete()
-          .eq('photo_id', currentPhoto.id)
-          .eq('user_id', userId);
+        // Remove reaction using secure function
+        const { data, error } = await supabase
+          .rpc('delete_own_reaction', {
+            p_photo_id: currentPhoto.id,
+            p_user_id: userId
+          });
         
         if (error) {
           console.error('Error removing reaction:', error);
@@ -150,13 +150,12 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose, albumDate
         setUserReaction(null);
         toast.success('Reação removida');
       } else {
-        // First delete any existing reaction, then insert new one
-        // (upsert requires SELECT which is now blocked)
+        // First delete any existing reaction using secure function, then insert new one
         await supabase
-          .from('photo_reactions')
-          .delete()
-          .eq('photo_id', currentPhoto.id)
-          .eq('user_id', userId);
+          .rpc('delete_own_reaction', {
+            p_photo_id: currentPhoto.id,
+            p_user_id: userId
+          });
 
         const { error } = await supabase
           .from('photo_reactions')

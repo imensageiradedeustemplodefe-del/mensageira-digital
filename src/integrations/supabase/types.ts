@@ -920,6 +920,10 @@ export type Database = {
       }
     }
     Functions: {
+      delete_own_reaction: {
+        Args: { p_photo_id: string; p_user_id: string }
+        Returns: boolean
+      }
       get_encrypted_contact: {
         Args: { p_prayer_request_id: string }
         Returns: {
