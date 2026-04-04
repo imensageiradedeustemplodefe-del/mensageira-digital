@@ -81,7 +81,7 @@ const menuItems = [
     items: [
       { title: "Pedidos de Oração", value: "prayers", icon: Heart, description: "Orações recebidas" },
       { title: "Testemunhos", value: "testimonies", icon: MessageCircle, description: "Histórias de fé" },
-      { title: "Notificações", value: "notifications", icon: Bell, description: "Push notifications" },
+      { title: "Notificações", value: "notifications", icon: Bell, description: "Notificações personalizadas" },
     ]
   }
 ];
