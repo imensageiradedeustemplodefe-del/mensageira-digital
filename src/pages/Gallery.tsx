@@ -45,17 +45,16 @@ const Gallery = () => {
     return parts[0]?.trim() || albumName;
   };
 
-  // Busca a URL do Apps Script nas configurações
+  // Busca a URL do Apps Script via edge function (protegida no servidor)
   useEffect(() => {
     const fetchScriptUrl = async () => {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('setting_value')
-        .eq('setting_key', 'google_drive_script_url')
-        .single();
-      
-      if (data?.setting_value) {
-        setScriptUrl(data.setting_value);
+      try {
+        const { data, error } = await supabase.functions.invoke('get-drive-script-url');
+        if (!error && data?.scriptUrl) {
+          setScriptUrl(data.scriptUrl);
+        }
+      } catch (err) {
+        console.error('Erro ao buscar script URL:', err);
       }
     };
     
