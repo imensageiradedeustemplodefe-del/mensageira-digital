@@ -1,16 +1,56 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Bell, CheckCheck, Loader2 } from 'lucide-react';
+import { Bell, BellRing, CheckCheck, Loader2, Smartphone } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
+
+const usePushNotificationStatus = () => {
+  const [isSupported, setIsSupported] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(false);
+  const [permission, setPermission] = useState<NotificationPermission>('default');
+
+  useEffect(() => {
+    const supported = 'Notification' in window && 'serviceWorker' in navigator;
+    setIsSupported(supported);
+    if (supported) {
+      setPermission(Notification.permission);
+      setIsEnabled(Notification.permission === 'granted');
+    }
+  }, []);
+
+  const requestPermission = async () => {
+    if (!isSupported) {
+      toast.error('Seu navegador não suporta notificações push.');
+      return;
+    }
+    try {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+      setIsEnabled(result === 'granted');
+      if (result === 'granted') {
+        toast.success('Notificações push ativadas!');
+      } else if (result === 'denied') {
+        toast.error('Permissão negada. Ative nas configurações do navegador.');
+      }
+    } catch {
+      toast.error('Erro ao solicitar permissão.');
+    }
+  };
+
+  return { isSupported, isEnabled, permission, requestPermission };
+};
 
 export const NotificationCenter = () => {
   const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useInAppNotifications();
   const navigate = useNavigate();
+  const { isSupported, isEnabled, permission, requestPermission } = usePushNotificationStatus();
 
   const handleNotificationClick = (notificationId: string, url: string) => {
     markAsRead(notificationId);
@@ -38,6 +78,47 @@ export const NotificationCenter = () => {
 
   return (
     <div className="space-y-4">
+      {/* Push Notification Toggle */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20">
+              {isEnabled ? (
+                <BellRing className="w-5 h-5 text-primary" />
+              ) : (
+                <Smartphone className="w-5 h-5 text-primary" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-foreground">
+                Notificações Push
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {!isSupported
+                  ? 'Não suportado neste navegador'
+                  : isEnabled
+                    ? 'Ativadas — você receberá alertas'
+                    : permission === 'denied'
+                      ? 'Bloqueadas — ative nas configurações do navegador'
+                      : 'Receba alertas de eventos, lives e novidades'}
+              </p>
+            </div>
+            {isSupported && permission !== 'denied' && (
+              <Switch
+                checked={isEnabled}
+                onCheckedChange={() => {
+                  if (!isEnabled) requestPermission();
+                }}
+                disabled={isEnabled}
+              />
+            )}
+            {isSupported && permission === 'denied' && (
+              <span className="text-xs text-destructive font-medium">Bloqueada</span>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -73,7 +154,7 @@ export const NotificationCenter = () => {
           </CardContent>
         </Card>
       ) : (
-        <ScrollArea className="h-[calc(100vh-200px)]">
+        <ScrollArea className="h-[calc(100vh-280px)]">
           <div className="space-y-2">
             {notifications.map((notification, index) => (
               <div key={notification.id}>
