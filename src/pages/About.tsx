@@ -59,25 +59,25 @@ const About = () => {
     },
     {
       name: "Palavra Viva",
-      leaders: "Jessica Vacelkoski",
+      leaders: "Jessica Vacelkoski e Elisa Maria",
       type: "Mídia",
       icon: "📱"
     },
     {
       name: "Ourinhos de Cristo",
-      leaders: "Leonice Cardoso e Elen Dale Laste",
+      leaders: "Leonice Cardoso",
       type: "Grupo De Crianças",
       icon: "👶"
     },
     {
       name: "Nova Geração Kids",
-      leaders: "Leonice Cardoso e Elen Dale Laste",
+      leaders: "Daniela Azeredo",
       type: "Grupo De Crianças",
       icon: "👶"
     },
     {
-      name: "Mensageira Do Cristo Rei",
-      leaders: "Ana Venconi e Gisele Segatto",
+      name: "Mensageiras Do Cristo Rei",
+      leaders: "Ana Venconi",
       type: "Grupo De Mulheres",
       icon: "👩"
     }
